@@ -85,7 +85,7 @@ public class Program
     private static void PrintList()
     {
         PrintLine();
-        var nNum = MountProg?.GetMountNumber();
+        var nNum = MountProg.GetMountNumber();
 
         for (var i = 0; i < nNum; i++)
         {
@@ -110,7 +110,7 @@ public class Program
 
         for (i = 0; i < numberOfElements; i++)
         {
-            MountProg?.Export(paths[i].path, paths[i].alias);  //export path for mount
+            MountProg.Export(paths[i].path, paths[i].alias);  //export path for mount
         }
     }
 
@@ -131,11 +131,11 @@ public class Program
             }
             else if (string.Compare(command, "log on", true) == 0)
             {
-                RPCServer?.SetLogOn(true);
+                RPCServer.SetLogOn(true);
             }
             else if (string.Compare(command, "log off", true) == 0)
             {
-                RPCServer?.SetLogOn(false);
+                RPCServer.SetLogOn(false);
             }
             else if (string.Compare(command, "list", true) == 0)
             {
@@ -143,7 +143,7 @@ public class Program
             }
             else if (string.Compare(command, "quit", true) == 0)
             {
-                if (MountProg?.GetMountNumber() == 0)
+                if (MountProg.GetMountNumber() == 0)
                 {
                     break;
                 }
@@ -159,11 +159,11 @@ public class Program
             }
             else if (string.Compare(command, "refresh", true) == 0)
             {
-                MountProg?.Refresh();
+                MountProg.Refresh();
             }
             else if (string.Compare(command, "reset", true) == 0)
             {
-                RPCServer?.Set((int)PROGS.PROG_NFS, null);
+                RPCServer.Set((int)PROGS.PROG_NFS, null);
             }
             else if (command != "")
             {
@@ -180,16 +180,16 @@ public class Program
         CServerSocket[] ServerSockets = new CServerSocket[SOCKET_NUM];
         bool bSuccess;
 
-        PortmapProg?.Set((int)PROGS.PROG_MOUNT, (int)NFS_PORTS.MOUNT_PORT);  //map port for mount
-        PortmapProg?.Set((int)PROGS.PROG_NFS, (int)NFS_PORTS.NFS_PORT);  //map port for nfs
-        NFSProg?.SetUserID(UID, GID);  //set uid and gid of files
+        PortmapProg.Set((int)PROGS.PROG_MOUNT, (int)NFS_PORTS.MOUNT_PORT);  //map port for mount
+        PortmapProg.Set((int)PROGS.PROG_NFS, (int)NFS_PORTS.NFS_PORT);  //map port for nfs
+        NFSProg.SetUserID(UID, GID);  //set uid and gid of files
 
         MountPaths(paths);
 
-        RPCServer?.Set((int)PROGS.PROG_PORTMAP, PortmapProg);  //program for portmap
-        RPCServer?.Set((int)PROGS.PROG_NFS, NFSProg);  //program for nfs
-        RPCServer?.Set((int)PROGS.PROG_MOUNT, MountProg);  //program for mount
-        RPCServer?.SetLogOn(UseLog);
+        RPCServer.Set((int)PROGS.PROG_PORTMAP, PortmapProg);  //program for portmap
+        RPCServer.Set((int)PROGS.PROG_NFS, NFSProg);  //program for nfs
+        RPCServer.Set((int)PROGS.PROG_MOUNT, MountProg);  //program for mount
+        RPCServer.SetLogOn(UseLog);
 
         for (i = 0; i < SOCKET_NUM; i++)
         {
@@ -248,18 +248,16 @@ public class Program
     public static int Main(string[] args)
     {
         PrintAbout();
-        string? pPath;
         if (args.Length < 2)
         {
-            pPath = Path.GetFileName(args[0]);
-            PrintUsage(pPath);
+            PrintUsage(Path.GetFileName(args[0]));
             return 1;
         }
 
-        List<(string path, string alias)> pPaths = [];
+        List<(string path, string alias)> paths = [];
         UID = GID = 0;
         UseLog = true;
-        FileName = null;
+        FileName = "";
         SocketAddress = "0.0.0.0";
 
         for (int i = 1; i < args.Length; i++)
@@ -281,35 +279,35 @@ public class Program
             {
                 FileName = args[++i];
 
-                if (MountProg?.SetPathFile(FileName) == false)
+                if (!MountProg.SetPathFile(FileName))
                 {
                     Console.WriteLine("Can't open file {0}.", FileName);
                     return 1;
                 }
                 else
                 {
-                    MountProg?.Refresh();
+                    MountProg.Refresh();
                     //pathFile = true;
                 }
             }
             else if (i == args.Length - 2)
             {
-                pPath = args[^2];  //path is before the last parameter
-                var pCurPathAlias = args[^1]; //path alias is the last parameter
-                if (pPath != null && pCurPathAlias != null)
-                    pPaths.Add((pPath, pCurPathAlias));
+                var path = args[^2];  //path is before the last parameter
+                var alias = args[^1]; //path alias is the last parameter
+                if (path != null && alias != null)
+                    paths.Add((path, alias));
 
                 break;
             }
             else if (i == args.Length - 1)
             {
-                var sPath = args[^1];  //path is the last parameter
-                if (sPath.Length > 0) pPaths.Add((sPath, sPath));
+                var path = args[^1];  //path is the last parameter
+                if (path.Length > 0) paths.Add((path, path));
                 break;
             }
         }
 
-        Start(pPaths);
+        Start(paths);
 
         return 0;
     }
