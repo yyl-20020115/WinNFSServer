@@ -9,4 +9,4 @@ public interface IInputStream
     int Skip(int nSize);
     uint Skip(uint nSize);
     int GetSize();
-};
+}

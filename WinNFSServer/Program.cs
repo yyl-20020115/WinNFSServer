@@ -199,18 +199,20 @@ public class Program
 
         bSuccess = false;
 
-        if (ServerSockets[0].Open((int)NFS_PORTS.PORTMAP_PORT, 3) && DatagramSockets[0].Open(
+        if (ServerSockets[0].Open(SocketAddress, (int)NFS_PORTS.PORTMAP_PORT, 3) 
+            && DatagramSockets[0].Open(
             SocketAddress,
             (int)NFS_PORTS.PORTMAP_PORT))
         { //start portmap daemon
             Console.WriteLine("Portmap daemon started");
 
-            if (ServerSockets[1].Open(
-                (int)NFS_PORTS.NFS_PORT, 10) && DatagramSockets[1].Open(SocketAddress, (int)NFS_PORTS.NFS_PORT))
+            if (ServerSockets[1].Open(SocketAddress,
+                (int)NFS_PORTS.NFS_PORT, 10) 
+                && DatagramSockets[1].Open(SocketAddress, (int)NFS_PORTS.NFS_PORT))
             { //start nfs daemon
                 Console.WriteLine("NFS daemon started");
 
-                if (ServerSockets[2].Open((int)NFS_PORTS.MOUNT_PORT, 3) 
+                if (ServerSockets[2].Open(SocketAddress, (int)NFS_PORTS.MOUNT_PORT, 3) 
                     && DatagramSockets[2].Open(SocketAddress,(int)NFS_PORTS.MOUNT_PORT))
                 { //start mount daemon
                     Console.WriteLine("Mount daemon started");

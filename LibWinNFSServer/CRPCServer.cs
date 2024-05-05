@@ -5,7 +5,6 @@ public class CRPCServer : ISocketListener
     public const int PROG_NUM = 10;
     public const int MIN_PROG_NUM = 100000;
 
-
     protected CRPCProg[] m_pProgTable = new CRPCProg[PROG_NUM];
     protected Mutex m_hMutex = new();
 
@@ -133,5 +132,5 @@ public class CRPCServer : ISocketListener
 
         return nResult;
     }
-};
+}
 

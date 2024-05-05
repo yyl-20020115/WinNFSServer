@@ -8,7 +8,7 @@ public class CNFS3Prog :CRPCProg
     ProcessParam m_pParam;
     Dictionary<int, IntPtr> unstableStorageFile;
 
-    public CNFS3Prog() { }
+    public CNFS3Prog() { } 
     ~CNFS3Prog() { }
     public void SetUserID(uint nUID, uint nGID)
     {

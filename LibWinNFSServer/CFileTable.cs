@@ -227,5 +227,4 @@ public class CFileTable
             m_pCacheList = pCurr;  //insert to the first
         }
     }
-
 }

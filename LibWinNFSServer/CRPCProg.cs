@@ -22,5 +22,4 @@ public abstract class CRPCProg
         if (m_bLogOn) Console.Out.WriteLine(format, ops);
         return 0;
     }
-
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace LibWinNFSServer;
 
@@ -17,10 +18,10 @@ public class CMountProg : CRPCProg
 
     private ProcessParam m_pParam;
     private int m_nResult;
-
-    public CMountProg()
+    private CFileTable fileTable;
+    public CMountProg(CFileTable fileTable)
     {
-
+        this.fileTable = fileTable;
     }
 
     public bool SetPathFile(string file)
@@ -124,66 +125,22 @@ public class CMountProg : CRPCProg
     }
     public string FormatPath(string pPath, PathFormats format)
     {
-        size_t len = strlen(pPath);
+        pPath = pPath.Trim();
+        if (pPath.EndsWith(":\\")) pPath = pPath[..^1];
+        pPath = pPath.TrimEnd('/');
+        if (pPath.StartsWith('#')) return null;
+        if (pPath.StartsWith('"')) pPath = pPath.TrimStart('"');
+        if (pPath.EndsWith('"')) pPath = pPath.TrimStart('"');
+        if (pPath.Length == 0) return null;
 
-        //Remove head spaces
-        while (*pPath == ' ')
-        {
-            ++pPath;
-            len--;
-        }
-
-        //Remove tail spaces
-        while (len > 0 && *(pPath + len - 1) == ' ')
-        {
-            len--;
-        }
-
-        //Remove windows tail slashes (except when its only a drive letter)
-        while (len > 0 && *(pPath + len - 2) != ':' && *(pPath + len - 1) == '\\')
-        {
-            len--;
-        }
-
-        //Remove unix tail slashes
-        while (len > 1 && *(pPath + len - 1) == '/')
-        {
-            len--;
-        }
-
-        //Is comment?
-        if (*pPath == '#')
-        {
-            return NULL;
-        }
-
-        //Remove head "
-        if (*pPath == '"')
-        {
-            ++pPath;
-            len--;
-        }
-
-        //Remove tail "
-        if (len > 0 && *(pPath + len - 1) == '"')
-        {
-            len--;
-        }
-
-        if (len < 1)
-        {
-            return NULL;
-        }
-        char* result = (char*)malloc(len + 1);
-        if (result == NULL) return NULL;
-        strncpy_s(result, len + 1, pPath, len);
+        string result = pPath;
 
         //Check for right path format
-        if (format == FORMAT_PATH)
+        if (format == PathFormats.FORMAT_PATH)
         {
             if (result[0] == '.')
             {
-                static char path1[MAXPATHLEN];
+                char path1[MAXPATHLEN];
                 char* p = _getcwd(path1, MAXPATHLEN);
 
                 if (result[1] == '\0')
@@ -229,7 +186,7 @@ public class CMountProg : CRPCProg
                 }
             }
         }
-        else if (format == FORMAT_PATHALIAS)
+        else if (format == PathFormats.FORMAT_PATHALIAS)
         {
             if (pPath[1] == ':' && ((pPath[0] >= 'A' && pPath[0] <= 'Z') || (pPath[0] >= 'a' && pPath[0] <= 'z')))
             {
@@ -274,16 +231,18 @@ public class CMountProg : CRPCProg
 
         if (GetPath(ref path))
         {
-            m_pOutStream.Write(MNT_OK); //OK
-
+            m_pOutStream.Write((int)MNTS.MNT_OK); //OK
+            var handle = this.fileTable.GetHandleByPath(path);
             if (m_pParam.nVersion == 1)
             {
-                m_pOutStream.Write(CFileTable::GetFileHandle(path), FHSIZE);  //fhandle
+                var half = new byte[handle.Length >> 1];
+                Array.Copy(handle, half, half.Length);
+                m_pOutStream.Write(half);  //fhandle
             }
             else
             {
                 m_pOutStream.Write(NFS3_FHSIZE);  //length
-                m_pOutStream.Write(CFileTable::GetFileHandle(path), NFS3_FHSIZE);  //fhandle
+                m_pOutStream.Write(handle);  //fhandle
                 m_pOutStream.Write(0);  //flavor
             }
 
@@ -291,17 +250,16 @@ public class CMountProg : CRPCProg
 
             for (i = 0; i < MOUNT_NUM_MAX; i++)
             {
-                if (m_pClientAddr[i] == NULL)
+                if (m_pClientAddr[i] == null)
                 { //search an empty space
-                    m_pClientAddr[i] = new char[strlen(m_pParam.pRemoteAddr) + 1];
-                    strcpy_s(m_pClientAddr[i], (strlen(m_pParam.pRemoteAddr) + 1), m_pParam.pRemoteAddr);  //remember the client address
+                    m_pClientAddr[i] = m_pParam.pRemoteAddr;
                     break;
                 }
             }
         }
         else
         {
-            m_pOutStream.Write(MNTERR_ACCESS);  //permission denied
+            m_pOutStream.Write((int)MNTS.MNTERR_ACCESS);  //permission denied
         }
     }
     protected void ProcedureUMNT()
@@ -317,9 +275,9 @@ public class CMountProg : CRPCProg
         {
             if (m_pClientAddr[i] != null)
             {
-                if (strcmp(m_pParam->pRemoteAddr, m_pClientAddr[i]) == 0)
+                if (String.Compare(m_pParam.pRemoteAddr, m_pClientAddr[i]) == 0)
                 { //address match
-                    delete[] m_pClientAddr[i];  //remove this address
+                     //remove this address
                     m_pClientAddr[i] = null;
                     --m_nMountNum;
                     break;
@@ -330,31 +288,31 @@ public class CMountProg : CRPCProg
     protected void ProcedureUMNTALL()
     {
         PrintLog("UMNTALL NOIMP");
-        m_nResult = PRC_NOTIMP;
+        m_nResult = (int)PRC_STATUS.PRC_NOTIMP;
 
     }
     protected void ProcedureEXPORT()
     {
         PrintLog("EXPORT");
-
-        for (auto const &exportedPath : m_PathMap) {
-            const char* path = exportedPath.first.c_str();
-            unsigned int length = (unsigned int)strlen(path);
+        //TODO: use encoding utf8?
+        foreach (var _path in m_PathMap.Keys) {
+            var buffer = Encoding.UTF8.GetBytes(_path);
+            int length = buffer.Length;
             // dirpath
             m_pOutStream.Write(1);
             m_pOutStream.Write(length);
-            m_pOutStream.Write(const_cast<char*>(path), length);
+            m_pOutStream.Write(buffer);
             int fillBytes = (length % 4);
             if (fillBytes > 0)
             {
                 fillBytes = 4 - fillBytes;
-                m_pOutStream.Write(".", fillBytes);
+                m_pOutStream.Write(Encoding.ASCII.GetBytes("."));
             }
             // groups
             m_pOutStream.Write(1);
             m_pOutStream.Write(1);
-            m_pOutStream.Write("*", 1);
-            m_pOutStream.Write("...", 3);
+            m_pOutStream.Write(Encoding.ASCII.GetBytes("*"));
+            m_pOutStream.Write(Encoding.ASCII.GetBytes("..."));
             m_pOutStream.Write(0);
         }
 
@@ -370,12 +328,12 @@ public class CMountProg : CRPCProg
 
     private bool GetPath(ref string returnPath)
     {
-        unsigned long i, nSize;
-        static char path[MAXPATHLEN + 1];
-        static char finalPath[MAXPATHLEN + 1];
+        uint i, nSize;
+        string path;
+        string finalPath;
         bool foundPath = false;
 
-        m_pInStream->Read(&nSize);
+        m_pInStream.Read(ref nSize);
 
         if (nSize > MAXPATHLEN)
         {
@@ -383,9 +341,10 @@ public class CMountProg : CRPCProg
         }
 
         typedef std::map < std::string, std::string>::iterator it_type;
-        m_pInStream->Read(path, nSize);
-        path[nSize] = '\0';
-
+        var bytes = new byte[nSize];
+        m_pInStream.Read(bytes);
+       
+        path = Encoding.UTF8.GetString(bytes);
         // TODO: this whole method is quite ugly and ripe for refactoring
         // strip slashes
         std::string pathTemp(path);
@@ -445,7 +404,7 @@ public class CMountProg : CRPCProg
             }
         }
 
-        if (foundPath != true)
+        if (foundPath)
         {
             //The requested path does not start with the alias, let's treat it normally.
             strncpy_s(finalPath, MAXPATHLEN, path, nSize);
@@ -468,67 +427,43 @@ public class CMountProg : CRPCProg
 
         if ((nSize & 3) != 0)
         {
-            m_pInStream->Read(&i, 4 - (nSize & 3));  //skip opaque bytes
+            m_pInStream.Read(&i, 4 - (nSize & 3));  //skip opaque bytes
         }
 
-        *returnPath = finalPath;
+        returnPath = finalPath;
         return foundPath;
     }
 
     private bool ReadPathsFromFile(string sFileName)
     {
-        std::ifstream pathFile(sFileName);
-
-        if (pathFile.is_open())
+        var lines = File.ReadAllLines(sFileName);
+        if(File.Exists(sFileName) && lines.Length>0)
         {
-            std::string line, path;
-            std::vector < std::string> paths;
-            std::istringstream ss;
-
-            while (std::getline(pathFile, line))
+            foreach (var line in lines)
             {
-                ss.clear();
-                paths.clear();
-                ss.str(line);
-
-                // split path and alias separated by '>'
-                while (std::getline(ss, path, '>'))
+                if (line.Length == 0) continue;
+                var parts = line.Split('>');
+                if (parts.Length == 0) continue;
+                if (parts.Length == 1)
                 {
-                    paths.push_back(path);
+                    var p1 = parts[0].Trim();
+                    if (p1.EndsWith(":\\")) p1 = p1[..^1];
+                    this.Export(p1, p1);
                 }
-                if (paths.size() < 1)
+                else if (parts.Length == 2)
                 {
-                    continue;
-                }
-                if (paths.size() < 2)
-                {
-                    paths.push_back(paths[0]);
-                }
-
-                // clean path, trim spaces and slashes (except drive letter)
-                paths[0].erase(paths[0].find_last_not_of(" ") + 1);
-                if (paths[0].substr(paths[0].size() - 2) != ":\\")
-                {
-                    paths[0].erase(paths[0].find_last_not_of("/\\ ") + 1);
-                }
-
-                char* pCurPath = (char*)malloc(paths[0].size() + 1);
-                pCurPath = (char*)paths[0].c_str();
-
-                if (pCurPath != NULL)
-                {
-                    char* pCurPathAlias = (char*)malloc(paths[1].size() + 1);
-                    pCurPathAlias = (char*)paths[1].c_str();
-                    Export(pCurPath, pCurPathAlias);
+                    var p1 = parts[0].Trim();
+                    if (p1.EndsWith(":\\")) p1 = p1[..^1];
+                    var p2 = parts[1].Trim();
+                    this.Export(p1, p2);
                 }
             }
+            return true;
         }
         else
         {
             Console.WriteLine("Can't open file {0}.", sFileName);
             return false;
         }
-
-        return true;
     }
 }

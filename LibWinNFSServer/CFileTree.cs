@@ -8,7 +8,7 @@ public class CFileTree
     public static bool debug = false;
     public FILE_ITEM AddItem(string absolutePath, byte[] handle)
     {
-        FILE_ITEM item =new();
+        FILE_ITEM item = new();
         item.handle = handle;
         item.bCached = false;
 
@@ -25,9 +25,9 @@ public class CFileTree
         else
         {
             // Check if the requested path belongs to an already registered parent node.
-            std::string sPath(absolutePath);
+            string sPath(absolutePath);
             tree_node_<FILE_ITEM>* parentNode = findParentNodeFromRootForPath(absolutePath);
-            std::string splittedPath = _basename_acp(sPath);
+            string splittedPath = _basename_acp(sPath);
             //printf("spl %s %s\n", splittedPath.c_str(), absolutePath);
             item.path = new char[splittedPath.length() + 1];
             strcpy_s(item.path, (splittedPath.length() + 1), splittedPath.c_str());
@@ -56,10 +56,10 @@ public class CFileTree
     }
     public void RemoveItem(string absolutePath)
     {
-        tree_node_<FILE_ITEM>* node = findNodeFromRootWithPath(absolutePath);
-        if (node != NULL)
+        TreeNode<FILE_ITEM> node = findNodeFromRootWithPath(absolutePath);
+        if (node != null)
         {
-            filesTree.erase(tree < FILE_ITEM >::iterator(node));
+            filesTree.erase(tree < FILE_ITEM >iterator(node));
         }
         else
         {
@@ -71,23 +71,23 @@ public class CFileTree
     }
     public void RenameItem(string absolutePathFrom, string absolutePathTo)
     {
-        tree_node_<FILE_ITEM>* node = findNodeFromRootWithPath(absolutePathFrom);
-        tree_node_<FILE_ITEM>* parentNode = findParentNodeFromRootForPath(absolutePathTo);
+        TreeNode<FILE_ITEM> node = findNodeFromRootWithPath(absolutePathFrom);
+        TreeNode<FILE_ITEM> parentNode = findParentNodeFromRootForPath(absolutePathTo);
 
-        if (parentNode != NULL && node != NULL)
+        if (parentNode != null && node != null)
         {
             if (filesTree.number_of_children(parentNode) < 1)
             {
-                FILE_ITEM emptyItem;
+                FILE_ITEM emptyItem = new();
                 emptyItem.nPathLen = 0;
-                emptyItem.path = const_cast<char*>("");
-                filesTree.append_child(tree < FILE_ITEM >::iterator_base(parentNode), emptyItem);
+                emptyItem.path = "";
+                filesTree.append_child((parentNode), emptyItem);
             }
             tree<FILE_ITEM>::iterator firstChild = filesTree.begin(parentNode);
             filesTree.move_after(firstChild, tree < FILE_ITEM >::iterator(node));
 
-            std::string sPath(absolutePathTo);
-            std::string splittedPath = sPath.substr(sPath.find_last_of('\\') + 1);
+            string sPath(absolutePathTo);
+            string splittedPath = sPath.substr(sPath.find_last_of('\\') + 1);
             node->data.path = new char[splittedPath.length() + 1];
             strcpy_s(node->data.path, (splittedPath.length() + 1), splittedPath.c_str());
 
@@ -97,18 +97,15 @@ public class CFileTree
 
     public TreeNode<FILE_ITEM> FindFileItemForPath(string absolutePath)
     {
-        tree_node_<FILE_ITEM>* node = findNodeFromRootWithPath(absolutePath);
-        if (node == NULL)
-        {
-            return NULL;
-        }
+        TreeNode<FILE_ITEM> node = findNodeFromRootWithPath(absolutePath);
+
         return node;
     }
 
     public void GetNodeFullPath(TreeNode<FILE_ITEM> node, ref string path)
     {
         path.append(node->data.path);
-        tree_node_<FILE_ITEM>* parentNode = node->parent;
+        tree_node_<FILE_ITEM> parentNode = node->parent;
         while (parentNode != NULL)
         {
             path.insert(0, "\\");
@@ -124,8 +121,8 @@ public class CFileTree
         {
             return NULL;
         }
-        std::string sPath(path);
-        std::string nPath(topNode->path);
+        string sPath(path);
+        string nPath(topNode->path);
         // topNode path and requested path are the same? Use the node.
         if (sPath == nPath)
         {
@@ -135,9 +132,9 @@ public class CFileTree
 
         // If the topNode path is part of the requested path this is a subpath.
         // Use the node.
-        if (sPath.find(nPath) != std::string::npos) {
+        if (sPath.find(nPath) != stdnpos) {
             // printf("Found %s is part of %s  \n", sPath.c_str(), topNode->path);
-            std::string splittedString = sPath.substr(strlen(topNode->path) + 1);
+            string splittedString = sPath.substr(strlen(topNode->path) + 1);
             return findNodeWithPathFromNode(splittedString.c_str(), topNode.node);
         }
 
@@ -151,7 +148,7 @@ public class CFileTree
             tree<FILE_ITEM>::sibling_iterator it;
             for (it = filesTree.begin(); it != filesTree.end(); it++)
             {
-                std::string itPath(it.node->data.path);
+                string itPath(it.node->data.path);
                 // Current item path matches the requested path - use the item as topNode.
                 if (sPath == itPath)
                 {
@@ -159,72 +156,73 @@ public class CFileTree
                     topNode = it;
                     return it.node;
                 }
-                else if (sPath.find(itPath) != std::string::npos) {
-                // If the item path is part of the requested path this is a subpath.
-                // Use the the item as topNode and continue analyzing.
-                // printf("Found root node %s \n", it.node->data.path);
-                topNode = it;
-                std::string splittedString = sPath.substr(itPath.length() + 1);
-                return findNodeWithPathFromNode(splittedString.c_str(), it.node);
+                else if (sPath.find(itPath) != stringnpos)
+                {
+                    // If the item path is part of the requested path this is a subpath.
+                    // Use the the item as topNode and continue analyzing.
+                    // printf("Found root node %s \n", it.node->data.path);
+                    topNode = it;
+                    string splittedString = sPath.substr(itPath.length() + 1);
+                    return findNodeWithPathFromNode(splittedString.c_str(), it.node);
+                }
             }
         }
-    }
-	// Nothing found return NULL.
-	return NULL;
+        // Nothing found return NULL.
+        return NULL;
     }
     protected TreeNode<FILE_ITEM> findNodeWithPathFromNode(string path, TreeNode<FILE_ITEM> node)
     {
-    tree<FILE_ITEM>::sibling_iterator sib = filesTree.begin(node);
-    tree<FILE_ITEM>::sibling_iterator end = filesTree.end(node);
-    bool currentLevel = true;
+        tree<FILE_ITEM>::sibling_iterator sib = filesTree.begin(node);
+        tree<FILE_ITEM>::sibling_iterator end = filesTree.end(node);
+        bool currentLevel = true;
 
-    std::string currentPath = _first_dirname(path);
+        std::string currentPath = _first_dirname(path);
 
-    size_t position = currentPath.size();
-    std::string followingPath = _following_path(path);
-    currentLevel = followingPath.empty();
+        size_t position = currentPath.size();
+        std::string followingPath = _following_path(path);
+        currentLevel = followingPath.empty();
 
-    while (sib != end)
-    {
-        // printf("sib->path '%s' lv %d curpath '%s' follow '%s'\n", sib->path, currentLevel, currentPath.c_str(), followingPath.c_str());
-        if (strcmp(sib->path, currentPath.c_str()) == 0)
+        while (sib != end)
         {
-            if (currentLevel)
+            // printf("sib->path '%s' lv %d curpath '%s' follow '%s'\n", sib->path, currentLevel, currentPath.c_str(), followingPath.c_str());
+            if (strcmp(sib->path, currentPath.c_str()) == 0)
             {
-                return sib.node;
+                if (currentLevel)
+                {
+                    return sib.node;
+                }
+                else
+                {
+                    return findNodeWithPathFromNode(followingPath.c_str(), sib.node);
+                }
             }
-            else
-            {
-                return findNodeWithPathFromNode(followingPath.c_str(), sib.node);
-            }
+            ++sib;
         }
-        ++sib;
-    }
-    return NULL;
-}
-	protected TreeNode<FILE_ITEM> findParentNodeFromRootForPath(string path)
-    {
-    std::string sPath(path);
-    std::string nPath(topNode->path);
-
-    // If the topNode path is not part of the requested path bail out.
-    // This avoids also issues with taking substrings of incompatible
-    // paths below.
-    if (sPath.find(nPath) == std::string::npos) {
-        // printf("Path %s doesn't belong to current topNode %s Found %s is part of %s  \n", sPath.c_str(), topNode->path);
         return NULL;
     }
-    std::string currentPath = sPath.substr(strlen(topNode->path) + 1);
-    std::string followingPath = _dirname_acp(currentPath);
-    if (followingPath.empty())
+    protected TreeNode<FILE_ITEM> findParentNodeFromRootForPath(string path)
     {
-        return topNode.node;
+        string sPath(path);
+        string nPath(topNode->path);
+
+        // If the topNode path is not part of the requested path bail out.
+        // This avoids also issues with taking substrings of incompatible
+        // paths below.
+        if (sPath.find(nPath) == stdstringnpos) {
+            // printf("Path %s doesn't belong to current topNode %s Found %s is part of %s  \n", sPath.c_str(), topNode->path);
+            return NULL;
+        }
+        string currentPath = sPath.substr(strlen(topNode->path) + 1);
+        string followingPath = _dirname_acp(currentPath);
+        if (followingPath.empty())
+        {
+            return topNode.node;
+        }
+        else
+        {
+            return findNodeWithPathFromNode(followingPath.c_str(), topNode.node);
+        }
     }
-    else
-    {
-        return findNodeWithPathFromNode(followingPath.c_str(), topNode.node);
-    }
-}
     protected void DisplayTree(TreeNode<FILE_ITEM> node, int level)
     {
         if (debug)

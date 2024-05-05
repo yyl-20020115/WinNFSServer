@@ -12,4 +12,3 @@ struct RPC_HEADER
     public OPAQUE_AUTH cred;
     public OPAQUE_AUTH verf;
 }
-
