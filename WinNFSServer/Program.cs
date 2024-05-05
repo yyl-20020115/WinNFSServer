@@ -9,10 +9,11 @@ public class Program
     private static bool UseLog = false;
     private static string FileName = "";
     private static string SocketAddress ="0.0.0.0";
+    private static CFileTable fileTable = new ();
     private static readonly CRPCServer RPCServer = new();
     private static readonly CPortmapProg PortmapProg = new();
     private static readonly CNFSProg NFSProg = new();
-    private static readonly CMountProg MountProg = new();
+    private static readonly CMountProg MountProg = new(fileTable);
 
     public const int SOCKET_NUM = 3;
 

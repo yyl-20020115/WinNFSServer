@@ -140,68 +140,39 @@ public class CMountProg : CRPCProg
         {
             if (result[0] == '.')
             {
-                char path1[MAXPATHLEN];
-                char* p = _getcwd(path1, MAXPATHLEN);
-
-                if (result[1] == '\0')
+                if (result.Length == 1)
                 {
-                    len = strlen(path1);
-                    result = (char*)realloc(result, len + 1);
-                    if (result == NULL) return NULL;
-                    strcpy_s(result, len + 1, path1);
+                    result = Environment.CurrentDirectory;
                 }
                 else if (result[1] == '\\')
                 {
-                    strcat_s(path1, result + 1);
-                    len = strlen(path1);
-                    result = (char*)realloc(result, len + 1);
-                    if (result == NULL) return NULL;
-                    strcpy_s(result, len + 1, path1);
+                    result = Environment.CurrentDirectory + result;
                 }
 
             }
-            if (len >= 2 && result[1] == ':' && ((result[0] >= 'A' && result[0] <= 'Z') || (result[0] >= 'a' && result[0] <= 'z')))
+            if (result.Length >= 2 && result[1] == ':' && ((result[0] >= 'A' && result[0] <= 'Z') || (result[0] >= 'a' && result[0] <= 'z')))
             { //check path format
-                char tempPath[MAXPATHLEN] = "\\\\?\\";
-                strcat_s(tempPath, result);
-                len = strlen(tempPath);
-                result = (char*)realloc(result, len + 1);
-                if (result == NULL) return NULL;
-                strcpy_s(result, len + 1, tempPath);
+                result = "\\\\?\\" + result;
             }
 
-            if ((len < 6) || result[5] != ':' || !isalpha(result[4]))
+            if ((result.Length < 6) || result[5] != ':' || !char.IsLetter(result[4]))
             { //check path format
                 Console.WriteLine("Path %s format is incorrect.", pPath);
                 Console.WriteLine("Please use a full path such as C:\\work or \\\\?\\C:\\work");
-                free(result);
-                return NULL;
+                
+                return null;
             }
-
-            for (size_t i = 0; i < len; i++)
-            {
-                if (result[i] == '/')
-                {
-                    result[i] = '\\';
-                }
-            }
+            result = result.Replace('/', '\\');
         }
         else if (format == PathFormats.FORMAT_PATHALIAS)
         {
             if (pPath[1] == ':' && ((pPath[0] >= 'A' && pPath[0] <= 'Z') || (pPath[0] >= 'a' && pPath[0] <= 'z')))
             {
-                strncpy_s(result, len + 1, pPath, len);
+                result = "/"+pPath[1..];
+
                 //transform Windows format to mount path d:\work => /d/work
-                result[1] = result[0];
-                result[0] = '/';
-                size_t len = strlen(result);
-                for (size_t i = 0; i < len; i++)
-                {
-                    if (i >= 2 && result[i] == '\\')
-                    {
-                        result[i] = '/';
-                    }
-                }
+                result = result.Replace('/', '\\');
+
             }
             else if (pPath[0] != '/')
             { //check path alias format
@@ -328,9 +299,9 @@ public class CMountProg : CRPCProg
 
     private bool GetPath(ref string returnPath)
     {
-        uint i, nSize;
+        uint i, nSize = 0;
         string path;
-        string finalPath;
+        string finalPath="";
         bool foundPath = false;
 
         m_pInStream.Read(ref nSize);
@@ -340,62 +311,45 @@ public class CMountProg : CRPCProg
             nSize = MAXPATHLEN;
         }
 
-        typedef std::map < std::string, std::string>::iterator it_type;
         var bytes = new byte[nSize];
         m_pInStream.Read(bytes);
        
         path = Encoding.UTF8.GetString(bytes);
         // TODO: this whole method is quite ugly and ripe for refactoring
         // strip slashes
-        std::string pathTemp(path);
-        pathTemp.erase(pathTemp.find_last_not_of("/\\") + 1);
-        std::copy(pathTemp.begin(), pathTemp.end(), path);
-        path[pathTemp.size()] = '\0';
+        string pathTemp = path.TrimEnd('\\').TrimEnd('/');
 
-        for (it_type iterator = m_PathMap.begin(); iterator != m_PathMap.end(); iterator++)
+        foreach (var pair in m_PathMap)
         {
 
             // strip slashes
-            std::string pathAliasTemp(iterator->first.c_str());
-            pathAliasTemp.erase(pathAliasTemp.find_last_not_of("/\\") + 1);
-            char* pathAlias = const_cast<char*>(pathAliasTemp.c_str());
+            string pathAliasTemp = pair.Key;
+            //pathAliasTemp.erase(pathAliasTemp.find_last_not_of("/\\") + 1);
+            string pathAlias = pathAliasTemp;
 
             // strip slashes
-            std::string windowsPathTemp(iterator->second.c_str());
+            string windowsPathTemp = pair.Value;
             // if it is a drive letter, e.g. D:\ keep the slash
-            if (windowsPathTemp.substr(windowsPathTemp.size() - 2) != ":\\")
-            {
-                windowsPathTemp.erase(windowsPathTemp.find_last_not_of("/\\") + 1);
-            }
-            char* windowsPath = const_cast<char*>(windowsPathTemp.c_str());
+            //if (windowsPathTemp.substr(windowsPathTemp.size() - 2) != ":\\")
+            //{
+            //    windowsPathTemp.erase(windowsPathTemp.find_last_not_of("/\\") + 1);
+            //}
+            string windowsPath = windowsPathTemp;
 
-            size_t aliasPathSize = strlen(pathAlias);
-            size_t windowsPathSize = strlen(windowsPath);
-            size_t requestedPathSize = pathTemp.size();
-
-            if ((requestedPathSize > aliasPathSize) && (strncmp(path, pathAlias, aliasPathSize) == 0))
-            {
-                foundPath = true;
-                //The requested path starts with the alias. Let's replace the alias with the real path
-                strncpy_s(finalPath, MAXPATHLEN, windowsPath, windowsPathSize);
-                strncpy_s(finalPath + windowsPathSize, MAXPATHLEN - windowsPathSize, (path + aliasPathSize), requestedPathSize - aliasPathSize);
-                finalPath[windowsPathSize + requestedPathSize - aliasPathSize] = '\0';
-
-                for (i = 0; i < requestedPathSize - aliasPathSize; i++)
-                {
-                    //transform path to Windows format
-                    if (finalPath[windowsPathSize + i] == '/')
-                    {
-                        finalPath[windowsPathSize + i] = '\\';
-                    }
-                }
-            }
-            else if ((requestedPathSize == aliasPathSize) && (strncmp(path, pathAlias, aliasPathSize) == 0))
+            //if ((requestedPathSize > aliasPathSize) && (strncmp(path, pathAlias, aliasPathSize) == 0))
+            //{
+            //    foundPath = true;
+            //    //The requested path starts with the alias. Let's replace the alias with the real path
+            //    finalPath = windowsPath;
+            //    finalPath = finalPath.Replace('/', '\\');
+            //}
+            //else 
+            if (String.Compare(path, pathAlias,true) == 0)
             {
                 foundPath = true;
+                finalPath = windowsPath;
                 //The requested path IS the alias
-                strncpy_s(finalPath, MAXPATHLEN, windowsPath, windowsPathSize);
-                finalPath[windowsPathSize] = '\0';
+
             }
 
             if (foundPath == true)
@@ -407,27 +361,22 @@ public class CMountProg : CRPCProg
         if (foundPath)
         {
             //The requested path does not start with the alias, let's treat it normally.
-            strncpy_s(finalPath, MAXPATHLEN, path, nSize);
+           
             //transform mount path to Windows format. /d/work => d:\work
-            finalPath[0] = finalPath[1];
-            finalPath[1] = ':';
-
-            for (i = 2; i < nSize; i++)
-            {
-                if (finalPath[i] == '/')
-                {
-                    finalPath[i] = '\\';
-                }
-            }
-
-            finalPath[nSize] = '\0';
+            //finalPath[0] = finalPath[1];
+            //finalPath[1] = ':';
+            finalPath = path[1..];
+            finalPath = finalPath.Replace('/', '\\');
+         
         }
 
-        PrintLog("Final local requested path: %s\n", finalPath);
+        PrintLog("Final local requested path: {0}\n", finalPath);
 
         if ((nSize & 3) != 0)
         {
-            m_pInStream.Read(&i, 4 - (nSize & 3));  //skip opaque bytes
+            byte[] buffer = new byte[4];
+            //4 - (nSize & 3)
+            m_pInStream.Read(buffer);  //skip opaque bytes
         }
 
         returnPath = finalPath;

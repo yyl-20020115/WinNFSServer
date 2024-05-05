@@ -18,7 +18,7 @@ public class CRPCServer : ISocketListener
     }
     public void SetLogOn(bool bLogOn)
     {
-        for (var i = 0; i < PROG_NUM; i++)
+        for (var i = 0; i < m_pProgTable.Length; i++)
         {
             m_pProgTable[i]?.SetLogOn(bLogOn);
         }
@@ -28,7 +28,7 @@ public class CRPCServer : ISocketListener
         int nResult;
 
         m_hMutex.WaitOne();
-        IInputStream pInStream = pSocket.GetInputStream();
+        var pInStream = pSocket.GetInputStream();
 
         while (pInStream.GetSize() > 0)
         {
@@ -46,7 +46,7 @@ public class CRPCServer : ISocketListener
     public virtual int Process(int nType, IInputStream pInStream, IOutputStream pOutStream, string pRemoteAddr)
     {
         RPC_HEADER header = new();
-        int nPos = 0, nSize = 0;
+        int nPos = 0;
         ProcessParam param = new();
         int nResult;
 
@@ -124,7 +124,7 @@ public class CRPCServer : ISocketListener
 
         if (nType == CSocket.SOCK_STREAM)
         {
-            nSize = pOutStream.GetPosition();  //remember current position
+            int nSize = pOutStream.GetPosition();  //remember current position
             pOutStream?.Seek(nPos, SEEKS.SEEK_SET);  //seek to the position of head
             header.header = (uint)(0x80000000 + nSize - nPos - 4);  //size of output data
             pOutStream?.Write(header.header);  //update header

@@ -2,7 +2,7 @@
 
 public class CFileTree
 {
-    private TreeNode<FILE_ITEM> filesTree;
+    private Tree<FILE_ITEM> filesTree;
     private TreeNode<FILE_ITEM> topNode;
 
     public static bool debug = false;
@@ -13,11 +13,11 @@ public class CFileTree
         item.bCached = false;
 
         // If the tree is empty just add the new path as node on the top level.
-        if (filesTree.empty())
+        if (filesTree.IsEmpty)
         {
-            item.path = new char[strlen(absolutePath) + 1];
-            strcpy_s(item.path, (strlen(absolutePath) + 1), absolutePath);
-            item.nPathLen = (unsigned int)strlen(item.path);
+            item.path = absolutePath;
+
+            item.nPathLen = absolutePath.Length;
 
             filesTree.set_head(item);
             topNode = filesTree.begin();
@@ -168,7 +168,7 @@ public class CFileTree
             }
         }
         // Nothing found return NULL.
-        return NULL;
+        return null;
     }
     protected TreeNode<FILE_ITEM> findNodeWithPathFromNode(string path, TreeNode<FILE_ITEM> node)
     {
@@ -176,16 +176,16 @@ public class CFileTree
         tree<FILE_ITEM>::sibling_iterator end = filesTree.end(node);
         bool currentLevel = true;
 
-        std::string currentPath = _first_dirname(path);
+        string currentPath = _first_dirname(path);
 
         size_t position = currentPath.size();
-        std::string followingPath = _following_path(path);
+        string followingPath = _following_path(path);
         currentLevel = followingPath.empty();
 
         while (sib != end)
         {
             // printf("sib->path '%s' lv %d curpath '%s' follow '%s'\n", sib->path, currentLevel, currentPath.c_str(), followingPath.c_str());
-            if (strcmp(sib->path, currentPath.c_str()) == 0)
+            if (strcmp(sib->path, currentPath) == 0)
             {
                 if (currentLevel)
                 {
@@ -193,7 +193,7 @@ public class CFileTree
                 }
                 else
                 {
-                    return findNodeWithPathFromNode(followingPath.c_str(), sib.node);
+                    return findNodeWithPathFromNode(followingPath, sib.node);
                 }
             }
             ++sib;
@@ -220,7 +220,7 @@ public class CFileTree
         }
         else
         {
-            return findNodeWithPathFromNode(followingPath.c_str(), topNode.node);
+            return findNodeWithPathFromNode(followingPath, topNode.node);
         }
     }
     protected void DisplayTree(TreeNode<FILE_ITEM> node, int level)

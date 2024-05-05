@@ -7,7 +7,7 @@ public class TreeNode<T>(T? data = null) where T:class
     public TreeNode<T>? PreviousSibling;
     public TreeNode<T>? NextSibling;
 	public T? Data = data;
-
+    
     public int CountOfChildren
     {
         get
@@ -22,4 +22,10 @@ public class TreeNode<T>(T? data = null) where T:class
             return count;
         }
     }
+}
+
+public class Tree<T>(TreeNode<T> Root) where T: class
+{
+    public TreeNode<T> Root = Root;
+    public bool IsEmpty => this.Root == null;
 }
