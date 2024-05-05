@@ -7,4 +7,19 @@ public class TreeNode<T>(T? data = null) where T:class
     public TreeNode<T>? PreviousSibling;
     public TreeNode<T>? NextSibling;
 	public T? Data = data;
+
+    public int CountOfChildren
+    {
+        get
+        {
+            var count = 0;
+            var tn = this.FirstChild;
+            while (tn!=null && tn != this.LastChild)
+            {
+                count++;
+                tn = tn?.NextSibling;
+            }
+            return count;
+        }
+    }
 }

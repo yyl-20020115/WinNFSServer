@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LibWinNFSServer;
+﻿namespace LibWinNFSServer;
 
 public class CNFS3Prog :CRPCProg
 {
@@ -27,29 +20,29 @@ public class CNFS3Prog :CRPCProg
     }
 
 
-    uint ProcedureNULL(void);
-    uint ProcedureGETATTR(void);
-    uint ProcedureSETATTR(void);
-    uint ProcedureLOOKUP(void);
-    uint ProcedureACCESS(void);
-    uint ProcedureREADLINK(void);
-    uint ProcedureREAD(void);
-    uint ProcedureWRITE(void);
-    uint ProcedureCREATE(void);
-    uint ProcedureMKDIR(void);
-    uint ProcedureSYMLINK(void);
-    uint ProcedureMKNOD(void);
-    uint ProcedureREMOVE(void);
-    uint ProcedureRMDIR(void);
-    uint ProcedureRENAME(void);
-    uint ProcedureLINK(void);
-    uint ProcedureREADDIR(void);
-    uint ProcedureREADDIRPLUS(void);
-    uint ProcedureFSSTAT(void);
-    uint ProcedureFSINFO(void);
-    uint ProcedurePATHCONF(void);
-    uint ProcedureCOMMIT(void);
-    uint ProcedureNOIMP(void);
+    uint ProcedureNULL();
+    uint ProcedureGETATTR();
+    uint ProcedureSETATTR();
+    uint ProcedureLOOKUP();
+    uint ProcedureACCESS();
+    uint ProcedureREADLINK();
+    uint ProcedureREAD();
+    uint ProcedureWRITE();
+    uint ProcedureCREATE();
+    uint ProcedureMKDIR();
+    uint ProcedureSYMLINK();
+    uint ProcedureMKNOD();
+    uint ProcedureREMOVE();
+    uint ProcedureRMDIR();
+    uint ProcedureRENAME();
+    uint ProcedureLINK();
+    uint ProcedureREADDIR();
+    uint ProcedureREADDIRPLUS();
+    uint ProcedureFSSTAT();
+    uint ProcedureFSINFO();
+    uint ProcedurePATHCONF();
+    uint ProcedureCOMMIT();
+    uint ProcedureNOIMP();
 
     void Read(bool* pBool);
     void Read(uint32* pUint32);
@@ -77,14 +70,14 @@ public class CNFS3Prog :CRPCProg
     private:
 	int m_nResult;
 
-    bool GetPath(std::string& path);
-    bool ReadDirectory(std::string& dirName, std::string& fileName);
-    string GetFullPath(std::string& dirName, std::string& fileName);
-    uint CheckFile(const char* fullPath);
-    uint CheckFile(const char* directory, const char* fullPath);
-    bool GetFileHandle(const char* path, nfs_fh3* pObject);
-	bool GetFileAttributesForNFS(const char* path, wcc_attr* pAttr);
-	bool GetFileAttributesForNFS(const char* path, fattr3* pAttr);
+    bool GetPath(ref string path);
+    bool ReadDirectory(ref string dirName, ref string fileName);
+    string GetFullPath(ref string dirName, ref string fileName);
+    uint CheckFile(string fullPath);
+    uint CheckFile(string directory, string fullPath);
+    bool GetFileHandle(string path, nfs_fh3* pObject);
+	bool GetFileAttributesForNFS(string path, wcc_attr* pAttr);
+	bool GetFileAttributesForNFS(string path, fattr3* pAttr);
 	uint FileTimeToPOSIX(FILETIME ft);
-    Dictionary<int, FILE*> unstableStorageFile;
+    Dictionary<int, FILE> unstableStorageFile;
 }

@@ -41,10 +41,6 @@ public class CFileTable
                 //printf("Missing handle for path %s\n", path);
             }
         }
-        if (node == null)
-        {
-            return null;
-        }
 
         return node?.Data?.handle;
     }
@@ -88,9 +84,7 @@ public class CFileTable
             }
             else
             {
-
                 pTable = m_pFirstTable;
-
                 for (i = FILE_TABLE.TABLE_SIZE; i <= handle; i += FILE_TABLE.TABLE_SIZE)
                 {
                     pTable = pTable.pNext;
@@ -100,7 +94,7 @@ public class CFileTable
             }
             // Remove from table end
 
-            string rpath = g_FileTree.GetNodeFullPath(foundDeletedItem);
+            var rpath = g_FileTree.GetNodeFullPath(foundDeletedItem);
             g_FileTree.RemoveItem(rpath);
             return true;
         }
@@ -113,18 +107,19 @@ public class CFileTable
     public void RenameFile(string pathFrom, string pathTo)
     {
         g_FileTree.RenameItem(pathFrom, pathTo);
-
     }
 
     protected TreeNode<FILE_ITEM> AddItem(string path)
     {
-        FILE_ITEM item = new();
         TreeNode<FILE_ITEM> node;
         uint nIndex;
 
-        item.path = path;
-        item.nPathLen = path.Length;
-        item.handle = new byte[NFS3_FHSIZE];
+        FILE_ITEM item = new()
+        {
+            path = path,
+            nPathLen = path.Length,
+            handle = new byte[NFS3_FHSIZE]
+        };
         var ts = BitConverter.GetBytes(m_nTableSize);
         Array.Copy(ts, item.handle, ts.Length);
         //let its handle equal the index

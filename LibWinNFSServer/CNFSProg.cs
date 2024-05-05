@@ -18,7 +18,7 @@ public class CNFSProg : CRPCProg
         {
             if (m_pNFS3Prog == null)
             {
-                m_pNFS3Prog = new CNFS3Prog();
+                m_pNFS3Prog = new ();
                 m_pNFS3Prog.SetUserID(m_nUID, m_nGID);
                 m_pNFS3Prog.SetLogOn(m_bLogOn);
             }
@@ -36,6 +36,4 @@ public class CNFSProg : CRPCProg
         base.SetLogOn(bLogOn);
         m_pNFS3Prog?.SetLogOn(bLogOn);
     }
-
-
 }
