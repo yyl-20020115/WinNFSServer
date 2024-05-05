@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LibWinNFSServer;
+﻿namespace LibWinNFSServer;
 public class CMountProg : CRPCProg
 {
     public CMountProg();
@@ -21,7 +15,7 @@ public class CMountProg : CRPCProg
     protected int m_nMountNum;
     protected string m_pPathFile;
     protected Dictionary<string,string> m_PathMap;
-    protected string[] m_pClientAddr[MOUNT_NUM_MAX];
+    protected string[] m_pClientAddr = new string[MOUNT_NUM_MAX];
     protected IInputStream m_pInStream;
     protected IOutputStream m_pOutStream;
 

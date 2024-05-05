@@ -17,7 +17,7 @@ public class CSocket : IDisposable
         Dispose(disposing: false);
     }
     public int GetType();
-    public void Open(Socket socket, ISocketListener pListener, IPEndPoint pRemoteAddr = null);
+    public void Open(Socket socket, ISocketListener? pListener, IPEndPoint pRemoteAddr = null);
     public void Close();
     public void Send();
     public bool Active();

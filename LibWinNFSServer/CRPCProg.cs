@@ -12,12 +12,12 @@ public abstract class CRPCProg
     public const int NFS3_FHSIZE = 64;
     public CRPCProg() { }
     public abstract int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam);
-    public virtual void SetLogOn(bool on) => this.log_onoff = on;
+    public virtual void SetLogOn(bool on) => this.m_bLogOn = on;
 
-    protected bool log_onoff = false;
+    protected bool m_bLogOn = false;
     public virtual int PrintLog(string format, params object[] ops)
     {
-        if (log_onoff) Console.Out.WriteLine(format, ops);
+        if (m_bLogOn) Console.Out.WriteLine(format, ops);
         return 0;
     }
 

@@ -10,13 +10,33 @@ namespace LibWinNFSServer;
 
 public class CServerSocket
 {
-    public CServerSocket();
-    ~CServerSocket();
-    public void SetListener(ISocketListener pListener);
-    public bool Open(int nPort, int nMaxNum);
-    public void Close();
-    public int GetPort();
-    public void Run();
+    public CServerSocket()
+    {
+
+    }
+    ~CServerSocket()
+    {
+
+    }
+    public void SetListener(ISocketListener pListener)
+    {
+
+    }
+    public bool Open(int nPort, int nMaxNum)
+    {
+    }
+    public void Close()
+    {
+
+    }
+    public int GetPort()
+    {
+
+    }
+    public void Run()
+    {
+
+    }
 
     
     private int m_nPort, m_nMaxNum;
