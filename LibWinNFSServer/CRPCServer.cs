@@ -54,7 +54,7 @@ public class CRPCServer : ISocketListener
         ProcessParam param;
         int nResult;
 
-        nResult = PRC_OK;
+        nResult = (int)PRC_STATUS.PRC_OK;
 
         if (nType == SOCK_STREAM)
         {
@@ -74,12 +74,12 @@ public class CRPCServer : ISocketListener
 
         if (pInStream?.Read(ref header.verf.length) < sizeof(header.verf.length))
         {
-            nResult = PRC_FAIL;
+            nResult = (int)PRC_STATUS.PRC_FAIL;
         }
 
         if (pInStream?.Skip(header.verf.length) < header.verf.length)
         {
-            nResult = PRC_FAIL;
+            nResult = (int)PRC_STATUS.PRC_FAIL;
         }
 
         if (nType == SOCK_STREAM)
@@ -94,7 +94,7 @@ public class CRPCServer : ISocketListener
         pOutStream?.Write(header.verf.flavor);
         pOutStream?.Write(header.verf.length);
 
-        if (nResult == PRC_FAIL)
+        if (nResult == (int)PRC_STATUS.PRC_FAIL)
         { //input data is truncated
             pOutStream?.Write(GARBAGE_ARGS);
         }

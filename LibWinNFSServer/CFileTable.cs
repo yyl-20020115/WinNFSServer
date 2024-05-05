@@ -54,7 +54,7 @@ public class CFileTable
         node = GetItemByID(id);
         if (node != null)
         {
-            path = g_FileTree.GetNodeFullPath(node);
+            g_FileTree.GetNodeFullPath(node, ref path);
             return true;
         }
         else
@@ -94,7 +94,8 @@ public class CFileTable
             }
             // Remove from table end
 
-            var rpath = g_FileTree.GetNodeFullPath(foundDeletedItem);
+            string rpath = "";
+            g_FileTree.GetNodeFullPath(foundDeletedItem, ref rpath);
             g_FileTree.RemoveItem(rpath);
             return true;
         }

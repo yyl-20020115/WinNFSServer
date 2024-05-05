@@ -4,5 +4,5 @@ namespace LibWinNFSServer;
 
 public interface ISocketListener
 {
-    void SocketReceived(Socket pSocket);
+    void SocketReceived(CSocket pSocket);
 }
