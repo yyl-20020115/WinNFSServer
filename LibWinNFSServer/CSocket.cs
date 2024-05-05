@@ -10,7 +10,7 @@ public class CSocket : IDisposable
 
     private int m_nType;
     private Socket m_Socket;
-    private IPEndPoint m_RemoteAddr;
+    private EndPoint m_RemoteAddr;
     private ISocketListener? m_pListener;
     private CSocketStream? m_SocketStream;
     private bool m_bActive;
@@ -49,10 +49,8 @@ public class CSocket : IDisposable
         Dispose(disposing: false);
     }
     public int GetType() => this.m_nType;
-    public void Open(Socket socket, ISocketListener? pListener, IPEndPoint pRemoteAddr = null)
+    public void Open(Socket socket, ISocketListener? pListener, EndPoint pRemoteAddr = null)
     {
-        uint id;
-
         Close();
 
         m_Socket = socket;  //socket
@@ -99,11 +97,17 @@ public class CSocket : IDisposable
     }
     public string GetRemoteAddress()
     {
-        return m_RemoteAddr.Address.ToString();
+        return (m_RemoteAddr is IPEndPoint ipe)
+            ? ipe.Address.ToString()
+            :""
+            ;
     }
     public int GetRemotePort()
     {
-        return m_RemoteAddr.Port;
+        return (m_RemoteAddr is IPEndPoint ipe)
+            ? ipe.Port
+            : 0
+            ;
     }
     public IInputStream GetInputStream()
     {

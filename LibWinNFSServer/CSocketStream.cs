@@ -56,6 +56,20 @@ public class CSocketStream : IInputStream, IOutputStream
         pnValue = BitConverter.ToInt64(pData);
         return s;
     }
+    public int Read(ref uint pnValue)
+    {
+        byte[] pData = new byte[sizeof(uint)];
+        int s = Read(pData);
+        pnValue = BitConverter.ToUInt32(pData);
+        return s;
+    }
+    public int Read8(ref ulong pnValue)
+    {
+        byte[] pData = new byte[sizeof(ulong)];
+        int s = Read(pData);
+        pnValue = BitConverter.ToUInt64(pData);
+        return s;
+    }
     public int Skip(int nSize)
     {
         if (nSize > m_nInBufferSize - m_nInBufferIndex)
@@ -64,6 +78,17 @@ public class CSocketStream : IInputStream, IOutputStream
         }
 
         m_nInBufferIndex += nSize;
+
+        return nSize;
+    }
+    public uint Skip(uint nSize)
+    {
+        if (nSize > m_nInBufferSize - m_nInBufferIndex)
+        { //over the number of bytes of data in the input buffer
+            nSize = (uint)(m_nInBufferSize - m_nInBufferIndex);
+        }
+
+        m_nInBufferIndex += (int)nSize;
 
         return nSize;
     }
@@ -88,6 +113,14 @@ public class CSocketStream : IInputStream, IOutputStream
         }
 
     }
+    public void Write(int nValue)
+    {
+        Write(BitConverter.GetBytes(nValue));
+    }
+    public void Write8(long nValue)
+    {
+        Write(BitConverter.GetBytes(nValue));
+    }
     public void Write(uint nValue)
     {
         Write(BitConverter.GetBytes(nValue));
@@ -96,19 +129,19 @@ public class CSocketStream : IInputStream, IOutputStream
     {
         Write(BitConverter.GetBytes(nValue));
     }
-    public void Seek(int nOffset, int nFrom)
+    public void Seek(int nOffset, SEEKS nFrom)
     {
-        if (nFrom == (int)SEEKS.SEEK_SET)
+        switch (nFrom)
         {
-            m_nOutBufferIndex = nOffset;
-        }
-        else if (nFrom == (int)SEEKS.SEEK_CUR)
-        {
-            m_nOutBufferIndex += nOffset;
-        }
-        else if (nFrom == (int)SEEKS.SEEK_END)
-        {
-            m_nOutBufferIndex = m_nOutBufferSize + nOffset;
+            case SEEKS.SEEK_SET:
+                m_nOutBufferIndex = nOffset;
+                break;
+            case SEEKS.SEEK_CUR:
+                m_nOutBufferIndex += nOffset;
+                break;
+            case SEEKS.SEEK_END:
+                m_nOutBufferIndex = m_nOutBufferSize + nOffset;
+                break;
         }
 
     }
