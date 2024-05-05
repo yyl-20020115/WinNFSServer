@@ -26,15 +26,14 @@ public class CRPCServer : ISocketListener
     }
     public void SocketReceived(CSocket pSocket)
     {
-        IInputStream pInStream;
         int nResult;
 
         m_hMutex.WaitOne();
-        pInStream = pSocket?.GetInputStream();
+        IInputStream pInStream = pSocket.GetInputStream();
 
-        while (pInStream?.GetSize() > 0)
+        while (pInStream.GetSize() > 0)
         {
-            nResult = Process((int)pSocket?.GetType(), pInStream, pSocket?.GetOutputStream(), pSocket?.GetRemoteAddress());  //process input data
+            nResult = Process((int)pSocket.GetType(), pInStream, pSocket.GetOutputStream(), pSocket.GetRemoteAddress());  //process input data
             pSocket?.Send();  //send response
 
             if (nResult != (int)PRC_STATUS.PRC_OK || pSocket?.GetType() == CSocket.SOCK_DGRAM)

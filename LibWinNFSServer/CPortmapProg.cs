@@ -17,7 +17,6 @@ public class CPortmapProg :  CRPCProg
     {
         m_nPortTable[nProg - MIN_PROG_NUM] = nPort;
     }
-    delegate void PPROC();
  
     public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
     {

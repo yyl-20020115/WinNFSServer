@@ -1,6 +1,8 @@
 ﻿namespace LibWinNFSServer;
 public abstract class CRPCProg
 {
+    protected delegate void PPROC();
+
     /* The maximum number of bytes in a pathname argument. */
     public const int MAXPATHLEN = 1024;
 

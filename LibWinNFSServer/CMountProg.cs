@@ -93,24 +93,31 @@ public class CMountProg : CRPCProg
         return m_nMountNum;  //the number of clients mounted
 
     }
-    public int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
+    
+    public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
     {
-        PPROC pf[] = { ProcedureNULL, ProcedureMNT, ProcedureNOIMP, ProcedureUMNT, ProcedureUMNTALL, ProcedureEXPORT };
+        PPROC[] pf = [
+            ProcedureNULL, 
+            ProcedureMNT, 
+            ProcedureNOIMP, 
+            ProcedureUMNT, 
+            ProcedureUMNTALL,
+            ProcedureEXPORT];
 
         PrintLog("MOUNT ");
 
-        if (pParam->nProc >= sizeof(pf) / sizeof(PPROC))
+        if (pParam.nProc >= pf.Length)
         {
             ProcedureNOIMP();
             PrintLog("\n");
-            return PRC_STATUS.PRC_NOTIMP;
+            return (int)PRC_STATUS.PRC_NOTIMP;
         }
 
         m_pInStream = pInStream;
         m_pOutStream = pOutStream;
         m_pParam = pParam;
-        m_nResult = PRC_OK;
-        (this->* pf[pParam->nProc])();
+        m_nResult = (int)PRC_STATUS.PRC_OK;
+        pf[pParam.nProc]();
         PrintLog("\n");
 
         return m_nResult;
@@ -267,17 +274,17 @@ public class CMountProg : CRPCProg
 
         if (GetPath(ref path))
         {
-            m_pOutStream->Write(MNT_OK); //OK
+            m_pOutStream.Write(MNT_OK); //OK
 
-            if (m_pParam->nVersion == 1)
+            if (m_pParam.nVersion == 1)
             {
-                m_pOutStream->Write(CFileTable::GetFileHandle(path), FHSIZE);  //fhandle
+                m_pOutStream.Write(CFileTable::GetFileHandle(path), FHSIZE);  //fhandle
             }
             else
             {
-                m_pOutStream->Write(NFS3_FHSIZE);  //length
-                m_pOutStream->Write(CFileTable::GetFileHandle(path), NFS3_FHSIZE);  //fhandle
-                m_pOutStream->Write(0);  //flavor
+                m_pOutStream.Write(NFS3_FHSIZE);  //length
+                m_pOutStream.Write(CFileTable::GetFileHandle(path), NFS3_FHSIZE);  //fhandle
+                m_pOutStream.Write(0);  //flavor
             }
 
             ++m_nMountNum;
@@ -286,15 +293,15 @@ public class CMountProg : CRPCProg
             {
                 if (m_pClientAddr[i] == NULL)
                 { //search an empty space
-                    m_pClientAddr[i] = new char[strlen(m_pParam->pRemoteAddr) + 1];
-                    strcpy_s(m_pClientAddr[i], (strlen(m_pParam->pRemoteAddr) + 1), m_pParam->pRemoteAddr);  //remember the client address
+                    m_pClientAddr[i] = new char[strlen(m_pParam.pRemoteAddr) + 1];
+                    strcpy_s(m_pClientAddr[i], (strlen(m_pParam.pRemoteAddr) + 1), m_pParam.pRemoteAddr);  //remember the client address
                     break;
                 }
             }
         }
         else
         {
-            m_pOutStream->Write(MNTERR_ACCESS);  //permission denied
+            m_pOutStream.Write(MNTERR_ACCESS);  //permission denied
         }
     }
     protected void ProcedureUMNT()
@@ -334,30 +341,30 @@ public class CMountProg : CRPCProg
             const char* path = exportedPath.first.c_str();
             unsigned int length = (unsigned int)strlen(path);
             // dirpath
-            m_pOutStream->Write(1);
-            m_pOutStream->Write(length);
-            m_pOutStream->Write(const_cast<char*>(path), length);
+            m_pOutStream.Write(1);
+            m_pOutStream.Write(length);
+            m_pOutStream.Write(const_cast<char*>(path), length);
             int fillBytes = (length % 4);
             if (fillBytes > 0)
             {
                 fillBytes = 4 - fillBytes;
-                m_pOutStream->Write(".", fillBytes);
+                m_pOutStream.Write(".", fillBytes);
             }
             // groups
-            m_pOutStream->Write(1);
-            m_pOutStream->Write(1);
-            m_pOutStream->Write("*", 1);
-            m_pOutStream->Write("...", 3);
-            m_pOutStream->Write(0);
+            m_pOutStream.Write(1);
+            m_pOutStream.Write(1);
+            m_pOutStream.Write("*", 1);
+            m_pOutStream.Write("...", 3);
+            m_pOutStream.Write(0);
         }
 
-        m_pOutStream->Write(0);
-        m_pOutStream->Write(0);
+        m_pOutStream.Write(0);
+        m_pOutStream.Write(0);
     }
     protected void ProcedureNOIMP()
     {
         PrintLog("NOIMP");
-        m_nResult = PRC_STATUS.PRC_NOTIMP;
+        m_nResult = (int)PRC_STATUS.PRC_NOTIMP;
 
     }
 
