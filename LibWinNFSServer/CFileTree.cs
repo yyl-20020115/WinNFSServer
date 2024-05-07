@@ -2,55 +2,54 @@
 
 public class CFileTree
 {
-    private Tree<FILE_ITEM> filesTree;
-    private TreeNode<FILE_ITEM> topNode;
+    private Tree<FILE_ITEM> filesTree = new();
+    private Tree<FILE_ITEM>.PreOrderIterator? topNode =null;
 
     public static bool debug = false;
     public FILE_ITEM AddItem(string absolutePath, byte[] handle)
     {
-        FILE_ITEM item = new();
-        item.handle = handle;
-        item.bCached = false;
+        FILE_ITEM item = new()
+        {
+            handle = handle,
+            bCached = false
+        };
 
         // If the tree is empty just add the new path as node on the top level.
         if (filesTree.IsEmpty)
         {
             item.path = absolutePath;
-
             item.nPathLen = absolutePath.Length;
 
-            filesTree.set_head(item);
-            topNode = filesTree.begin();
+            filesTree.SetHead(item);
+            topNode = filesTree.Begin();
         }
         else
         {
             // Check if the requested path belongs to an already registered parent node.
-            string sPath(absolutePath);
-            tree_node_<FILE_ITEM>* parentNode = findParentNodeFromRootForPath(absolutePath);
-            string splittedPath = _basename_acp(sPath);
+            string sPath = absolutePath;
+            TreeNode<FILE_ITEM> parentNode = findParentNodeFromRootForPath(absolutePath);
+            string splittedPath = Path.GetFileName(sPath);
             //printf("spl %s %s\n", splittedPath.c_str(), absolutePath);
-            item.path = new char[splittedPath.length() + 1];
-            strcpy_s(item.path, (splittedPath.length() + 1), splittedPath.c_str());
+            item.path = splittedPath;
             // If a parent was found use th parent.
-            if (parentNode)
+            if (parentNode!=null)
             {
                 //printf("parent %s\n", parentNode->data.path);
-                filesTree.append_child(tree < FILE_ITEM >::iterator_base(parentNode), item);
+                filesTree.AppendChild(new Tree<FILE_ITEM>.IteratorBase(parentNode), item);
             }
             else
             {
                 // Node wasn't found - most likely a new root - add it to the top level.
                 //printf("No parent node found for %s. Adding new sibbling.", absolutePath);
-                item.path = new char[strlen(absolutePath) + 1];
-                strcpy_s(item.path, (strlen(absolutePath) + 1), absolutePath);
-                item.nPathLen = (unsigned int)strlen(item.path);
+                item.path = absolutePath;
+                item.nPathLen = absolutePath.Length;
 
-                filesTree.insert(tree < FILE_ITEM >::iterator_base(topNode), item);
-                topNode = filesTree.begin();
+                filesTree.Insert(new Tree<FILE_ITEM>.PreOrderIterator(topNode.Node), item);
+                topNode = filesTree.Begin();
             }
         }
 
-        DisplayTree(topNode.node, 0);
+        DisplayTree(topNode.Node, 0);
 
         return item;
     }
@@ -59,14 +58,14 @@ public class CFileTree
         TreeNode<FILE_ITEM> node = findNodeFromRootWithPath(absolutePath);
         if (node != null)
         {
-            filesTree.erase(tree < FILE_ITEM >iterator(node));
+            filesTree.Erase(new Tree< FILE_ITEM >.IteratorBase(node));
         }
         else
         {
             //printf("Do not find node for path : %s\n", absolutePath);
         }
 
-        DisplayTree(topNode, 0);
+        DisplayTree(topNode.Node, 0);
 
     }
     public void RenameItem(string absolutePathFrom, string absolutePathTo)
@@ -76,23 +75,21 @@ public class CFileTree
 
         if (parentNode != null && node != null)
         {
-            if (filesTree.number_of_children(parentNode) < 1)
+            if (parentNode.CountOfChildren < 1)
             {
                 FILE_ITEM emptyItem = new();
                 emptyItem.nPathLen = 0;
                 emptyItem.path = "";
-                filesTree.append_child((parentNode), emptyItem);
+                filesTree.AppendChild(new Tree<FILE_ITEM>.IteratorBase(parentNode), emptyItem);
             }
-            tree<FILE_ITEM>::iterator firstChild = filesTree.begin(parentNode);
-            filesTree.move_after(firstChild, tree < FILE_ITEM >::iterator(node));
+            Tree<FILE_ITEM>.SiblingIterator firstChild = filesTree.Begin(new Tree<FILE_ITEM>.IteratorBase(parentNode));
+            filesTree.MoveAfter(firstChild,new Tree < FILE_ITEM >.IteratorBase(node));
 
-            string sPath(absolutePathTo);
-            string splittedPath = sPath.substr(sPath.find_last_of('\\') + 1);
-            node->data.path = new char[splittedPath.length() + 1];
-            strcpy_s(node->data.path, (splittedPath.length() + 1), splittedPath.c_str());
-
+            string sPath=(absolutePathTo);
+            string splittedPath = Path.GetFileName( sPath);
+            node.Data.path = splittedPath;
         }
-        DisplayTree(topNode.node, 0);
+        DisplayTree(topNode.Node, 0);
     }
 
     public TreeNode<FILE_ITEM> FindFileItemForPath(string absolutePath)
@@ -104,38 +101,37 @@ public class CFileTree
 
     public void GetNodeFullPath(TreeNode<FILE_ITEM> node, ref string path)
     {
-        path.append(node->data.path);
-        tree_node_<FILE_ITEM> parentNode = node->parent;
-        while (parentNode != NULL)
+        path += node.Data.path;
+        var parentNode = node.Parent;
+        while (parentNode != null)
         {
-            path.insert(0, "\\");
-            path.insert(0, parentNode->data.path);
-            parentNode = parentNode->parent;
+            path = parentNode.Data.path + "\\" + path;
+            parentNode = parentNode.Parent;
         }
     }
 
     protected TreeNode<FILE_ITEM> findNodeFromRootWithPath(string path)
     {
         // No topNode - bail out.
-        if (topNode.node == NULL)
+        if (topNode.Node == null)
         {
-            return NULL;
+            return null;
         }
-        string sPath(path);
-        string nPath(topNode->path);
+        string sPath=(path);
+        string nPath=(topNode.Node.Data.path);
         // topNode path and requested path are the same? Use the node.
         if (sPath == nPath)
         {
-            return topNode.node;
+            return topNode.Node;
         }
         // printf("Did not find node for path : %s\n", path);
 
         // If the topNode path is part of the requested path this is a subpath.
         // Use the node.
-        if (sPath.find(nPath) != stdnpos) {
+        if (sPath.Contains(nPath)) {
             // printf("Found %s is part of %s  \n", sPath.c_str(), topNode->path);
-            string splittedString = sPath.substr(strlen(topNode->path) + 1);
-            return findNodeWithPathFromNode(splittedString.c_str(), topNode.node);
+            string splittedString = sPath[(topNode.Node.Data.path.Length + 1) ..];
+            return findNodeWithPathFromNode(splittedString, topNode.Node);
         }
 
     else
@@ -145,26 +141,27 @@ public class CFileTree
             // a matching item and register it as current top node.
 
             // printf("NOT found %s is NOT part of %s  \n", sPath.c_str(), topNode->path);
-            tree<FILE_ITEM>::sibling_iterator it;
-            for (it = filesTree.begin(); it != filesTree.end(); it++)
+            Tree<FILE_ITEM>.PreOrderIterator it;
+            for (it = filesTree.Begin(); it != filesTree.End(); )
             {
-                string itPath(it.node->data.path);
+                string itPath = (it.Node.Data.path);
                 // Current item path matches the requested path - use the item as topNode.
                 if (sPath == itPath)
                 {
                     // printf("Found parent node %s \n", it.node->data.path);
                     topNode = it;
-                    return it.node;
+                    return it.Node;
                 }
-                else if (sPath.find(itPath) != stringnpos)
+                else if (sPath.Contains(itPath))
                 {
                     // If the item path is part of the requested path this is a subpath.
                     // Use the the item as topNode and continue analyzing.
                     // printf("Found root node %s \n", it.node->data.path);
                     topNode = it;
-                    string splittedString = sPath.substr(itPath.length() + 1);
-                    return findNodeWithPathFromNode(splittedString.c_str(), it.node);
+                    string splittedString = sPath[(itPath.Length + 1)..];
+                    return findNodeWithPathFromNode(splittedString, it.Node);
                 }
+                it.Next();
             }
         }
         // Nothing found return NULL.
@@ -172,55 +169,55 @@ public class CFileTree
     }
     protected TreeNode<FILE_ITEM> findNodeWithPathFromNode(string path, TreeNode<FILE_ITEM> node)
     {
-        tree<FILE_ITEM>::sibling_iterator sib = filesTree.begin(node);
-        tree<FILE_ITEM>::sibling_iterator end = filesTree.end(node);
+        Tree<FILE_ITEM>.SiblingIterator sib = filesTree.Begin(new Tree<FILE_ITEM>.IteratorBase(node));
+        Tree<FILE_ITEM>.SiblingIterator end = filesTree.End(new Tree<FILE_ITEM>.IteratorBase(node));
         bool currentLevel = true;
 
-        string currentPath = _first_dirname(path);
+        string currentPath = Path.GetDirectoryName(path);
 
-        size_t position = currentPath.size();
-        string followingPath = _following_path(path);
-        currentLevel = followingPath.empty();
+        var position = currentPath.Length;
+        string followingPath = path.IndexOf('\\') is int p && p>=0 ? path[(p+1)..]:"";
+        currentLevel = followingPath.Length==0;
 
         while (sib != end)
         {
             // printf("sib->path '%s' lv %d curpath '%s' follow '%s'\n", sib->path, currentLevel, currentPath.c_str(), followingPath.c_str());
-            if (strcmp(sib->path, currentPath) == 0)
+            if (String.Compare(sib.Node.Data.path, currentPath) == 0)
             {
                 if (currentLevel)
                 {
-                    return sib.node;
+                    return sib.Node;
                 }
                 else
                 {
-                    return findNodeWithPathFromNode(followingPath, sib.node);
+                    return findNodeWithPathFromNode(followingPath, sib.Node);
                 }
             }
-            ++sib;
+            sib.Next();
         }
-        return NULL;
+        return null;
     }
     protected TreeNode<FILE_ITEM> findParentNodeFromRootForPath(string path)
     {
-        string sPath(path);
-        string nPath(topNode->path);
+        string sPath=(path);
+        string nPath=topNode.Node.Data.path;
 
         // If the topNode path is not part of the requested path bail out.
         // This avoids also issues with taking substrings of incompatible
         // paths below.
-        if (sPath.find(nPath) == stdstringnpos) {
+        if (!sPath.Contains(nPath)) {
             // printf("Path %s doesn't belong to current topNode %s Found %s is part of %s  \n", sPath.c_str(), topNode->path);
-            return NULL;
+            return null;
         }
-        string currentPath = sPath.substr(strlen(topNode->path) + 1);
-        string followingPath = _dirname_acp(currentPath);
-        if (followingPath.empty())
+        string currentPath = sPath[(topNode.Node.Data.path.Length + 1)..];//.substr(strlen(topNode->path) + 1);
+        string followingPath = Path.GetDirectoryName(currentPath);
+        if (string.IsNullOrEmpty( followingPath))
         {
-            return topNode.node;
+            return topNode.Node;
         }
         else
         {
-            return findNodeWithPathFromNode(followingPath, topNode.node);
+            return findNodeWithPathFromNode(followingPath, topNode.Node);
         }
     }
     protected void DisplayTree(TreeNode<FILE_ITEM> node, int level)

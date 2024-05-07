@@ -1,8 +1,8 @@
 ﻿namespace LibWinNFSServer;
 
-public class CNFS3Prog :CRPCProg
+public partial class CNFS3Prog :CRPCProg
 {
-    uint m_nUID, m_nGID;
+    int m_nUID, m_nGID;
     IInputStream m_pInStream;
     IOutputStream m_pOutStream;
     ProcessParam m_pParam;
@@ -10,106 +10,106 @@ public class CNFS3Prog :CRPCProg
 
     public CNFS3Prog() { } 
     ~CNFS3Prog() { }
-    public void SetUserID(uint nUID, uint nGID)
+    public void SetUserID(int nUID, int nGID)
     {
         m_nUID = nUID;
         m_nGID = nGID;
     }
     public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
     {
+        return 0;
+    }
 
-    }
 
-
-    uint ProcedureNULL() 
+    int ProcedureNULL() 
     {
         return 0;
     }
-    uint ProcedureGETATTR()
+    int ProcedureGETATTR()
     {
         return 0;
     }
-    uint ProcedureSETATTR()
+    int ProcedureSETATTR()
     {
         return 0;
     }
-    uint ProcedureLOOKUP()
+    int ProcedureLOOKUP()
     {
         return 0;
     }
-    uint ProcedureACCESS()
+    int ProcedureACCESS()
     {
         return 0;
     }
-    uint ProcedureREADLINK()
+    int ProcedureREADLINK()
     {
         return 0;
     }
-    uint ProcedureREAD()
+    int ProcedureREAD()
     {
         return 0;
     }
-    uint ProcedureWRITE()
+    int ProcedureWRITE()
     {
         return 0;
     }
-    uint ProcedureCREATE()
+    int ProcedureCREATE()
     {
         return 0;
     }
-    uint ProcedureMKDIR()
+    int ProcedureMKDIR()
     {
         return 0;
     }
-    uint ProcedureSYMLINK()
+    int ProcedureSYMLINK()
     {
         return 0;
     }
-    uint ProcedureMKNOD()
+    int ProcedureMKNOD()
     {
         return 0;
     }
-    uint ProcedureREMOVE()
+    int ProcedureREMOVE()
     {
         return 0;
     }
-    uint ProcedureRMDIR()
+    int ProcedureRMDIR()
     {
         return 0;
     }
-    uint ProcedureRENAME()
+    int ProcedureRENAME()
     {
         return 0;
     }
-    uint ProcedureLINK()
+    int ProcedureLINK()
     {
         return 0;
     }
-    uint ProcedureREADDIR()
+    int ProcedureREADDIR()
     {
         return 0;
     }
-    uint ProcedureREADDIRPLUS()
+    int ProcedureREADDIRPLUS()
     {
         return 0;
     }
-    uint ProcedureFSSTAT()
+    int ProcedureFSSTAT()
     {
         return 0;
     }
-    uint ProcedureFSINFO()
+    int ProcedureFSINFO()
     {
         return 0;
     }
-    uint ProcedurePATHCONF()
+    int ProcedurePATHCONF()
     {
         return 0;
     }
-    uint ProcedureCOMMIT()
+    int ProcedureCOMMIT()
     {
         return 0;
     }
-    uint ProcedureNOIMP()
+    int ProcedureNOIMP()
     {
         return 0;
     }
@@ -117,67 +117,67 @@ public class CNFS3Prog :CRPCProg
     void Read(ref bool pBool)
     {
     }
-    void Read(uint32* pUint32)
+    void Read(ref int pUint32)
     {
     }
-    void Read(uint64* pUint64)
+    void Read(ref ulong pUint64)
     {
     }
-    void Read(sattr3* pAttr)
+    void Read(ref sattr3 pAttr)
     {
     }
-    void Read(sattrguard3* pGuard)
+    void Read(ref sattrguard3 pGuard)
     {
     }
-    void Read(diropargs3* pDir)
+    void Read(ref diropargs3 pDir)
     {
     }
-    void Read(opaque* pOpaque)
+    void Read(ref opaque pOpaque)
     {
     }
-    void Read(nfstime3* pTime)
+    void Read(ref nfstime3 pTime)
     {
     }
-    void Read(createhow3* pHow)
+    void Read(ref createhow3 pHow)
     {
     }
-    void Read(symlinkdata3* pSymlink)
+    void Read(ref symlinkdata3 pSymlink)
     {
     }
-    void Write(ref bool pBool)
+    void Write(bool pBool)
     {
     }
-    void Write(uint32* pUint32)
+    void Write(int pUint32)
     {
     }
-    void Write(uint64* pUint64)
+    void Write(ulong pUint64)
     {
     }
-    void Write(fattr3* pAttr)
+    void Write(fattr3 pAttr)
     {
     }
-    void Write(opaque* pOpaque)
+    void Write(opaque pOpaque)
     {
     }
-    void Write(wcc_data* pWcc)
+    void Write(wcc_data pWcc)
     {
     }
-    void Write(post_op_attr* pAttr)
+    void Write(post_op_attr pAttr)
     {
     }
-    void Write(pre_op_attr* pAttr)
+    void Write(pre_op_attr pAttr)
     {
     }
-    void Write(post_op_fh3* pObj)
+    void Write(post_op_fh3 pObj)
     {
     }
-    void Write(nfstime3* pTime)
+    void Write(nfstime3 pTime)
     {
     }
-    void Write(specdata3* pSpec)
+    void Write(specdata3 pSpec)
     {
     }
-    void Write(wcc_attr* pAttr)
+    void Write(wcc_attr pAttr)
     {
     }
 
@@ -185,29 +185,38 @@ public class CNFS3Prog :CRPCProg
 
     bool GetPath(ref string path)
     {
+        return false;
     }
     bool ReadDirectory(ref string dirName, ref string fileName)
     {
+        return false;
     }
     string GetFullPath(ref string dirName, ref string fileName)
     {
+        return "";
     }
-    uint CheckFile(string fullPath)
+    int CheckFile(string fullPath)
     {
+        return 0;
     }
-    uint CheckFile(string directory, string fullPath)
+    int CheckFile(string directory, string fullPath)
     {
+        return 0;
     }
-    bool GetFileHandle(string path, nfs_fh3* pObject)
+    bool GetFileHandle(string path, nfs_fh3 pObject)
     {
+        return false;
     }
-    bool GetFileAttributesForNFS(string path, wcc_attr* pAttr)
+    bool GetFileAttributesForNFS(string path, wcc_attr pAttr)
     {
+        return false;
     }
-    bool GetFileAttributesForNFS(string path, fattr3* pAttr)
+    bool GetFileAttributesForNFS(string path, fattr3 pAttr)
     {
+        return false;
     }
-    uint FileTimeToPOSIX(FILETIME ft)
+    int FileTimeToPOSIX(FILETIME ft)
     {
+        return 0;
     }
 }
