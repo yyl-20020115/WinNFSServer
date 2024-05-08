@@ -1,5 +1,4 @@
-﻿using LibWinNFSServer;
-using System.Xml.Linq;
+﻿using System.Runtime.InteropServices;
 
 namespace LibWinNFSServer;
 
@@ -230,24 +229,31 @@ public class CFileTable
         }
     }
 
+    [DllImport("Kerenl32")]
+    public static extern int GetLastError();
 
-    public bool SRenameFile(string pathFrom, string pathTo)
+    [DllImport("Kerenl32")]
+    public static extern int SetLastError(int e);
+
+    public int SRenameFile(string pathFrom, string pathTo)
     {
+        int e = -1;
         try
         {
             File.Move(pathFrom, pathTo);
+            e = GetLastError();
             this.RenameFile(pathFrom, pathTo);
-            return true;
+            return e;
         }
         catch
         {
-            return false;
+            return e;
         }
     }
 
-    public bool RenameDirectory(string pathFrom, string pathTo)
+    public int RenameDirectory(string pathFrom, string pathTo)
     {
-        var done = SRenameFile(pathFrom, pathTo);
+        var e = SRenameFile(pathFrom, pathTo);
         string dotFile = "\\.";
         string dotDirectoryPathFrom= pathFrom+dotFile;
         string dotDirectoryPathTo = pathTo + dotFile;
@@ -256,28 +262,33 @@ public class CFileTable
 
         this.RenameFile(dotDirectoryPathFrom, dotDirectoryPathTo);
         this.RenameFile(backDirectoryPathFrom, backDirectoryPathTo);
-        return done;
+        return e;
     }
 
-    public bool RemoveFile(string path)
+    public int RemoveFile(string path)
     {
+        int e = -1;
         try
         {
             File.Delete(path);
+            e = GetLastError();
             this.RemoveItem(path);
-            return true;
+            return e;
         }
         catch
         {
-            return false;
+            return e;
         }
     }
 
-    public bool RemoveFolder(string path)
+    public int RemoveFolder(string path)
     {
+        int e = -1; 
         try
         {
             Directory.Delete(path, true);
+            
+            e=GetLastError();
 
             string dotFile = "\\.";
             string backFile = "\\..";
@@ -289,11 +300,11 @@ public class CFileTable
             this.RemoveItem(backDirectoryPath);
             this.RemoveItem(path);
 
-            return true;
+            return e;
         }
         catch
         {
-            return false;
+            return e = GetLastError();
         }
     }
 
