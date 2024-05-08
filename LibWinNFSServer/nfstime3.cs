@@ -1,7 +1,7 @@
 ﻿namespace LibWinNFSServer;
 
-public struct nfstime3
+public class Nfstime3
 {
-    public uint seconds;
-    public uint nseconds;
+    public uint seconds = 0;
+    public uint nseconds = 0;
 }

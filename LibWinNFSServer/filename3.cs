@@ -1,11 +1,13 @@
-﻿namespace LibWinNFSServer;
+﻿using System.Text;
 
-public class filename3 :  opaque
+namespace LibWinNFSServer;
+
+public class Filename3 :  Opaque
 {
-    public string name;
+    public string? name = null;
 
-    public filename3() { }
-    ~filename3() { }
+    public Filename3() { }
+    ~Filename3() { }
     public override void SetSize(uint len) => length = len;
-    void Set(string str) => name = str;
+    public void Set(string str) => this.contents = Encoding.UTF8.GetBytes(name = str);
 }

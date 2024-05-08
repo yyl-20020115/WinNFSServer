@@ -36,7 +36,7 @@ public class CFileTable
             //printf("Add file for path %s\n", path);
             AddItem(path);
             node = g_FileTree.FindFileItemForPath(path);
-            if (node == null || node?.Data?.handle == null)
+            if (node == null || node.Data.handle == null)
             {
                 //printf("Missing handle for path %s\n", path);
             }
@@ -62,14 +62,13 @@ public class CFileTable
             return false;
         }
     }
-    public TreeNode<FILE_ITEM> FindItemByPath(string path)
+    public Tree<FILE_ITEM> FindItemByPath(string path)
     {
         return null;
     }
     public bool RemoveItem(string path)
     {
-        TreeNode<FILE_ITEM> foundDeletedItem;
-        foundDeletedItem = g_FileTree.FindFileItemForPath(path);
+        var foundDeletedItem = g_FileTree.FindFileItemForPath(path);
         if (foundDeletedItem != null)
         {
             // Remove from table

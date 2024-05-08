@@ -1,7 +1,7 @@
 ﻿namespace LibWinNFSServer;
 
-public struct set_mode3
+public class set_mode3
 {
-    bool set_it;
-    uint mode;
+    public bool set_it;
+    public uint mode;
 }

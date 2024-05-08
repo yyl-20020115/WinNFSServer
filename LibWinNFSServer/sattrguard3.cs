@@ -1,7 +1,7 @@
 ﻿namespace LibWinNFSServer;
 
-public struct sattrguard3
+public class sattrguard3
 {
-    public bool check;
-    public nfstime3 obj_ctime;
+    public bool check =false;
+    public Nfstime3 obj_ctime = new();
 }

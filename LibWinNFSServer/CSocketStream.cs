@@ -42,28 +42,28 @@ public class CSocketStream : IInputStream, IOutputStream
 
         return nSize;
     }
-    public int Read(ref int pnValue)
+    public int Read(out int pnValue)
     {
         byte[] pData = new byte[sizeof(int)];
         int s = Read(pData);
         pnValue = BitConverter.ToInt32(pData);
         return s;
     }
-    public int Read8(ref long pnValue)
+    public int Read8(out long pnValue)
     {
         byte[] pData = new byte[sizeof(long)];
         int s = Read(pData);
         pnValue = BitConverter.ToInt64(pData);
         return s;
     }
-    public int Read(ref uint pnValue)
+    public int Read(out uint pnValue)
     {
         byte[] pData = new byte[sizeof(uint)];
         int s = Read(pData);
         pnValue = BitConverter.ToUInt32(pData);
         return s;
     }
-    public int Read8(ref ulong pnValue)
+    public int Read8(out ulong pnValue)
     {
         byte[] pData = new byte[sizeof(ulong)];
         int s = Read(pData);

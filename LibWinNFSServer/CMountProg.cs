@@ -304,7 +304,7 @@ public class CMountProg : CRPCProg
         string finalPath="";
         bool foundPath = false;
 
-        m_pInStream.Read(ref nSize);
+        m_pInStream.Read(out nSize);
 
         if (nSize > MAXPATHLEN)
         {

@@ -225,8 +225,8 @@ public class CFileTree
         if (debug)
         {
             Console.WriteLine("\n\n\n<<<<<<<<<<<<<<<<<<<<<DISPLAY tree \n\n\n");
-            TreeNode<FILE_ITEM> sib2 = node.FirstChild;
-            TreeNode<FILE_ITEM> end2 = node.LastChild;
+            var sib2 = node.FirstChild;
+            var end2 = node.LastChild;
             while (sib2 != end2)
             {
                 for (int i = 0; i < level; i++)

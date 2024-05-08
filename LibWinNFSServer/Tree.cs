@@ -1,8 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using static LibWinNFSServer.Tree<T>;
-
-namespace LibWinNFSServer;
+﻿namespace LibWinNFSServer;
 public class TreeNode<T>(T? data = null) where T : class
 {
     public TreeNode<T>? Parent;
@@ -47,43 +43,44 @@ public class Tree<T> where T : class
     }
 
     public PreOrderIterator SetHead(T data) => Insert(new PreOrderIterator(Tail), data);
-    public PreOrderIterator Begin() => new PreOrderIterator(Head?.NextSibling);
-    public PreOrderIterator End() => new PreOrderIterator(Tail);
+    public PreOrderIterator Begin() => new(Head?.NextSibling);
+    public PreOrderIterator End() => new(Tail);
 
-    public PreOrderIterator Insert(PreOrderIterator iterator, T data)
+    public PreOrderIterator Insert(PreOrderIterator iterator, T? data = null)
     {
         if (iterator.Node == null)
         {
             iterator.Node = Tail; // Backward compatibility: when calling insert on a null node,
                                   // insert before the feet.
         }
-        TreeNode<T> new_node = new(data);
-        //	kp::constructor(&tmp.data, x);
-        new_node.FirstChild = null;
-        new_node.LastChild = null;
-
-        new_node.Parent = iterator.Node.Parent;
-        new_node.NextSibling = iterator.Node;
-        new_node.PreviousSibling = iterator.Node.PreviousSibling;
-        iterator.Node.PreviousSibling = new_node;
-
-        if (new_node.PreviousSibling == null)
+        TreeNode<T> node = new(data)
         {
-            if (new_node.Parent != null) // when inserting nodes at the head, there is no parent
-                new_node.Parent.FirstChild = new_node;
-        }
-        else
-            new_node.PreviousSibling.NextSibling = new_node;
-        return new PreOrderIterator(new_node);
-    }
-
-    public TreeNode<T> AppendChild(IteratorBase iterator, T data)
-    {
-        TreeNode<T> node = new()
-        {
+            //	kp::constructor(&tmp.data, x);
             FirstChild = null,
             LastChild = null,
 
+            Parent = iterator.Node.Parent,
+            NextSibling = iterator.Node,
+            PreviousSibling = iterator.Node.PreviousSibling
+        };
+        iterator.Node.PreviousSibling = node;
+
+        if (node.PreviousSibling == null)
+        {
+            if (node.Parent != null) // when inserting nodes at the head, there is no parent
+                node.Parent.FirstChild = node;
+        }
+        else
+            node.PreviousSibling.NextSibling = node;
+        return new (node);
+    }
+
+    public IteratorBase AppendChild(IteratorBase iterator, T? data = null)
+    {
+        TreeNode<T> node = new(data)
+        {
+            FirstChild = null,
+            LastChild = null,
             Parent = iterator.Node
         };
         if (iterator?.Node?.LastChild != null)
@@ -97,7 +94,7 @@ public class Tree<T> where T : class
         node.PreviousSibling = iterator.Node.LastChild;
         iterator.Node.LastChild = node;
         node.NextSibling = null;
-        return node;
+        return new(node);
     }
 
     public IteratorBase MoveAfter(IteratorBase target, IteratorBase source)
@@ -106,7 +103,7 @@ public class Tree<T> where T : class
         var src = source.Node;
 
         if (dst == src) return source;
-        if (dst.NextSibling!=null)
+        if (dst?.NextSibling!=null)
             if (dst.NextSibling == src) // already in the right spot
                 return source;
 
@@ -125,23 +122,16 @@ public class Tree<T> where T : class
         src.Parent = dst.Parent;
         return new IteratorBase(src);
     }
-    public SiblingIterator Begin(IteratorBase iterator)
-    {
-        if (iterator.Node.FirstChild == null)
-        {
-            return End(iterator);
-        }
-        return new SiblingIterator(iterator.Node.FirstChild);
-    }
+    public SiblingIterator Begin(IteratorBase? iterator) 
+        => iterator?.Node?.FirstChild == null 
+        ? End(iterator) 
+        : new(iterator.Node.FirstChild)
+        ;
 
-    public SiblingIterator End(IteratorBase iterator)
+    public SiblingIterator End(IteratorBase? iterator) => new()
     {
-        SiblingIterator ret = new()
-        {
-            Parent = iterator.Node
-        };
-        return ret;
-    }
+        Parent = iterator?.Node
+    };
 
     public void Clear()
     {
@@ -152,12 +142,12 @@ public class Tree<T> where T : class
     }
     public IteratorBase Erase(IteratorBase it)
     {
-        TreeNode<T> cur = it.Node;
-        IteratorBase ret = it;
+        var cur = it?.Node;
+        var ret = it;
         ret.SkipChildren();
         ret.Next();
         //EraseChildren(it);
-        if (cur.PreviousSibling == null)
+        if (cur?.PreviousSibling == null)
         {
             cur.Parent.FirstChild = cur.NextSibling;
         }
@@ -196,7 +186,6 @@ public class Tree<T> where T : class
 
     protected void Init()
     {
-
         Head.Parent = null;
         Head.FirstChild = null;
         Head.LastChild = null;
@@ -210,11 +199,10 @@ public class Tree<T> where T : class
         Tail.NextSibling = null;
     }
 
-    public class IteratorBase
+    public class IteratorBase(TreeNode<T>? Node = null)
     {
-        protected bool Skip = false;
-        public TreeNode<T>? Node = null;
-        public IteratorBase(TreeNode<T>? Node = null) => this.Node = Node;
+        public bool Skip = false;
+        public TreeNode<T>? Node = Node;
 
         public void SkipChildren(bool skip = true) => this.Skip = skip;
         public int GetChildrenCount()
@@ -240,16 +228,12 @@ public class Tree<T> where T : class
         {
             Parent = this.Node
         };
-        public IteratorBase Next() => this;
-        public IteratorBase Previous() => this;
+        public virtual IteratorBase Next() => this;
+        public virtual IteratorBase Previous() => this;
     }
-    public class PreOrderIterator : IteratorBase
+    public class PreOrderIterator(TreeNode<T>? Node = null) : IteratorBase(Node)
     {
-        public PreOrderIterator(TreeNode<T>? Node = null) : base(Node)
-        {
-
-        }
-        public PreOrderIterator Next()
+        public override PreOrderIterator Next()
         {
             if (!this.Skip && this.Node?.FirstChild != null)
             {
@@ -269,7 +253,7 @@ public class Tree<T> where T : class
             return this;
 
         }
-        public PreOrderIterator Previous()
+        public override PreOrderIterator Previous()
         {
             if (this.Node?.PreviousSibling != null)
             {
@@ -292,7 +276,7 @@ public class Tree<T> where T : class
         {
 
         }
-        public PostOrderIterator Next()
+        public override PostOrderIterator Next()
         {
             if (this.Node?.NextSibling == null)
             {
@@ -315,7 +299,7 @@ public class Tree<T> where T : class
 
             return this;
         }
-        public PostOrderIterator Previous()
+        public override PostOrderIterator Previous()
         {
             if (this.Skip || this.Node?.LastChild == null)
             {
@@ -342,13 +326,13 @@ public class Tree<T> where T : class
         }
         public TreeNode<T>? RangeFirst => this.Parent?.FirstChild;
         public TreeNode<T>? RangeLast => this.Parent?.LastChild;
-        public SiblingIterator Next()
+        public override SiblingIterator Next()
         {
             if (this.Node != null)
                 this.Node = this.Node.NextSibling;
             return this;
         }
-        public SiblingIterator Previous()
+        public override SiblingIterator Previous()
         {
             if (this.Node != null)
                 this.Node = this.Node.PreviousSibling;
@@ -374,10 +358,10 @@ public class Tree<T> where T : class
                 this.Queue.Enqueue(Node);
         }
 
-        public BridthFirstQueueIterator Next()
+        public override BridthFirstQueueIterator Next()
         {
             // Add child nodes and pop current node
-            SiblingIterator sib = this.Begin();
+            var sib = this.Begin();
             while (sib != this.End())
             {
                 Queue.Enqueue(sib.Node);
@@ -400,7 +384,7 @@ public class Tree<T> where T : class
         {
 
         }
-        public FixedDepthIterator Next()
+        public override FixedDepthIterator Next()
         {
             if (this.Node?.NextSibling != null)
             {
@@ -445,7 +429,7 @@ public class Tree<T> where T : class
             return this;
         }
 
-        public FixedDepthIterator Previous()
+        public override FixedDepthIterator Previous()
         {
             if (this.Node?.PreviousSibling != null)
             {
@@ -475,7 +459,7 @@ public class Tree<T> where T : class
                     this.Node = this.Node.PreviousSibling;
                     if (this.Node == null) return this;
                 }
-                while (relative_depth < 0 && this.Node.LastChild != null)
+                while (relative_depth < 0 && this?.Node?.LastChild != null)
                 {
                     this.Node = this.Node?.LastChild;
                     ++relative_depth;
@@ -497,7 +481,7 @@ public class Tree<T> where T : class
         {
 
         }
-        public LeafIterator Next()
+        public override LeafIterator Next()
         {
             if (this.Node?.FirstChild != null)
             { // current node is no longer leaf (children got added)
@@ -519,7 +503,7 @@ public class Tree<T> where T : class
 
             return this;
         }
-        public LeafIterator Previous()
+        public override LeafIterator Previous()
         {
             while (this.Node?.PreviousSibling == null)
             {

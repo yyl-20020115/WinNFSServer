@@ -1,15 +1,18 @@
 ﻿namespace LibWinNFSServer;
 
-public class opaque
+public class Opaque
 {
-	public uint length;
-    public byte[] contents;
+	public uint length = 0;
+    public byte[]? contents = null;
 
-    public opaque() { }
-    public opaque(uint len)
+    public Opaque() { }
+    public Opaque(uint len)
     {
-        this.length = len;
+        this.SetSize(len);
     }
 
-    public virtual void SetSize(uint len) => this.length = len;
+    public virtual void SetSize(uint len)
+    {
+        this.contents = new byte[this.length = len];
+    }
 }

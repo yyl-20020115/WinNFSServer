@@ -1,6 +1,6 @@
 ﻿namespace LibWinNFSServer;
 
-public struct fattr3
+public class Fattr3
 {
     public uint type;
     public uint mode;
@@ -9,10 +9,10 @@ public struct fattr3
     public uint gid;
     public ulong size;
     public ulong used;
-    public specdata3 rdev;
+    public Specdata3 rdev;
     public ulong fsid;
     public ulong fileid;
-    public nfstime3 atime;
-    public nfstime3 mtime;
-    public nfstime3 ctime;
+    public Nfstime3 atime;
+    public Nfstime3 mtime;
+    public Nfstime3 ctime;
 }
