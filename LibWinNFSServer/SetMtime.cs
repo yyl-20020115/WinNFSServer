@@ -2,6 +2,6 @@
 
 public class SetMtime
 {
-    public bool set_it = false;
+    public TIMESETS set_it = 0;
     public NfsTime3 mtime = new();
 }
