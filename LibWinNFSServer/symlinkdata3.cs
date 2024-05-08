@@ -1,7 +1,7 @@
 ﻿namespace LibWinNFSServer;
 
-public class symlinkdata3
+public class SymLinkData3
 {
-    public sattr3 symlink_attributes = new();
-    public Nfspath3 symlink_data = new();
+    public Sattr3 symlink_attributes = new();
+    public NfsPath3 symlink_data = new();
 }

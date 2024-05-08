@@ -1,8 +1,8 @@
 ﻿namespace LibWinNFSServer;
 
-public struct createhow3
+public class Createhow3
 {
-    public uint mode;
-    sattr3 obj_attributes;
-    public ulong verf;
+    public uint mode = 0;
+    public Sattr3 obj_attributes = new();
+    public ulong verf = 0;
 }

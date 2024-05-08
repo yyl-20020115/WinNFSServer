@@ -8,17 +8,17 @@ public class CSocket : IDisposable
     public const int SOCK_STREAM = 1;
     public const int SOCK_DGRAM = 2;
 
-    private int m_nType;
-    private Socket m_Socket;
-    private EndPoint m_RemoteAddr;
+    private int m_nType = 0;
+    private Socket? m_Socket;
+    private EndPoint? m_RemoteAddr;
     private ISocketListener? m_pListener;
     private CSocketStream? m_SocketStream;
     private bool m_bActive;
-    private Thread m_hThread;
+    private Thread? m_hThread;
     private bool disposedValue;
     public void Dispose()
     {
-        // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+        
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
@@ -42,13 +42,13 @@ public class CSocket : IDisposable
     {
         this.m_nType = nType;
     }
-    // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
+    
     ~CSocket()
     {
-        // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+        
         Dispose(disposing: false);
     }
-    public int GetType() => this.m_nType;
+    public int GetSocketType() => this.m_nType;
     public void Open(Socket socket, ISocketListener? pListener, EndPoint pRemoteAddr = null)
     {
         Close();

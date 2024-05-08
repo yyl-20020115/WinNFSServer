@@ -32,10 +32,10 @@ public class CRPCServer : ISocketListener
 
         while (pInStream.GetSize() > 0)
         {
-            nResult = Process((int)pSocket.GetType(), pInStream, pSocket.GetOutputStream(), pSocket.GetRemoteAddress());  //process input data
+            nResult = Process((int)pSocket.GetSocketType(), pInStream, pSocket.GetOutputStream(), pSocket.GetRemoteAddress());  //process input data
             pSocket?.Send();  //send response
 
-            if (nResult != (int)PRC_STATUS.PRC_OK || pSocket?.GetType() == CSocket.SOCK_DGRAM)
+            if (nResult != (int)PRC_STATUS.PRC_OK || pSocket?.GetSocketType() == CSocket.SOCK_DGRAM)
             {
                 break;
             }
@@ -54,21 +54,21 @@ public class CRPCServer : ISocketListener
 
         if (nType ==CSocket.SOCK_STREAM)
         {
-            pInStream?.Read(ref header.header);
+            pInStream?.Read(out header.header);
         }
 
-        pInStream?.Read(ref header.XID);
-        pInStream?.Read(ref header.msg);
-        pInStream?.Read(ref header.rpcvers);  //rpc version
-        pInStream?.Read(ref header.prog);  //program
-        pInStream?.Read(ref header.vers);  //program version
-        pInStream?.Read(ref header.proc);  //procedure
-        pInStream?.Read(ref header.cred.flavor);
-        pInStream?.Read(ref header.cred.length);
+        pInStream?.Read(out header.XID);
+        pInStream?.Read(out header.msg);
+        pInStream?.Read(out header.rpcvers);  //rpc version
+        pInStream?.Read(out header.prog);  //program
+        pInStream?.Read(out header.vers);  //program version
+        pInStream?.Read(out header.proc);  //procedure
+        pInStream?.Read(out header.cred.flavor);
+        pInStream?.Read(out header.cred.length);
         pInStream?.Skip(header.cred.length);
-        pInStream?.Read(ref header.verf.flavor);  //vefifier
+        pInStream?.Read(out header.verf.flavor);  //vefifier
 
-        if (pInStream?.Read(ref header.verf.length) < sizeof(uint))
+        if (pInStream?.Read(out header.verf.length) < sizeof(uint))
         {
             nResult = (int)PRC_STATUS.PRC_FAIL;
         }

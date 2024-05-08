@@ -1,9 +1,9 @@
 ﻿namespace LibWinNFSServer;
 
-public struct PORTMAP_HEADER
+public class PORTMAP_HEADER
 {
-    public uint prog;
-    public uint vers;
-    public uint proto;
-    public uint port;
+    public uint prog = 0;
+    public uint vers = 0;
+    public uint proto = 0;
+    public uint port = 0;
 }

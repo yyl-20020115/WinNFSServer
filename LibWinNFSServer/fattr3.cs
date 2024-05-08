@@ -2,17 +2,17 @@
 
 public class Fattr3
 {
-    public uint type;
-    public uint mode;
-    public uint nlink;
-    public uint uid;
-    public uint gid;
-    public ulong size;
-    public ulong used;
-    public Specdata3 rdev;
-    public ulong fsid;
-    public ulong fileid;
-    public Nfstime3 atime;
-    public Nfstime3 mtime;
-    public Nfstime3 ctime;
+    public uint type = 0;
+    public uint mode = 0;
+    public uint nlink = 0;
+    public uint uid = 0;
+    public uint gid = 0;
+    public ulong size = 0;
+    public ulong used = 0;
+    public Specdata3 rdev = new();
+    public ulong fsid = 0;
+    public ulong fileid = 0;
+    public NfsTime3 atime = new();
+    public NfsTime3 mtime = new();
+    public NfsTime3 ctime = new();
 }

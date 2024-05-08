@@ -200,9 +200,9 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureSETATTR()
     {
         string path;
-        sattr3 new_attributes;
+        Sattr3 new_attributes;
         sattrguard3 guard;
-        wcc_data obj_wcc;
+        WccData obj_wcc;
         int stat;
         int nMode;
         FILE* pFile;
@@ -303,8 +303,8 @@ public partial class CNFS3Prog : CRPCProg
     {
         string path;
         NfsFh3 obj;
-        post_op_attr obj_attributes;
-        post_op_attr dir_attributes;
+        PostOpAttr obj_attributes;
+        PostOpAttr dir_attributes;
         int stat;
 
         PrintLog("LOOKUP");
@@ -340,7 +340,7 @@ public partial class CNFS3Prog : CRPCProg
     {
         string path;
         uint access;
-        post_op_attr obj_attributes;
+        PostOpAttr obj_attributes;
         int stat;
 
         PrintLog("ACCESS");
@@ -372,8 +372,8 @@ public partial class CNFS3Prog : CRPCProg
         string path;
         string pMBBuffer = 0;
 
-        post_op_attr symlink_attributes;
-        Nfspath3 data = Nfspath3();
+        PostOpAttr symlink_attributes;
+        NfsPath3 data = NfsPath3();
 
         //opaque data;
         int stat;
@@ -492,7 +492,7 @@ public partial class CNFS3Prog : CRPCProg
         string path;
         long offset;
         count3_32 count;
-        post_op_attr file_attributes;
+        PostOpAttr file_attributes;
         bool eof;
         Opaque data;
         int stat;
@@ -560,7 +560,7 @@ public partial class CNFS3Prog : CRPCProg
         count3_32 count;
         stable_how_32 stable;
         Opaque data;
-        wcc_data file_wcc;
+        WccData file_wcc;
         writeverf3_64 verf;
         int stat;
         FILE* pFile;
@@ -678,10 +678,10 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureCREATE()
     {
         string path = null;
-        createhow3 how=new ();
-        post_op_fh3 obj=new ();
-        post_op_attr obj_attributes=new ();
-        wcc_data dir_wcc=new ();
+        Createhow3 how=new ();
+        PostOpFh3 obj=new ();
+        PostOpAttr obj_attributes=new ();
+        WccData dir_wcc=new ();
         int stat = 0;
         FILE* pFile = null;
 
@@ -745,10 +745,10 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureMKDIR()
     {
         string path;
-        sattr3 attributes=new ();
-        post_op_fh3 obj=new ();
-        post_op_attr obj_attributes=new ();
-        wcc_data dir_wcc=new ();
+        Sattr3 attributes=new ();
+        PostOpFh3 obj=new ();
+        PostOpAttr obj_attributes=new ();
+        WccData dir_wcc=new ();
         int stat;
 
         PrintLog("MKDIR");
@@ -807,13 +807,13 @@ public partial class CNFS3Prog : CRPCProg
         PrintLog("SYMLINK");
 
         string path;
-        post_op_fh3 obj=new ();
-        post_op_attr obj_attributes=new ();
-        wcc_data dir_wcc=new ();
+        PostOpFh3 obj=new ();
+        PostOpAttr obj_attributes=new ();
+        WccData dir_wcc=new ();
         int stat;
 
         Diropargs3 where=new ();
-        symlinkdata3 symlink=new ();
+        SymLinkData3 symlink=new ();
 
         uint targetFileAttr;
         uint dwFlags;
@@ -893,7 +893,7 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureREMOVE()
     {
         string path;
-        wcc_data dir_wcc;
+        WccData dir_wcc;
         int stat;
         unsigned long returnCode;
 
@@ -944,7 +944,7 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureRMDIR()
     {
         string path;
-        wcc_data dir_wcc;
+        WccData dir_wcc;
         int stat;
         unsigned long returnCode;
 
@@ -984,7 +984,7 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureRENAME()
     {
         char pathFrom[MAXPATHLEN], *pathTo;
-        wcc_data fromdir_wcc, todir_wcc;
+        WccData fromdir_wcc, todir_wcc;
         int stat;
         unsigned long returnCode;
 
@@ -1070,8 +1070,8 @@ public partial class CNFS3Prog : CRPCProg
         string dirName;
         string fileName;
         int stat;
-        post_op_attr obj_attributes;
-        wcc_data dir_wcc;
+        PostOpAttr obj_attributes;
+        WccData dir_wcc;
 
         bool validHandle = GetPath(path);
         const string cStr = validHandle ? path : null;
@@ -1113,7 +1113,7 @@ public partial class CNFS3Prog : CRPCProg
         cookie3_64 cookie;
         cookieverf3_64 cookieverf;
         count3_32 count;
-        post_op_attr dir_attributes;
+        PostOpAttr dir_attributes;
         fileid3_64 fileid;
         Filename3 name;
         bool eof;
@@ -1202,11 +1202,11 @@ public partial class CNFS3Prog : CRPCProg
         cookie3_64 cookie;
         cookieverf3_64 cookieverf;
         count3_32 dircount, maxcount;
-        post_op_attr dir_attributes;
+        PostOpAttr dir_attributes;
         fileid3_64 fileid;
         Filename3 name;
-        post_op_attr name_attributes=new ();
-        post_op_fh3 name_handle=new ();
+        PostOpAttr name_attributes=new ();
+        PostOpFh3 name_handle=new ();
         bool eof;
         int stat;
         char filePath[MAXPATHLEN];
@@ -1294,7 +1294,7 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureFSSTAT()
     {
         string path;
-        post_op_attr obj_attributes;
+        PostOpAttr obj_attributes;
         size3_64 tbytes, fbytes, abytes, tfiles, ffiles, afiles;
         uint32 invarsec;
 
@@ -1343,10 +1343,10 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureFSINFO()
     {
         string path;
-        post_op_attr obj_attributes;
+        PostOpAttr obj_attributes;
         uint32 rtmax, rtpref, rtmult, wtmax, wtpref, wtmult, dtpref;
         size3_64 maxfilesize;
-        Nfstime3 time_delta;
+        NfsTime3 time_delta;
         uint32 properties;
         int stat;
 
@@ -1401,7 +1401,7 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedurePATHCONF()
     {
         string path;
-        post_op_attr obj_attributes;
+        PostOpAttr obj_attributes;
         int stat;
         uint32 linkmax, name_max;
         bool no_trunc, chown_restricted, case_insensitive, case_preserving;
@@ -1451,7 +1451,7 @@ public partial class CNFS3Prog : CRPCProg
         int handleId;
         long offset;
         count3_32 count;
-        wcc_data file_wcc;
+        WccData file_wcc;
         int stat;
         NfsFh3 file;
         writeverf3_64 verf;
@@ -1545,7 +1545,7 @@ public partial class CNFS3Prog : CRPCProg
             throw new Exception();
         }
     }
-    void Read(out sattr3 pAttr)
+    void Read(out Sattr3 pAttr)
     {
         pAttr = new();
 
@@ -1631,14 +1631,14 @@ public partial class CNFS3Prog : CRPCProg
             }
         }
     }
-    void Read(out Nfstime3 pTime)
+    void Read(out NfsTime3 pTime)
     {
         pTime = new();
         Read(out pTime.seconds);
         Read(out pTime.nseconds);
 
     }
-    void Read(out createhow3 pHow)
+    void Read(out Createhow3 pHow)
     {
         pHow = new();
         Read(out pHow.mode);
@@ -1653,7 +1653,7 @@ public partial class CNFS3Prog : CRPCProg
         }
 
     }
-    void Read(out symlinkdata3 pSymlink)
+    void Read(out SymLinkData3 pSymlink)
     {
         pSymlink = new();
         Read(out pSymlink.symlink_attributes);
@@ -1707,13 +1707,13 @@ public partial class CNFS3Prog : CRPCProg
         }
 
     }
-    void Write(wcc_data pWcc)
+    void Write(WccData pWcc)
     {
         Write(pWcc.before);
         Write(pWcc.after);
 
     }
-    void Write(post_op_attr pAttr)
+    void Write(PostOpAttr pAttr)
     {
         Write( pAttr.attributes_follow);
 
@@ -1723,7 +1723,7 @@ public partial class CNFS3Prog : CRPCProg
         }
 
     }
-    void Write(pre_op_attr pAttr)
+    void Write(PreOpAttr pAttr)
     {
         Write( pAttr.attributes_follow);
 
@@ -1733,7 +1733,7 @@ public partial class CNFS3Prog : CRPCProg
         }
 
     }
-    void Write(post_op_fh3 pObj)
+    void Write(PostOpFh3 pObj)
     {
         Write( pObj.handle_follows);
 
@@ -1743,7 +1743,7 @@ public partial class CNFS3Prog : CRPCProg
         }
 
     }
-    void Write(Nfstime3 pTime)
+    void Write(NfsTime3 pTime)
     {
         Write( pTime.seconds);
         Write( pTime.nseconds);
@@ -1755,7 +1755,7 @@ public partial class CNFS3Prog : CRPCProg
         Write( pSpec.specdata2);
 
     }
-    void Write(wcc_attr pAttr)
+    void Write(WccAttr pAttr)
     {
         Write( pAttr.size);
         Write( pAttr.mtime);
@@ -1859,7 +1859,7 @@ public partial class CNFS3Prog : CRPCProg
 
         return true;
     }
-    bool GetFileAttributesForNFS(string path, out wcc_attr pAttr)
+    bool GetFileAttributesForNFS(string path, out WccAttr pAttr)
     {
         stat data;
 
