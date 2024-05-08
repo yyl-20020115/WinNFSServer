@@ -313,14 +313,14 @@ public partial class CNFS3Prog : CRPCProg
 
         string dirName;
         string fileName;
-        ReadDirectory(dirName, fileName);
+        ReadDirectory(dirName, ref fileName);
 
         path = GetFullPath(dirName, fileName);
         stat = CheckFile((string)dirName, path);
 
         if (stat == NFS3_OK)
         {
-            GetFileHandle(path, ref object);
+            GetFileHandle(path, ref obj);
             obj_attributes.attributes_follow = GetFileAttributesForNFS(path, ref obj_attributes.attributes);
         }
 
@@ -1201,16 +1201,16 @@ public partial class CNFS3Prog : CRPCProg
     NFS3S ProcedureREADDIRPLUS()
     {
         string path;
-        cookie3_64 cookie;
-        cookieverf3_64 cookieverf;
-        count3_32 dircount, maxcount;
+        long cookie;
+        long cookieverf;
+        int dircount, maxcount;
         PostOpAttr dir_attributes;
-        fileid3_64 fileid;
+        long fileid;
         Filename3 name;
         PostOpAttr name_attributes=new ();
         PostOpFh3 name_handle=new ();
         bool eof;
-        int stat;
+        NFS3S stat;
         char filePath[MAXPATHLEN];
         intptr_t handle;
         int nFound;
@@ -1221,10 +1221,10 @@ public partial class CNFS3Prog : CRPCProg
         PrintLog("READDIRPLUS");
         bool validHandle = GetPath(path);
         const string cStr = validHandle ? path : null;
-        Read(ref cookie);
-        Read(ref cookieverf);
-        Read(ref dircount);
-        Read(ref maxcount);
+        Read(out cookie);
+        Read(out cookieverf);
+        Read(out dircount);
+        Read(out maxcount);
         stat = CheckFile(cStr);
 
         if (stat == NFS3_OK)
@@ -1297,19 +1297,19 @@ public partial class CNFS3Prog : CRPCProg
     {
         string path;
         PostOpAttr obj_attributes;
-        size3_64 tbytes, fbytes, abytes, tfiles, ffiles, afiles;
-        uint32 invarsec;
+        long tbytes, fbytes, abytes, tfiles, ffiles, afiles;
+        uint invarsec;
 
-        int stat;
+        NFS3S stat;
 
         PrintLog("FSSTAT");
         bool validHandle = GetPath(path);
         const string cStr = validHandle ? path : null;
         stat = CheckFile(cStr);
 
-        if (stat == NFS3_OK)
+        if (stat == NFS3S.NFS3_OK)
         {
-            obj_attributes.attributes_follow = GetFileAttributesForNFS(cStr, ref obj_attributes.attributes);
+            obj_attributes.attributes_follow = GetFileAttributesForNFS(cStr, out obj_attributes.attributes);
 
             if (obj_attributes.attributes_follow
                 && GetDiskFreeSpaceEx(cStr, (PULARGE_INTEGER) & fbytes, (PULARGE_INTEGER) & tbytes, (PULARGE_INTEGER) & abytes)
@@ -1322,14 +1322,14 @@ public partial class CNFS3Prog : CRPCProg
             }
             else
             {
-                stat = NFS3ERR_IO;
+                stat = NFS3S.NFS3ERR_IO;
             }
         }
 
         Write(stat);
         Write(obj_attributes);
 
-        if (stat == NFS3_OK)
+        if (stat == NFS3S.NFS3_OK)
         {
             Write(tbytes);
             Write(fbytes);
@@ -1346,11 +1346,11 @@ public partial class CNFS3Prog : CRPCProg
     {
         string path;
         PostOpAttr obj_attributes;
-        uint32 rtmax, rtpref, rtmult, wtmax, wtpref, wtmult, dtpref;
-        size3_64 maxfilesize;
+        uint rtmax, rtpref, rtmult, wtmax, wtpref, wtmult, dtpref;
+        long maxfilesize;
         NfsTime3 time_delta;
-        uint32 properties;
-        int stat;
+        uint properties;
+        NFS3S stat;
 
         PrintLog("FSINFO");
         bool validHandle = GetPath(path);
@@ -1405,7 +1405,7 @@ public partial class CNFS3Prog : CRPCProg
         string path;
         PostOpAttr obj_attributes;
         int stat;
-        uint32 linkmax, name_max;
+        uint linkmax, name_max;
         bool no_trunc, chown_restricted, case_insensitive, case_preserving;
 
         PrintLog("PATHCONF");
@@ -1413,7 +1413,7 @@ public partial class CNFS3Prog : CRPCProg
         const string cStr = validHandle ? path : null;
         stat = CheckFile(cStr);
 
-        if (stat == NFS3_OK)
+        if (stat == NFS3S.NFS3_OK)
         {
             obj_attributes.attributes_follow = GetFileAttributesForNFS(cStr, ref obj_attributes.attributes);
 
@@ -1428,14 +1428,14 @@ public partial class CNFS3Prog : CRPCProg
             }
             else
             {
-                stat = NFS3ERR_SERVERFAULT;
+                stat = NFS3S.NFS3ERR_SERVERFAULT;
             }
         }
 
         Write(stat);
         Write(obj_attributes);
 
-        if (stat == NFS3_OK)
+        if (stat == NFS3S.NFS3_OK)
         {
             Write(linkmax);
             Write(name_max);
@@ -1452,16 +1452,16 @@ public partial class CNFS3Prog : CRPCProg
         string path;
         int handleId;
         long offset;
-        count3_32 count;
+        int count;
         WccData file_wcc;
-        int stat;
+        NFS3S stat;
         NfsFh3 file;
-        writeverf3_64 verf;
+        long verf;
 
         PrintLog("COMMIT");
-        Read(ref file);
-        bool validHandle = CFileTable.GetFilePath(file.contents, path);
-        const string cStr = validHandle ? path : null;
+        Read(out file);
+        bool validHandle = CFileTable.GetFilePath(file.contents,out path);
+        string cStr = validHandle ? path : null;
 
         if (validHandle)
         {
@@ -1472,10 +1472,10 @@ public partial class CNFS3Prog : CRPCProg
         // offset never was anything else than 0 in my tests
         // count does not matter in the way COMMIT is implemented here
         // to fulfill the spec this should be improved
-        Read(ref offset);
-        Read(ref count);
+        Read(out offset);
+        Read(out count);
 
-        file_wcc.before.attributes_follow = GetFileAttributesForNFS(cStr, ref file_wcc.before.attributes);
+        file_wcc.before.attributes_follow = GetFileAttributesForNFS(cStr, out file_wcc.before.attributes);
 
         handleId = *(uint*)file.contents;
 
@@ -1485,19 +1485,19 @@ public partial class CNFS3Prog : CRPCProg
             {
                 fclose(unstableStorageFile[handleId]);
                 unstableStorageFile.erase(handleId);
-                stat = NFS3_OK;
+                stat = NFS3S.NFS3_OK;
             }
             else
             {
-                stat = NFS3ERR_IO;
+                stat = NFS3S.NFS3ERR_IO;
             }
         }
         else
         {
-            stat = NFS3_OK;
+            stat = NFS3S.NFS3_OK;
         }
 
-        file_wcc.after.attributes_follow = GetFileAttributesForNFS(cStr, ref file_wcc.after.attributes);
+        file_wcc.after.attributes_follow = GetFileAttributesForNFS(cStr, out file_wcc.after.attributes);
 
         Write(stat);
         Write(file_wcc);
@@ -1539,6 +1539,7 @@ public partial class CNFS3Prog : CRPCProg
             throw new Exception();
         }
     }
+
     void Read(out uint pUint32)
     {
         if (m_pInStream.Read(out pUint32) < sizeof(uint))
@@ -1551,12 +1552,24 @@ public partial class CNFS3Prog : CRPCProg
         this.Read(out int u);
         ts=(TIMESETS)u; 
     }
+    void Read(out long pUint64)
+    {
+        if (m_pInStream.Read8(out pUint64) < sizeof(ulong))
+        {
+            throw new Exception();
+        }
+    }
     void Read(out ulong pUint64)
     {
         if (m_pInStream.Read8(out pUint64) < sizeof(ulong))
         {
             throw new Exception();
         }
+    }
+    void Read(out STAS stas)
+    {
+        Read(out int v);
+        stas = (STAS)v;
     }
     void Read(out Sattr3 pAttr)
     {
@@ -1668,7 +1681,7 @@ public partial class CNFS3Prog : CRPCProg
         pHow = new();
         Read(out pHow.mode);
 
-        if (pHow.mode == UNCHECKED || pHow.mode == GUARDED)
+        if (pHow.mode == STAS.UNCHECKED || pHow.mode == STAS.GUARDED)
         {
             Read(out pHow.obj_attributes);
         }
@@ -1704,6 +1717,16 @@ public partial class CNFS3Prog : CRPCProg
     void Write(int pUint32)
     {
         m_pOutStream?.Write(pUint32);
+
+    }
+    void Write(uint pUint32)
+    {
+        m_pOutStream?.Write(pUint32);
+
+    }
+    void Write(long pUint64)
+    {
+        m_pOutStream?.Write8(pUint64);
 
     }
     void Write(ulong pUint64)
