@@ -72,7 +72,7 @@ public class CPortmapProg :  CRPCProg
         uint nPort;
 
         PrintLog("GETPORT");
-        m_pInStream?.Read(ref header.prog);  //program
+        m_pInStream?.Read(out header.prog);  //program
         m_pInStream?.Skip(12);
         nPort = header.prog >= MIN_PROG_NUM && header.prog < MIN_PROG_NUM + PORT_NUM
             ? m_nPortTable[header.prog - MIN_PROG_NUM] 

@@ -140,7 +140,7 @@ public class CSocket : IDisposable
                 if (nBytes == 4)
                 {
                     m_SocketStream.SetInputSize(4);
-                    m_SocketStream.Read(ref fragmentHeader);
+                    m_SocketStream.Read(out fragmentHeader);
                     fragmentHeaderMsb = (int)(fragmentHeader & 0x80000000);
                     fragmentHeaderLengthBytes = (int)(fragmentHeader ^ 0x80000000) + 4;
                     while (nBytes != fragmentHeaderLengthBytes)

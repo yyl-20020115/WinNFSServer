@@ -57,7 +57,7 @@ public partial class CNFS3Prog : CRPCProg
 
         PrintLog(" ");
 
-        if (stat != null)
+        if (stat.HasValue)
         {
             switch (stat.Value)
             {
@@ -254,12 +254,12 @@ public partial class CNFS3Prog : CRPCProg
             }
 
             // deliberately not implemented because we cannot reflect uid/gid on windows (easliy)
-            if (new_attributes.uid.set_it) =new ()
-            if (new_attributes.gid.set_it) =new ()
+            if (new_attributes.uid.set_it) {}
+            if (new_attributes.gid.set_it) {}
 
             // deliberately not implemented
-            if (new_attributes.mtime.set_it == SET_TO_CLIENT_TIME) =new ()
-            if (new_attributes.atime.set_it == SET_TO_CLIENT_TIME) =new ()
+            if (new_attributes.mtime.set_it == SET_TO_CLIENT_TIME) {}
+            if (new_attributes.atime.set_it == SET_TO_CLIENT_TIME) {}
 
             if (new_attributes.mtime.set_it == SET_TO_SERVER_TIME || new_attributes.atime.set_it == SET_TO_SERVER_TIME)
             {
@@ -587,7 +587,7 @@ public partial class CNFS3Prog : CRPCProg
             {
                 NfsFh3 handle;
                 GetFileHandle(cStr, ref handle);
-                int handleId = *(unsigned int*)handle.contents;
+                int handleId = *(uint*)handle.contents;
 
                 if (unstableStorageFile.count(handleId) == 0)
                 {
@@ -1123,7 +1123,7 @@ public partial class CNFS3Prog : CRPCProg
         intptr_t handle;
         int nFound;
         _finddata_t fileinfo;
-        unsigned int i, j;
+        uint i, j;
 
         PrintLog("READDIR");
         bool validHandle = GetPath(path);
@@ -1158,7 +1158,7 @@ public partial class CNFS3Prog : CRPCProg
             {
                 nFound = 0;
 
-                for (i = (unsigned int) cookie; i > 0; i--) {
+                for (i = (uint) cookie; i > 0; i--) {
                     nFound = _findnext(handle, ref fileinfo);
                 }
 
@@ -1213,7 +1213,7 @@ public partial class CNFS3Prog : CRPCProg
         intptr_t handle;
         int nFound;
         _finddata_t fileinfo;
-        unsigned int i, j;
+        uint i, j;
         bool bFollows;
 
         PrintLog("READDIRPLUS");
@@ -1249,7 +1249,7 @@ public partial class CNFS3Prog : CRPCProg
             {
                 nFound = 0;
 
-                for (i = (unsigned int) cookie; i > 0; i--) {
+                for (i = (uint) cookie; i > 0; i--) {
                     nFound = _findnext(handle, ref fileinfo);
                 }
 
@@ -1475,7 +1475,7 @@ public partial class CNFS3Prog : CRPCProg
 
         file_wcc.before.attributes_follow = GetFileAttributesForNFS(cStr, ref file_wcc.before.attributes);
 
-        handleId = *(unsigned int*)file.contents;
+        handleId = *(uint*)file.contents;
 
         if (unstableStorageFile.count(handleId) != 0)
         {
@@ -1874,12 +1874,12 @@ public partial class CNFS3Prog : CRPCProg
         }
 
         pAttr.size = data.st_size;
-        pAttr.mtime.seconds = (unsigned int)data.st_mtime;
+        pAttr.mtime.seconds = (uint)data.st_mtime;
         pAttr.mtime.nseconds = 0;
         // TODO: This needs to be tested (not called on my setup)
         // This seems to be the changed time, not creation time.
         //pAttr.ctime.seconds = data.st_ctime;
-        pAttr.ctime.seconds = (unsigned int)data.st_mtime;
+        pAttr.ctime.seconds = (uint)data.st_mtime;
         pAttr.ctime.nseconds = 0;
 
         return true;
