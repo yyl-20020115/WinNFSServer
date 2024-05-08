@@ -99,14 +99,14 @@ public class CFileTree
         return node;
     }
 
-    public void GetNodeFullPath(TreeNode<FILE_ITEM> node, ref string path)
+    public static void GetNodeFullPath(TreeNode<FILE_ITEM>? node, ref string path)
     {
-        path += node.Data.path;
-        var parentNode = node.Parent;
+        path += node?.Data?.path;
+        var parentNode = node?.Parent;
         while (parentNode != null)
         {
-            path = parentNode.Data.path + "\\" + path;
-            parentNode = parentNode.Parent;
+            path = parentNode?.Data?.path + "\\" + path;
+            parentNode = parentNode?.Parent;
         }
     }
 

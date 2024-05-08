@@ -1,4 +1,7 @@
-﻿namespace LibWinNFSServer;
+﻿using LibWinNFSServer;
+using System.Xml.Linq;
+
+namespace LibWinNFSServer;
 
 public class CFileTable
 {
@@ -44,7 +47,7 @@ public class CFileTable
 
         return node?.Data?.handle;
     }
-    public bool GetPathByHandle(byte[] handle, ref string path)
+    public bool GetPathByHandle(byte[]? handle, ref string path)
     {
         uint id;
         TreeNode<FILE_ITEM> node;
@@ -54,7 +57,7 @@ public class CFileTable
         node = GetItemByID(id);
         if (node != null)
         {
-            g_FileTree.GetNodeFullPath(node, ref path);
+            CFileTree.GetNodeFullPath(node, ref path);
             return true;
         }
         else
@@ -62,7 +65,7 @@ public class CFileTable
             return false;
         }
     }
-    public Tree<FILE_ITEM> FindItemByPath(string path)
+    public TreeNode<FILE_ITEM> FindItemByPath(string path)
     {
         return null;
     }
@@ -74,7 +77,7 @@ public class CFileTable
             // Remove from table
             FILE_TABLE pTable;
             uint i;
-            uint handle =BitConverter.ToUInt32(foundDeletedItem.Data.handle);
+            uint handle = BitConverter.ToUInt32(foundDeletedItem.Data.handle);
 
             if (handle >= m_nTableSize)
             {
@@ -94,7 +97,7 @@ public class CFileTable
             // Remove from table end
 
             string rpath = "";
-            g_FileTree.GetNodeFullPath(foundDeletedItem, ref rpath);
+            CFileTree.GetNodeFullPath(foundDeletedItem, ref rpath);
             g_FileTree.RemoveItem(rpath);
             return true;
         }
@@ -226,4 +229,72 @@ public class CFileTable
             m_pCacheList = pCurr;  //insert to the first
         }
     }
+
+
+    public bool SRenameFile(string pathFrom, string pathTo)
+    {
+        try
+        {
+            File.Move(pathFrom, pathTo);
+            this.RenameFile(pathFrom, pathTo);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool RenameDirectory(string pathFrom, string pathTo)
+    {
+        var done = SRenameFile(pathFrom, pathTo);
+        string dotFile = "\\.";
+        string dotDirectoryPathFrom= pathFrom+dotFile;
+        string dotDirectoryPathTo = pathTo + dotFile;
+        string backDirectoryPathFrom = pathFrom + dotFile;
+        string backDirectoryPathTo = pathTo + dotFile;
+
+        this.RenameFile(dotDirectoryPathFrom, dotDirectoryPathTo);
+        this.RenameFile(backDirectoryPathFrom, backDirectoryPathTo);
+        return done;
+    }
+
+    public bool RemoveFile(string path)
+    {
+        try
+        {
+            File.Delete(path);
+            this.RemoveItem(path);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool RemoveFolder(string path)
+    {
+        try
+        {
+            Directory.Delete(path, true);
+
+            string dotFile = "\\.";
+            string backFile = "\\..";
+
+            string dotDirectoryPath = path + dotFile;
+            string backDirectoryPath = path + backFile;
+
+            this.RemoveItem(dotDirectoryPath);
+            this.RemoveItem(backDirectoryPath);
+            this.RemoveItem(path);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
 }
