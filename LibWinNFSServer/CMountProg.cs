@@ -8,15 +8,18 @@ public class CMountProg : CRPCProg
     public const int MOUNT_PATH_MAX = 100;
 
     protected int m_nMountNum = 0;
-    protected string m_pPathFile = null;
+    protected string? m_pPathFile = null;
     protected Dictionary<string, string> m_PathMap;
-    protected string[] m_pClientAddr = new string[MOUNT_NUM_MAX];
+    protected List<string> m_pClientAddr = [];
     protected IInputStream m_pInStream;
     protected IOutputStream m_pOutStream;
 
     private ProcessParam m_pParam;
     private int m_nResult;
     private CFileTable fileTable;
+
+    public int add { get; private set; }
+
     public CMountProg(CFileTable fileTable)
     {
         this.fileTable = fileTable;
@@ -61,15 +64,11 @@ public class CMountProg : CRPCProg
 
         return false;
     }
-    public string GetClientAddr(int nIndex)
+    public string? GetClientAddr(int nIndex)
     {
         int i;
 
-        if (nIndex < 0 || nIndex >= m_nMountNum)
-        {
-            return null;
-        }
-
+        if (nIndex < 0 || nIndex >= m_nMountNum) return null;
         for (i = 0; i < MOUNT_NUM_MAX; i++)
         {
             if (m_pClientAddr[i] != null)
@@ -90,7 +89,6 @@ public class CMountProg : CRPCProg
     public int GetMountNumber()
     {
         return m_nMountNum;  //the number of clients mounted
-
     }
     
     public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
@@ -121,7 +119,7 @@ public class CMountProg : CRPCProg
 
         return m_nResult;
     }
-    public string FormatPath(string pPath, PathFormats format)
+    public string? FormatPath(string pPath, PathFormats format)
     {
         pPath = pPath.Trim();
         if (pPath.EndsWith(":\\")) pPath = pPath[..^1];
@@ -131,7 +129,7 @@ public class CMountProg : CRPCProg
         if (pPath.EndsWith('"')) pPath = pPath.TrimStart('"');
         if (pPath.Length == 0) return null;
 
-        string result = pPath;
+        var result = pPath;
 
         //Check for right path format
         if (format == PathFormats.FORMAT_PATH)
@@ -180,19 +178,17 @@ public class CMountProg : CRPCProg
                 return null;
             }
         }
-
         return result;
     }
 
     protected void ProcedureNULL()
     {
         PrintLog("NULL");
-
     }
     protected void ProcedureMNT()
     {
         Refresh();
-        string path =""; //MAXPATHLEN+1
+        var path =""; //MAXPATHLEN+1
         int i;
 
         PrintLog("MNT");
@@ -233,14 +229,14 @@ public class CMountProg : CRPCProg
     }
     protected void ProcedureUMNT()
     {
-        string path = ""; //MAXPATHLEN+1
+        var path = ""; //MAXPATHLEN+1
         int i;
 
         PrintLog("UMNT");
         GetPath(ref path);
         PrintLog(" from {0}", m_pParam.pRemoteAddr);
 
-        for (i = 0; i < MOUNT_NUM_MAX; i++)
+        for (i = 0; i < m_pClientAddr.Count; i++)
         {
             if (m_pClientAddr[i] != null)
             {
@@ -258,7 +254,6 @@ public class CMountProg : CRPCProg
     {
         PrintLog("UMNTALL NOIMP");
         m_nResult = (int)PRC_STATUS.PRC_NOTIMP;
-
     }
     protected void ProcedureEXPORT()
     {
@@ -292,7 +287,6 @@ public class CMountProg : CRPCProg
     {
         PrintLog("NOIMP");
         m_nResult = (int)PRC_STATUS.PRC_NOTIMP;
-
     }
 
     private bool GetPath(ref string returnPath)
@@ -304,10 +298,7 @@ public class CMountProg : CRPCProg
 
         m_pInStream.Read(out nSize);
 
-        if (nSize > MAXPATHLEN)
-        {
-            nSize = MAXPATHLEN;
-        }
+        if (nSize > MAXPATHLEN) nSize = MAXPATHLEN;
 
         var bytes = new byte[nSize];
         m_pInStream.Read(bytes);
@@ -315,11 +306,10 @@ public class CMountProg : CRPCProg
         path = Encoding.UTF8.GetString(bytes);
         // TODO: this whole method is quite ugly and ripe for refactoring
         // strip slashes
-        string pathTemp = path.TrimEnd('\\').TrimEnd('/');
+        var _path = path.TrimEnd('\\').TrimEnd('/');
 
         foreach (var pair in m_PathMap)
         {
-
             // strip slashes
             string pathAliasTemp = pair.Key;
             //pathAliasTemp.erase(pathAliasTemp.find_last_not_of("/\\") + 1);
