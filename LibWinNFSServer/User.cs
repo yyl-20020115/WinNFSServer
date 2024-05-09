@@ -559,7 +559,7 @@ public class User
     [DllImport("user32")] public static extern int CreateAcceleratorTable(ref ACCEL lpaccl, int cEntries);
     [DllImport("user32")] public static extern int CreateCaret(HWND hwnd, HANDLE hBitmap, int nWidth, int nHeight);
     [DllImport("user32")] public static extern int CreateCursor(HANDLE hInstance, int nXhotspot, int nYhotspot, int nWidth, int nHeight, IntPtr lpANDbitPlane, IntPtr lpXORbitPlane);
-    [DllImport("user32")] public static extern int CreateDesktop(string lpszDesktop, string lpszDevice, ref DEVMODE pDevmode, int dwFlags, int dwDesiredAccess, ref SECURITY_ATTRIBUTES lpsa);
+    [DllImport("user32")] public static extern int CreateDesktop(string lpszDesktop, string lpszDevice, ref IntPtr pDevmode, int dwFlags, int dwDesiredAccess, ref SECURITY_ATTRIBUTES lpsa);
     [DllImport("user32")] public static extern int CreateDialogIndirectParam(HANDLE hInstance, ref DLGTEMPLATE lpTemplate, HWND hwndParent, ref int lpDialogFunc, int dwInitParam);
     [DllImport("user32")] public static extern int CreateDialogParam(HANDLE hInstance, string lpName, HWND hwndParent, ref int lpDialogFunc, int lParamInit);
     [DllImport("user32")] public static extern int CreateIcon(HANDLE hInstance, int nWidth, int nHeight, Byte nPlanes, Byte nBitsPixel, Byte lpANDbits, Byte lpXORbits);

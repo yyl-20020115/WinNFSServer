@@ -210,8 +210,8 @@ public partial class CNFS3Prog : CRPCProg
         NFS3S stat;
         int nMode;
         FILETIME fileTime;
-        FILE pFile;
-        HANDLE hFile;
+        //FILE pFile;
+        //HANDLE hFile;
         SYSTEMTIME systemTime;
 
         PrintLog("SETATTR");
@@ -346,7 +346,6 @@ public partial class CNFS3Prog : CRPCProg
         NFS3S stat;
 
         REPARSE_DATA_BUFFER lpOutBuffer;
-        lpOutBuffer = (REPARSE_DATA_BUFFER)malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
         uint bytesReturned;
 
         bool validHandle = GetPath(ref path);
@@ -356,90 +355,90 @@ public partial class CNFS3Prog : CRPCProg
             return NFS3S.NFS3ERR_STALE;
         }
         stat = CheckFile(cStr);
-        if (stat == NFS3S.NFS3_OK)
-        {
+        //if (stat == NFS3S.NFS3_OK)
+        //{
 
-            hFile = CreateFile(cStr, GENERIC_READ, FILE_SHARE_READ, null, OPEN_EXISTING, FILE_ATTRIBUTE_REPARSE_POINT | FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, null);
+        //    hFile = CreateFile(cStr, GENERIC_READ, FILE_SHARE_READ, null, OPEN_EXISTING, FILE_ATTRIBUTE_REPARSE_POINT | FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, null);
 
-            if (hFile == INVALID_HANDLE_VALUE)
-            {
-                stat = NFS3S.NFS3ERR_IO;
-            }
-            else
-            {
-                lpOutBuffer = (REPARSE_DATA_BUFFER)malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
-                if (!lpOutBuffer)
-                {
-                    stat = NFS3S.NFS3ERR_IO;
-                }
-                else
-                {
-                    DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, null, 0, lpOutBuffer, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, ref bytesReturned, null);
-                    string finalSymlinkPath;
-                    if (lpOutBuffer.ReparseTag == IO_REPARSE_TAG_SYMLINK || lpOutBuffer.ReparseTag == IO_REPARSE_TAG_MOUNT_POINT)
-                    {
-                        if (lpOutBuffer.ReparseTag == IO_REPARSE_TAG_SYMLINK)
-                        {
-                            size_t plen = lpOutBuffer.SymbolicLinkReparseBuffer.PrintNameLength / sizeof(char);
-                            string szPrintName;//= new WCHAR[plen + 1];
-                            wcsncpy_s(szPrintName, plen + 1, ref lpOutBuffer.SymbolicLinkReparseBuffer.PathBuffer[lpOutBuffer.SymbolicLinkReparseBuffer.PrintNameOffset / sizeof(WCHAR)], plen);
-                            szPrintName[plen] = 0;
-                            string wStringTemp = (szPrintName);
-                            string cPrintName = wstring_to_dbcs(wStringTemp);
+        //    if (hFile == INVALID_HANDLE_VALUE)
+        //    {
+        //        stat = NFS3S.NFS3ERR_IO;
+        //    }
+        //    else
+        //    {
+        //        lpOutBuffer = (REPARSE_DATA_BUFFER)malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+        //        if (!lpOutBuffer)
+        //        {
+        //            stat = NFS3S.NFS3ERR_IO;
+        //        }
+        //        else
+        //        {
+        //            DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, null, 0, lpOutBuffer, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, ref bytesReturned, null);
+        //            string finalSymlinkPath;
+        //            if (lpOutBuffer.ReparseTag == IO_REPARSE_TAG_SYMLINK || lpOutBuffer.ReparseTag == IO_REPARSE_TAG_MOUNT_POINT)
+        //            {
+        //                if (lpOutBuffer.ReparseTag == IO_REPARSE_TAG_SYMLINK)
+        //                {
+        //                    size_t plen = lpOutBuffer.SymbolicLinkReparseBuffer.PrintNameLength / sizeof(char);
+        //                    string szPrintName;//= new WCHAR[plen + 1];
+        //                    wcsncpy_s(szPrintName, plen + 1, ref lpOutBuffer.SymbolicLinkReparseBuffer.PathBuffer[lpOutBuffer.SymbolicLinkReparseBuffer.PrintNameOffset / sizeof(WCHAR)], plen);
+        //                    szPrintName[plen] = 0;
+        //                    string wStringTemp = (szPrintName);
+        //                    string cPrintName = wstring_to_dbcs(wStringTemp);
 
-                            finalSymlinkPath.assign(cPrintName);
-                            // TODO: Revisit with cleaner solution
-                            if (!PathIsRelative(cPrintName))
-                            {
-                                string strFromChar;
-                                strFromChar.append("\\\\?\\");
-                                strFromChar.append(cPrintName);
-                                string target = _strdup(strFromChar);
-                                // remove last folder
-                                int lastFolderIndex = path.find_last_of('\\');
-                                if (lastFolderIndex !=npos)
-                                {
-                                    path = path.substr(0, lastFolderIndex);
-                                }
-                                string szOut;// [MAX_PATH] = "";
-                                PathRelativePathTo(szOut, cStr, FILE_ATTRIBUTE_DIRECTORY, target, FILE_ATTRIBUTE_DIRECTORY);
-                                string symlinkPath=(szOut);
-                                finalSymlinkPath.assign(symlinkPath);
-                            }
-                        }
+        //                    finalSymlinkPath.assign(cPrintName);
+        //                    // TODO: Revisit with cleaner solution
+        //                    if (!PathIsRelative(cPrintName))
+        //                    {
+        //                        string strFromChar;
+        //                        strFromChar.append("\\\\?\\");
+        //                        strFromChar.append(cPrintName);
+        //                        string target = _strdup(strFromChar);
+        //                        // remove last folder
+        //                        int lastFolderIndex = path.find_last_of('\\');
+        //                        if (lastFolderIndex !=npos)
+        //                        {
+        //                            path = path.substr(0, lastFolderIndex);
+        //                        }
+        //                        string szOut;// [MAX_PATH] = "";
+        //                        PathRelativePathTo(szOut, cStr, FILE_ATTRIBUTE_DIRECTORY, target, FILE_ATTRIBUTE_DIRECTORY);
+        //                        string symlinkPath=(szOut);
+        //                        finalSymlinkPath.assign(symlinkPath);
+        //                    }
+        //                }
 
-                        // TODO: Revisit with cleaner solution
-                        if (lpOutBuffer.ReparseTag == IO_REPARSE_TAG_MOUNT_POINT)
-                        {
-                            int slen = lpOutBuffer.MountPointReparseBuffer.SubstituteNameLength / sizeof(char);
-                            string szSubName;//= new WCHAR[slen + 1];
-                            wcsncpy_s(szSubName, slen + 1, lpOutBuffer.MountPointReparseBuffer.PathBuffer[lpOutBuffer.MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR)], slen);
-                            szSubName[slen] = 0;
-                            string wStringTemp = (szSubName);
-                            string target = wstring_to_dbcs(wStringTemp);
-                            target.erase(0, 2);
-                            target.insert(0, 2, '\\');
-                            // remove last folder, see above
-                            int lastFolderIndex = path.find_last_of('\\');
-                            if (lastFolderIndex != npos)
-                            {
-                                path = path.substr(0, lastFolderIndex);
-                            }
-                            string szOut = "";// [MAX_PATH] = "";
-                            PathRelativePathTo(szOut, cStr, FILE_ATTRIBUTE_DIRECTORY, target, FILE_ATTRIBUTE_DIRECTORY);
-                            string symlinkPath = szOut;
-                            finalSymlinkPath.assign(symlinkPath);
-                        }
+        //                // TODO: Revisit with cleaner solution
+        //                if (lpOutBuffer.ReparseTag == IO_REPARSE_TAG_MOUNT_POINT)
+        //                {
+        //                    int slen = lpOutBuffer.MountPointReparseBuffer.SubstituteNameLength / sizeof(char);
+        //                    string szSubName;//= new WCHAR[slen + 1];
+        //                    wcsncpy_s(szSubName, slen + 1, lpOutBuffer.MountPointReparseBuffer.PathBuffer[lpOutBuffer.MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR)], slen);
+        //                    szSubName[slen] = 0;
+        //                    string wStringTemp = (szSubName);
+        //                    string target = wstring_to_dbcs(wStringTemp);
+        //                    target.erase(0, 2);
+        //                    target.insert(0, 2, '\\');
+        //                    // remove last folder, see above
+        //                    int lastFolderIndex = path.find_last_of('\\');
+        //                    if (lastFolderIndex != npos)
+        //                    {
+        //                        path = path.substr(0, lastFolderIndex);
+        //                    }
+        //                    string szOut = "";// [MAX_PATH] = "";
+        //                    PathRelativePathTo(szOut, cStr, FILE_ATTRIBUTE_DIRECTORY, target, FILE_ATTRIBUTE_DIRECTORY);
+        //                    string symlinkPath = szOut;
+        //                    finalSymlinkPath.assign(symlinkPath);
+        //                }
 
-                        // write path always with / separator, so windows created symlinks work too
-                        replace(finalSymlinkPath.begin(), finalSymlinkPath.end(), '\\', '/');
-                        string result = (finalSymlinkPath);
-                        data.Set(result);
-                    }
+        //                // write path always with / separator, so windows created symlinks work too
+        //                replace(finalSymlinkPath.begin(), finalSymlinkPath.end(), '\\', '/');
+        //                string result = (finalSymlinkPath);
+        //                data.Set(result);
+        //            }
                     
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
 
         symlink_attributes.attributes_follow = GetFileAttributesForNFS(cStr, out symlink_attributes.attributes);
 
@@ -543,31 +542,31 @@ public partial class CNFS3Prog : CRPCProg
         if (stat == NFS3S.NFS3_OK)
         {
 
-            if (stable == UNSTABLE)
+            if (stable ==(int) SYNCS.UNSTABLE)
             {
-                NfsFh3 handle;
-                GetFileHandle(cStr, ref handle);
-                int handleId = *(uint*)handle.contents;
+                NfsFh3 handle=new();
+                GetFileHandle(cStr, handle);
+                //int handleId = *(uint*)handle.contents;
 
-                if (unstableStorageFile.count(handleId) == 0)
-                {
-                    pFile = _fsopen(cStr, "r+b", _SH_DENYWR);
-                    if (pFile != null)
-                    {
-                        unstableStorageFile.insert(make_pair(handleId, pFile));
-                    }
-                }
-                else
-                {
-                    pFile = unstableStorageFile[handleId];
-                }
+                //if (unstableStorageFile.ContainsKey(handleId))
+                //{
+                //    pFile = _fsopen(cStr, "r+b", _SH_DENYWR);
+                //    if (pFile != null)
+                //    {
+                //        unstableStorageFile.Add(handleId, pFile);
+                //    }
+                //}
+                //else
+                //{
+                //    pFile = unstableStorageFile[handleId];
+                //}
 
-                if (pFile != null)
-                {
-                    _fseeki64(pFile, offset, SEEK_SET);
-                    count = (count3_32)fwrite(data.contents, sizeof(char), data.length, pFile);
-                }
-                else
+                //if (pFile != null)
+                //{
+                //    _fseeki64(pFile, offset, SEEK_SET);
+                //    count = (count3_32)fwrite(data.contents, sizeof(char), data.length, pFile);
+                //}
+                //else
                 {
                     int errorNumber = WinAPIs.GetLastError();
                     PrintLog("{0}", errorNumber);
@@ -589,13 +588,13 @@ public partial class CNFS3Prog : CRPCProg
             else
             {
 
-                pFile = _fsopen(cStr, "r+b", _SH_DENYWR);
-
-                if (pFile != null)
+                
+                using var fs = new FileStream(cStr, FileMode.OpenOrCreate, FileAccess.Write);    
+                if (fs != null)
                 {
-                    _fseeki64(pFile, offset, SEEK_SET);
-                    count = (count3_32)fwrite(data.contents, sizeof(char), data.length, pFile);
-                    fclose(pFile);
+                    fs.Seek(offset, SeekOrigin.Begin);
+                    fs.Write(data.contents);
+                    count = data.contents.Length;
                 }
                 else
                 {
@@ -721,12 +720,12 @@ public partial class CNFS3Prog : CRPCProg
             obj.handle_follows = GetFileHandle(path, obj.handle);
             obj_attributes.attributes_follow = GetFileAttributesForNFS(path, out obj_attributes.attributes);
         }
-        else if (e == EEXIST)
+        else if (e == WinAPIs.FILE_EXISTS)
         {
             PrintLog("Directory already exists.");
             stat = NFS3S.NFS3ERR_EXIST;
         }
-        else if (e == ENOENT)
+        else if (e == WinAPIs.FILE_NOT_FOUND)
         {
             stat = NFS3S.NFS3ERR_NOENT;
         }
@@ -865,7 +864,7 @@ public partial class CNFS3Prog : CRPCProg
                 var returnCode = fileTable.RemoveFolder(path);
                 if (returnCode!=0)
                 {
-                    if (returnCode == ERROR_DIR_NOT_EMPTY)
+                    if (returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY)
                     {
                         stat = NFS3S.NFS3ERR_NOTEMPTY;
                     }
@@ -913,7 +912,7 @@ public partial class CNFS3Prog : CRPCProg
             returnCode = fileTable.RemoveFolder(path);
             if (returnCode != 0)
             {
-                if (returnCode == ERROR_DIR_NOT_EMPTY)
+                if (returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY)
                 {
                     stat = NFS3S.NFS3ERR_NOTEMPTY;
                 }
@@ -963,7 +962,7 @@ public partial class CNFS3Prog : CRPCProg
                 returnCode = fileTable.RemoveFolder(pathTo);
                 if (returnCode != 0)
                 {
-                    if (returnCode == ERROR_DIR_NOT_EMPTY)
+                    if (returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY)
                     {
                         stat = NFS3S.NFS3ERR_NOTEMPTY;
                     }
@@ -1070,8 +1069,8 @@ public partial class CNFS3Prog : CRPCProg
         NFS3S stat;
         string filePath;
         int nFound;
-        intptr_t handle;
-        _finddata_t fileinfo;
+        //intptr_t handle;
+        //_finddata_t fileinfo;
         uint i, j;
 
         PrintLog("READDIR");
@@ -1100,16 +1099,16 @@ public partial class CNFS3Prog : CRPCProg
             Write(cookieverf);
             filePath = cStr + "\\*";
             eof = true;
-            handle = _findfirst(filePath, ref fileinfo);
+            //handle = _findfirst(filePath, ref fileinfo);
             bFollows = true;
 
-            if (handle)
+            //if (handle)
             {
                 nFound = 0;
 
                 for (i = (uint)cookie; i > 0; i--)
                 {
-                    nFound = _findnext(handle, ref fileinfo);
+                    //nFound = _findnext(handle, ref fileinfo);
                 }
 
                 // TODO: Implement this workaround correctly with the
@@ -1118,13 +1117,13 @@ public partial class CNFS3Prog : CRPCProg
                 {
                     j = 10;
 
-                    do
+                    foreach(var name2 in Directory.GetFiles(path,"*.*"))
                     {
                         Write(bFollows); //value follows
-                        filePath = cStr + "\\" + fileinfo.name;
+                        filePath = cStr + "\\" + name2;// fileinfo.name;
                         fileid = fileTable.GetIDByPath(filePath);
                         Write(fileid); //file id
-                        name.Set(fileinfo.name);
+                        name.Set(name2);// fileinfo.name);
                         Write(name); //name
                         ++cookie;
                         Write(cookie); //cookie
@@ -1133,7 +1132,7 @@ public partial class CNFS3Prog : CRPCProg
                             eof = false;
                             break;
                         }
-                    } while (_findnext(handle, ref fileinfo) == 0);
+                    }// while (_findnext(handle, ref fileinfo) == 0);
                 }
 
             }
@@ -1163,8 +1162,8 @@ public partial class CNFS3Prog : CRPCProg
         uint i, j;
         bool bFollows;
 
-        intptr_t handle;
-        _finddata_t fileinfo;
+        //intptr_t handle;
+        //_finddata_t fileinfo;
 
         PrintLog("READDIRPLUS");
         bool validHandle = GetPath(ref path);
@@ -1193,16 +1192,16 @@ public partial class CNFS3Prog : CRPCProg
             Write(cookieverf);
             filePath = cStr + "\\*";
 
-            handle = _findfirst(filePath, ref fileinfo);
+            //handle = _findfirst(filePath, ref fileinfo);
             eof = true;
 
-            if (handle)
+            //if (handle)
             {
                 nFound = 0;
 
                 for (i = (uint)cookie; i > 0; i--)
                 {
-                    nFound = _findnext(handle, ref fileinfo);
+                    //nFound = _findnext(handle, ref fileinfo);
                 }
 
                 if (nFound == 0)
@@ -1210,13 +1209,15 @@ public partial class CNFS3Prog : CRPCProg
                     bFollows = true;
                     j = 10;
 
-                    do
+                    foreach(var name2 in Directory.GetFiles(path,"*.*"))
                     {
+                        
+                        //fileinfo.name = name2;
                         Write(bFollows); //value follows
-                        filePath =cStr+"\\" +fileinfo.name;
+                        filePath = cStr + "\\" + name2;// fileinfo.name;
                         fileid = fileTable.GetIDByPath(filePath);
                         Write(fileid); //file id
-                        name.Set(fileinfo.name);
+                        name.Set(name2);// fileinfo.name);
                         Write(name); //name
                         ++cookie;
                         Write(cookie); //cookie
@@ -1230,7 +1231,7 @@ public partial class CNFS3Prog : CRPCProg
                             eof = false;
                             break;
                         }
-                    } while (_findnext(handle, ref fileinfo) == 0);
+                    } //while (_findnext(handle, ref fileinfo) == 0);
                 }
 
             }
