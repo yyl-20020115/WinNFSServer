@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace LibWinNFSServer;
 
@@ -238,31 +239,23 @@ public partial class CNFS3Prog : CRPCProg
 
             if (new_attributes.mtime.set_it == TIMESETS.SET_TO_SERVER_TIME || new_attributes.atime.set_it == TIMESETS.SET_TO_SERVER_TIME)
             {
-                hFile = CreateFile(cStr, FILE_WRITE_ATTRIBUTES, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
-                if (hFile != INVALID_HANDLE_VALUE)
+                var f = new FileInfo(cStr);
+                if (new_attributes.mtime.set_it == TIMESETS.SET_TO_SERVER_TIME)
                 {
-                    GetSystemTime(ref systemTime);
-                    SystemTimeToFileTime(ref systemTime, ref fileTime);
-                    if (new_attributes.mtime.set_it == TIMESETS.SET_TO_SERVER_TIME)
-                    {
-                        SetFileTime(hFile, null, null, ref fileTime);
-                    }
-                    if (new_attributes.atime.set_it == TIMESETS.SET_TO_SERVER_TIME)
-                    {
-                        SetFileTime(hFile, null, ref fileTime, null);
-                    }
+                    //TODO:
+                    //SetFileTime(hFile, null, null, ref fileTime);
+                }
+                if (new_attributes.atime.set_it == TIMESETS.SET_TO_SERVER_TIME)
+                {
+                    //TODO:
+                    //SetFileTime(hFile, null, ref fileTime, null);
                 }
             }
 
             if (new_attributes.size.set_it)
             {
-                pFile = _fsopen(cStr, "r+b", _SH_DENYWR);
-                if (pFile != null)
-                {
-                    int filedes = _fileno(pFile);
-                    _chsize_s(filedes, new_attributes.size.size);
-                    fclose(pFile);
-                }
+                using var fs = new FileStream(cStr,FileMode.Open, FileAccess.ReadWrite);
+                fs.SetLength((long)new_attributes.size.size);
             }
         }
 
@@ -352,7 +345,6 @@ public partial class CNFS3Prog : CRPCProg
         //opaque data;
         NFS3S stat;
 
-        HANDLE hFile;
         REPARSE_DATA_BUFFER lpOutBuffer;
         lpOutBuffer = (REPARSE_DATA_BUFFER)malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
         uint bytesReturned;
@@ -405,7 +397,7 @@ public partial class CNFS3Prog : CRPCProg
                                 string target = _strdup(strFromChar);
                                 // remove last folder
                                 int lastFolderIndex = path.find_last_of('\\');
-                                if (lastFolderIndex != string.npos)
+                                if (lastFolderIndex !=npos)
                                 {
                                     path = path.substr(0, lastFolderIndex);
                                 }
@@ -421,7 +413,7 @@ public partial class CNFS3Prog : CRPCProg
                         {
                             int slen = lpOutBuffer.MountPointReparseBuffer.SubstituteNameLength / sizeof(char);
                             string szSubName;//= new WCHAR[slen + 1];
-                            wcsncpy_s(szSubName, slen + 1, ref lpOutBuffer.MountPointReparseBuffer.PathBuffer[lpOutBuffer.MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR)], slen);
+                            wcsncpy_s(szSubName, slen + 1, lpOutBuffer.MountPointReparseBuffer.PathBuffer[lpOutBuffer.MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR)], slen);
                             szSubName[slen] = 0;
                             string wStringTemp = (szSubName);
                             string target = wstring_to_dbcs(wStringTemp);
@@ -469,7 +461,6 @@ public partial class CNFS3Prog : CRPCProg
         bool eof = false;
         Opaque data = new();
         NFS3S stat;
-        FILE pFile;
 
         PrintLog("READ");
         bool validHandle = GetPath(ref path);
@@ -484,22 +475,19 @@ public partial class CNFS3Prog : CRPCProg
 
         if (stat == NFS3S.NFS3_OK)
         {
-            data.SetSize(count);
-            pFile = _fsopen(cStr, "rb", _SH_DENYWR);
+            data.SetSize((uint)count);
 
-            if (pFile != null)
+            if (File.Exists(cStr))
             {
-                _fseeki64(pFile, offset, SEEK_SET);
-                count = (count3_32)fread(data.contents, sizeof(char), count, pFile);
-                eof = fgetc(pFile) == EOF;
-                fclose(pFile);
+                using var fs = new FileStream(cStr,FileMode.Open,FileAccess.Read);
+                fs.Seek(offset, SeekOrigin.Begin);
+                fs.Read(data.contents);
+                eof = fs.Position == fs.Length;
             }
             else
             {
-                char buffer[BUFFER_SIZE];
-                errno_t errorNumber = errno;
-                strerror_s(buffer, BUFFER_SIZE, errorNumber);
-                PrintLog(buffer);
+                int errorNumber = WinAPIs.GetLastError();
+                PrintLog("{0}", errorNumber);
 
                 if (errorNumber == 13)
                 {
@@ -536,7 +524,6 @@ public partial class CNFS3Prog : CRPCProg
         WccData file_wcc = new();
         long verf = 0;
         NFS3S stat;
-        FILE pFile;
 
         PrintLog("WRITE");
         bool validHandle = GetPath(ref path);
@@ -582,10 +569,8 @@ public partial class CNFS3Prog : CRPCProg
                 }
                 else
                 {
-                    string buffer = "";// [BUFFER_SIZE];
-                    errno_t errorNumber = errno;
-                    strerror_s(buffer, BUFFER_SIZE, errorNumber);
-                    PrintLog(buffer);
+                    int errorNumber = WinAPIs.GetLastError();
+                    PrintLog("{0}", errorNumber);
 
                     if (errorNumber == 13)
                     {
@@ -614,10 +599,8 @@ public partial class CNFS3Prog : CRPCProg
                 }
                 else
                 {
-                    char buffer[BUFFER_SIZE];
-                    errno_t errorNumber = errno;
-                    strerror_s(buffer, BUFFER_SIZE, errorNumber);
-                    PrintLog(buffer);
+                    int errorNumber = WinAPIs.GetLastError();
+                    PrintLog("{0}", errorNumber);
 
                     if (errorNumber == 13)
                     {
@@ -657,8 +640,7 @@ public partial class CNFS3Prog : CRPCProg
         WccData dir_wcc = new();
         NFS3S stat = 0;
         int errorNumber = 0;
-        FILE pFile = null;
-
+        
         PrintLog("CREATE");
         string dirName = "";
         string fileName = "";
@@ -666,13 +648,11 @@ public partial class CNFS3Prog : CRPCProg
         path = GetFullPath(ref dirName, ref fileName);
         Read(out how);
 
-        dir_wcc.before.attributes_follow = GetFileAttributesForNFS((string)dirName, out dir_wcc.before.attributes);
+        dir_wcc.before.attributes_follow = GetFileAttributesForNFS(dirName, out dir_wcc.before.attributes);
 
-        pFile = _fsopen(path, "wb", _SH_DENYWR);
-
-        if (pFile != null)
+        using var fs = new FileStream(path,FileMode.Create, FileAccess.Write);
+        if (fs.CanWrite)
         {
-            fclose(pFile);
             stat = NFS3S.NFS3_OK;
         }
         else
@@ -730,7 +710,7 @@ public partial class CNFS3Prog : CRPCProg
         path = GetFullPath(ref dirName, ref fileName);
         Read(out attributes);
 
-        dir_wcc.before.attributes_follow = GetFileAttributesForNFS((string)dirName, out dir_wcc.before.attributes);
+        dir_wcc.before.attributes_follow = GetFileAttributesForNFS(dirName, out dir_wcc.before.attributes);
 
         int result = 0;
         Directory.CreateDirectory(path);
@@ -787,7 +767,7 @@ public partial class CNFS3Prog : CRPCProg
         Diropargs3 where = new();
         SymLinkData3 symlink = new();
 
-        uint dwFlags;
+        uint dwFlags = 0;
 
         string dirName = "";
         string fileName = "";
@@ -802,7 +782,7 @@ public partial class CNFS3Prog : CRPCProg
         // Convert target path to windows path format, maybe this could also be done
         // in a safer way by a combination of PathRelativePathTo and GetFullPathName.
         // Without this conversion nested folder symlinks do not work cross platform.
-        string strFromChar = (symlink.symlink_data.path); // target (should be relative path));
+        string strFromChar = symlink.symlink_data.path; // target (should be relative path));
         strFromChar = strFromChar.Replace( '/', '\\');
          var lpTargetFileName = (strFromChar);
 
@@ -812,7 +792,7 @@ public partial class CNFS3Prog : CRPCProg
         // so we normalize the path before calling GetFileAttributes
         string fullTargetPathNormalized;// [MAX_PATH];
         string fullTargetPathString = (fullTargetPath);
-        GetFullPathName(fullTargetPathString, MAX_PATH, fullTargetPathNormalized, null);
+        fullTargetPathNormalized = Path.GetFullPath(fullTargetPathString);
         var targetFileAttr = File.GetAttributes(fullTargetPathNormalized);
 
         dwFlags = 0x0;
@@ -944,7 +924,7 @@ public partial class CNFS3Prog : CRPCProg
             }
         }
 
-        dir_wcc.after.attributes_follow = GetFileAttributesForNFS((string)dirName, out dir_wcc.after.attributes);
+        dir_wcc.after.attributes_follow = GetFileAttributesForNFS(dirName, out dir_wcc.after.attributes);
 
         Write(stat);
         Write(dir_wcc);
@@ -1089,8 +1069,8 @@ public partial class CNFS3Prog : CRPCProg
         bool bFollows;
         NFS3S stat;
         string filePath;
-        intptr_t handle;
         int nFound;
+        intptr_t handle;
         _finddata_t fileinfo;
         uint i, j;
 
@@ -1179,11 +1159,12 @@ public partial class CNFS3Prog : CRPCProg
         bool eof;
         NFS3S stat;
         string filePath;// [MAXPATHLEN];
-        intptr_t handle;
         int nFound;
-        _finddata_t fileinfo;
         uint i, j;
         bool bFollows;
+
+        intptr_t handle;
+        _finddata_t fileinfo;
 
         PrintLog("READDIRPLUS");
         bool validHandle = GetPath(ref path);
@@ -1241,7 +1222,7 @@ public partial class CNFS3Prog : CRPCProg
                         Write(cookie); //cookie
                         name_attributes.attributes_follow = GetFileAttributesForNFS(filePath, out name_attributes.attributes);
                         Write(name_attributes);
-                        name_handle.handle_follows = GetFileHandle(filePath, ref name_handle.handle);
+                        name_handle.handle_follows = GetFileHandle(filePath, name_handle.handle);
                         Write(name_handle);
 
                         if (--j == 0)
