@@ -1,6 +1,6 @@
 ﻿namespace LibWinNFSServer;
 
-public enum SYNCS : int
+public enum SYNC_MODES : int
 {
     UNSTABLE = 0,
     DATA_SYNC = 1,

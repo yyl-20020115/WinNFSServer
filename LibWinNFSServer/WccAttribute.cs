@@ -1,6 +1,6 @@
 ﻿namespace LibWinNFSServer;
 
-public class WccAttr
+public class WccAttribute
 {
     public ulong size = 0;
     public NfsTime3 mtime = new();

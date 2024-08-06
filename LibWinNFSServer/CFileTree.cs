@@ -2,7 +2,7 @@
 
 public class CFileTree
 {
-    private Tree<FILE_ITEM> filesTree = new();
+    private readonly Tree<FILE_ITEM> filesTree = new();
     private Tree<FILE_ITEM>.PreOrderIterator? topNode = null;
 
     public static bool Debug = false;

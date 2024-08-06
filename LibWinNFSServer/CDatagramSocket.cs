@@ -7,65 +7,62 @@ public class CDatagramSocket : IDisposable
 {
     public const int SendBufferSize = 1 * (1 << 20);
     public const int ReceiveBufferSize = 8 * (1 << 20);
+    public int Port => port;
+    protected Socket? socket;
+    protected CSocket? csocket;
+    protected ISocketListener? listener;
+    protected int port;
+    protected bool is_closed;
+    protected bool disposed;
 
     public CDatagramSocket() { }
 
     ~CDatagramSocket()
     {
-
         Dispose(disposing: false);
     }
-    public void SetListener(ISocketListener pListener)
+    public void SetListener(ISocketListener listener)
     {
-        m_pListener = pListener;
-
+        this.listener = listener;
     }
-    public bool Open(string address,int nPort)
+    public bool Open(string address, int nPort)
     {
         if (!IPAddress.TryParse(address, out var ipa))
             return false;
 
         Close();
 
-        this.m_Socket = new Socket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        m_Socket.SendBufferSize = SendBufferSize;
-        m_Socket.ReceiveBufferSize = ReceiveBufferSize;
+        this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+        {
+            SendBufferSize = SendBufferSize,
+            ReceiveBufferSize = ReceiveBufferSize
+        };
+        this.socket.Bind(new IPEndPoint(ipa, nPort));
 
-        m_Socket.Bind(new IPEndPoint(ipa, nPort));
-
-        m_bClosed = false;
-        m_pSocket = new CSocket(CSocket.SOCK_DGRAM);
-        m_pSocket.Open(m_Socket, m_pListener);  //wait for receiving data
+        this.is_closed = false;
+        this.csocket = new CSocket(CSocket.SOCK_DGRAM);
+        this.csocket.Open(socket, listener);  //wait for receiving data
         return true;
     }
     public void Close()
     {
-        if (m_bClosed) return;
-        m_bClosed = true;
-        m_pSocket?.Dispose();
-        m_pSocket = null;
-        m_Socket = null;
+        if (this.is_closed) return;
+        this.is_closed = true;
+        this.csocket?.Dispose();
+        this.csocket = null;
+        this.socket = null;
     }
-    public int GetPort() => m_nPort;
-
-
-    private Socket? m_Socket;
-    private CSocket? m_pSocket;
-    private ISocketListener? m_pListener;
-    private int m_nPort;
-    private bool m_bClosed;
-    private bool disposedValue;
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!disposed)
         {
             if (disposing)
             {
             }
 
             this.Close();
-            disposedValue = true;
+            this.disposed = true;
         }
     }
 

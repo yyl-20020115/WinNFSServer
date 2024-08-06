@@ -7,7 +7,8 @@ public class CFileTable
 
     private readonly CFileTree fileTree = new();
 
-    private FILE_TABLE m_pFirstTable, m_pLastTable;
+    private FILE_TABLE m_pFirstTable;
+    private FILE_TABLE m_pLastTable;
     private uint m_nTableSize = 0;
     public CFileTable()
     {

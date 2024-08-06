@@ -18,7 +18,6 @@ public class CSocket : IDisposable
     private bool disposedValue;
     public void Dispose()
     {
-        
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }

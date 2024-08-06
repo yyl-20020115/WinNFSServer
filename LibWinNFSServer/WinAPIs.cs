@@ -2,14 +2,14 @@
 
 namespace LibWinNFSServer;
 
-public static class WinAPIs
+public static partial class WinAPIs
 {
 
-    [DllImport("Kerenl32")]
-    public static extern int GetLastError();
+    [LibraryImport("Kerenl32")]
+    public static partial int GetLastError();
 
-    [DllImport("Kerenl32")]
-    public static extern int SetLastError(int e);
+    [LibraryImport("Kerenl32")]
+    public static partial int SetLastError(int e);
 
     public const int ERROR_DIR_NOT_EMPTY = 145;
 

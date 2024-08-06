@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LibWinNFSServer;
+﻿namespace LibWinNFSServer;
 
 using System;
 using System.Runtime.InteropServices;
@@ -13,7 +7,6 @@ using System.Text;
 using HANDLE = System.IntPtr;
 using HWND = System.IntPtr;
 using HDC = System.IntPtr;
-using System.Drawing;
 
 public struct CBTACTIVATESTRUCT
 {

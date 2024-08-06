@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace LibWinNFSServer;
 
@@ -234,18 +233,18 @@ public partial class CNFS3Prog : CRPCProg
             if (new_attributes.gid.set_it) { }
 
             // deliberately not implemented
-            if (new_attributes.mtime.set_it == TIMESETS.SET_TO_CLIENT_TIME) { }
-            if (new_attributes.atime.set_it == TIMESETS.SET_TO_CLIENT_TIME) { }
+            if (new_attributes.mtime.set_it == TIME_SETS.SET_TO_CLIENT_TIME) { }
+            if (new_attributes.atime.set_it == TIME_SETS.SET_TO_CLIENT_TIME) { }
 
-            if (new_attributes.mtime.set_it == TIMESETS.SET_TO_SERVER_TIME || new_attributes.atime.set_it == TIMESETS.SET_TO_SERVER_TIME)
+            if (new_attributes.mtime.set_it == TIME_SETS.SET_TO_SERVER_TIME || new_attributes.atime.set_it == TIME_SETS.SET_TO_SERVER_TIME)
             {
                 var f = new FileInfo(cStr);
-                if (new_attributes.mtime.set_it == TIMESETS.SET_TO_SERVER_TIME)
+                if (new_attributes.mtime.set_it == TIME_SETS.SET_TO_SERVER_TIME)
                 {
                     //TODO:
                     //SetFileTime(hFile, null, null, ref fileTime);
                 }
-                if (new_attributes.atime.set_it == TIMESETS.SET_TO_SERVER_TIME)
+                if (new_attributes.atime.set_it == TIME_SETS.SET_TO_SERVER_TIME)
                 {
                     //TODO:
                     //SetFileTime(hFile, null, ref fileTime, null);
@@ -542,7 +541,7 @@ public partial class CNFS3Prog : CRPCProg
         if (stat == NFS3S.NFS3_OK)
         {
 
-            if (stable ==(int) SYNCS.UNSTABLE)
+            if (stable ==(int) SYNC_MODES.UNSTABLE)
             {
                 NfsFh3 handle=new();
                 GetFileHandle(cStr, handle);
@@ -611,7 +610,7 @@ public partial class CNFS3Prog : CRPCProg
                     }
                 }
 
-                stable = (int)SYNCS.FILE_SYNC;
+                stable = (int)SYNC_MODES.FILE_SYNC;
                 verf = 0;
 
                 file_wcc.after.attributes_follow = GetFileAttributesForNFS(cStr, out file_wcc.after.attributes);
@@ -1496,10 +1495,10 @@ public partial class CNFS3Prog : CRPCProg
             throw new Exception();
         }
     }
-    void Read(out TIMESETS ts)
+    void Read(out TIME_SETS ts)
     {
         this.Read(out int u);
-        ts = (TIMESETS)u;
+        ts = (TIME_SETS)u;
     }
     void Read(out long pUint64)
     {
@@ -1554,14 +1553,14 @@ public partial class CNFS3Prog : CRPCProg
 
         Read(out pAttr.atime.set_it);
 
-        if (pAttr.atime.set_it == TIMESETS.SET_TO_CLIENT_TIME)
+        if (pAttr.atime.set_it == TIME_SETS.SET_TO_CLIENT_TIME)
         {
             Read(out pAttr.atime.atime);
         }
 
         Read(out pAttr.mtime.set_it);
 
-        if (pAttr.mtime.set_it == TIMESETS.SET_TO_CLIENT_TIME)
+        if (pAttr.mtime.set_it == TIME_SETS.SET_TO_CLIENT_TIME)
         {
             Read(out pAttr.mtime.mtime);
         }
@@ -1763,7 +1762,7 @@ public partial class CNFS3Prog : CRPCProg
         Write(pSpec.specdata2);
 
     }
-    void Write(WccAttr pAttr)
+    void Write(WccAttribute pAttr)
     {
         Write(pAttr.size);
         Write(pAttr.mtime);
@@ -1864,7 +1863,7 @@ public partial class CNFS3Prog : CRPCProg
         return true;
     }
 
-    static bool GetFileAttributesForNFS(string path, out WccAttr pAttr)
+    static bool GetFileAttributesForNFS(string path, out WccAttribute pAttr)
     {
         pAttr = new();
         if (path == null || !File.Exists(path))

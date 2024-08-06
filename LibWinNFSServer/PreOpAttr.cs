@@ -3,5 +3,5 @@
 public class PreOpAttr
 {
     public bool attributes_follow = false;
-    public WccAttr attributes = new();
+    public WccAttribute attributes = new();
 }

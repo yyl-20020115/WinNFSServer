@@ -2,8 +2,8 @@
 
 using System.Runtime.InteropServices;
 
-using HWND = System.IntPtr;
-using HANDLE = System.IntPtr;
+using HWND = nint;
+using HANDLE = nint;
 
 public struct POINT
 {
