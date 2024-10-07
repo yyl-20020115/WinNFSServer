@@ -9,7 +9,7 @@ public class Program
     private static bool UseLog = false;
     private static string FileName = "";
     private static string SocketAddress ="0.0.0.0";
-    private static CFileTable fileTable = new ();
+    private static readonly CFileTable fileTable = new ();
     private static readonly CRPCServer RPCServer = new();
     private static readonly CPortmapProg PortmapProg = new();
     private static readonly CNFSProg NFSProg = new();
@@ -67,30 +67,29 @@ public class Program
 
     private static void PrintCount()
     {
-        var nNum = MountProg?.GetMountNumber();
-
-        if (nNum == 0)
+        var n = MountProg?.Clients;
+        switch (n)
         {
-            Console.WriteLine("There is no client mounted.");
-        }
-        else if (nNum == 1)
-        {
-            Console.WriteLine("There is 1 client mounted.");
-        }
-        else
-        {
-            Console.WriteLine("There are {0} clients mounted.", nNum);
+            case 0:
+                Console.WriteLine("There is no client mounted.");
+                break;
+            case 1:
+                Console.WriteLine("There is 1 client mounted.");
+                break;
+            default:
+                Console.WriteLine($"There are {n} clients mounted.");
+                break;
         }
     }
 
     private static void PrintList()
     {
         PrintLine();
-        var nNum = MountProg.GetMountNumber();
+        var nNum = MountProg.Clients;
 
         for (var i = 0; i < nNum; i++)
         {
-            Console.WriteLine("{0}", MountProg?.GetClientAddr(i)??"");
+            Console.WriteLine($"{MountProg?.GetClientAddr(i) ?? ""}");
         }
 
         PrintCount();
@@ -106,10 +105,7 @@ public class Program
 
     private static void MountPaths(List<(string path, string alias)> paths)
     {
-        int i;
-        var numberOfElements = paths.Count;
-
-        for (i = 0; i < numberOfElements; i++)
+        for (int i = 0; i < paths.Count; i++)
         {
             MountProg.Export(paths[i].path, paths[i].alias);  //export path for mount
         }
@@ -144,7 +140,7 @@ public class Program
             }
             else if (string.Compare(command, "quit", true) == 0)
             {
-                if (MountProg.GetMountNumber() == 0)
+                if (MountProg.Clients == 0)
                 {
                     break;
                 }

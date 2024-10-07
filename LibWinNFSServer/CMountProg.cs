@@ -2,28 +2,21 @@
 
 namespace LibWinNFSServer;
 
-public class CMountProg : CRPCProg
+public class CMountProg(CFileTable fileTable) : CRPCProg
 {
     public const int MOUNT_NUM_MAX = 100;
     public const int MOUNT_PATH_MAX = 100;
 
-    protected int m_nMountNum = 0;
-    protected string? m_pPathFile = null;
-    protected Dictionary<string, string> m_PathMap;
-    protected List<string> m_pClientAddr = [];
-    protected IInputStream m_pInStream;
-    protected IOutputStream m_pOutStream;
+    protected int mounts = 0;
+    protected string? path_file = null;
+    protected Dictionary<string, string>? paths;
+    protected List<string> clients = [];
+    protected IInputStream? in_stream;
+    protected IOutputStream? out_stream;
 
-    private ProcessParam m_pParam;
-    private int m_nResult;
-    private CFileTable fileTable;
-
-    public int add { get; private set; }
-
-    public CMountProg(CFileTable fileTable)
-    {
-        this.fileTable = fileTable;
-    }
+    private ProcessParam? m_pParam;
+    private PRC_STATUS result;
+    private readonly CFileTable fileTable = fileTable;
 
     public bool SetPathFile(string file)
     {
@@ -33,7 +26,7 @@ public class CMountProg : CRPCProg
         {
             return false;
         }
-        m_pPathFile = formattedFile;
+        path_file = formattedFile;
         return true;
     }
     public void Export(string path, string pathAlias)
@@ -43,22 +36,22 @@ public class CMountProg : CRPCProg
 
         if (path != null && pathAlias != null)
         {
-            if (!m_PathMap.ContainsKey(pathAlias))
+            if (!paths.ContainsKey(pathAlias))
             {
-                m_PathMap[pathAlias] = formattedPath;
-                Console.WriteLine("Path #{0} is: {1}, path alias is: {2}", m_PathMap.Count, path, pathAlias);
+                paths[pathAlias] = formattedPath;
+                Console.WriteLine($"Path #{paths.Count} is: {path}, path alias is: {pathAlias}");
             }
             else
             {
-                Console.WriteLine("Path {0} with path alias {1} already known", path, pathAlias);
+                Console.WriteLine($"Path {path} with path alias {pathAlias} already known");
             }
         }
     }
     public bool Refresh()
     {
-        if (m_pPathFile != null)
+        if (path_file != null)
         {
-            ReadPathsFromFile(m_pPathFile);
+            ReadPathsFromFile(path_file);
             return true;
         }
 
@@ -68,14 +61,14 @@ public class CMountProg : CRPCProg
     {
         int i;
 
-        if (nIndex < 0 || nIndex >= m_nMountNum) return null;
+        if (nIndex < 0 || nIndex >= mounts) return null;
         for (i = 0; i < MOUNT_NUM_MAX; i++)
         {
-            if (m_pClientAddr[i] != null)
+            if (clients[i] != null)
             {
                 if (nIndex == 0)
                 {
-                    return m_pClientAddr[i];  //client address
+                    return clients[i];  //client address
                 }
                 else
                 {
@@ -86,40 +79,37 @@ public class CMountProg : CRPCProg
         }
         return null;
     }
-    public int GetMountNumber()
-    {
-        return m_nMountNum;  //the number of clients mounted
-    }
-    
+    public int Clients => mounts;  //the number of clients mounted
+
     public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
     {
-        PPROC[] pf = [
-            ProcedureNULL, 
-            ProcedureMNT, 
-            ProcedureNOIMP, 
-            ProcedureUMNT, 
-            ProcedureUMNTALL,
-            ProcedureEXPORT];
+        PPROC[] procs = [
+            NULL, 
+            MNT, 
+            NOIMP, 
+            UMNT, 
+            UMNTALL,
+            EXPORT];
 
         PrintLog("MOUNT ");
 
-        if (pParam.nProc >= pf.Length)
+        if (pParam.nProc >= procs.Length)
         {
-            ProcedureNOIMP();
+            NOIMP();
             PrintLog("\n");
             return (int)PRC_STATUS.PRC_NOTIMP;
         }
 
-        m_pInStream = pInStream;
-        m_pOutStream = pOutStream;
+        in_stream = pInStream;
+        out_stream = pOutStream;
         m_pParam = pParam;
-        m_nResult = (int)PRC_STATUS.PRC_OK;
-        pf[pParam.nProc]();
+        result = PRC_STATUS.PRC_OK;
+        procs[pParam.nProc]();
         PrintLog("\n");
 
-        return m_nResult;
+        return (int)result;
     }
-    public string? FormatPath(string pPath, PathFormats format)
+    public static string? FormatPath(string pPath, PathFormats format)
     {
         pPath = pPath.Trim();
         if (pPath.EndsWith(":\\")) pPath = pPath[..^1];
@@ -181,53 +171,53 @@ public class CMountProg : CRPCProg
         return result;
     }
 
-    protected void ProcedureNULL()
+    protected void NULL()
     {
         PrintLog("NULL");
     }
-    protected void ProcedureMNT()
+    protected void MNT()
     {
         Refresh();
         var path =""; //MAXPATHLEN+1
         int i;
 
         PrintLog("MNT");
-        PrintLog(" from {0}\n", m_pParam.pRemoteAddr);
+        PrintLog(" from {0}\n", m_pParam?.pRemoteAddr??"");
 
         if (GetPath(ref path))
         {
-            m_pOutStream.Write((int)MNTS.MNT_OK); //OK
+            out_stream.Write((int)MNTS.MNT_OK); //OK
             var handle = this.fileTable.GetHandleByPath(path);
             if (m_pParam.nVersion == 1)
             {
                 var half = new byte[handle.Length >> 1];
                 Array.Copy(handle, half, half.Length);
-                m_pOutStream.Write(half);  //fhandle
+                out_stream.Write(half);  //fhandle
             }
             else
             {
-                m_pOutStream.Write(NFS3_FHSIZE);  //length
-                m_pOutStream.Write(handle);  //fhandle
-                m_pOutStream.Write(0);  //flavor
+                out_stream.Write(NFS3_FHSIZE);  //length
+                out_stream.Write(handle);  //fhandle
+                out_stream.Write(0);  //flavor
             }
 
-            ++m_nMountNum;
+            ++mounts;
 
             for (i = 0; i < MOUNT_NUM_MAX; i++)
             {
-                if (m_pClientAddr[i] == null)
+                if (clients[i] == null)
                 { //search an empty space
-                    m_pClientAddr[i] = m_pParam.pRemoteAddr;
+                    clients[i] = m_pParam.pRemoteAddr;
                     break;
                 }
             }
         }
         else
         {
-            m_pOutStream.Write((int)MNTS.MNTERR_ACCESS);  //permission denied
+            out_stream.Write((int)MNTS.MNTERR_ACCESS);  //permission denied
         }
     }
-    protected void ProcedureUMNT()
+    protected void UMNT()
     {
         var path = ""; //MAXPATHLEN+1
         int i;
@@ -236,57 +226,57 @@ public class CMountProg : CRPCProg
         GetPath(ref path);
         PrintLog(" from {0}", m_pParam.pRemoteAddr);
 
-        for (i = 0; i < m_pClientAddr.Count; i++)
+        for (i = 0; i < clients.Count; i++)
         {
-            if (m_pClientAddr[i] != null)
+            if (clients[i] != null)
             {
-                if (String.Compare(m_pParam.pRemoteAddr, m_pClientAddr[i]) == 0)
+                if (String.Compare(m_pParam.pRemoteAddr, clients[i]) == 0)
                 { //address match
                      //remove this address
-                    m_pClientAddr[i] = null;
-                    --m_nMountNum;
+                    clients[i] = null;
+                    --mounts;
                     break;
                 }
             }
         }
     }
-    protected void ProcedureUMNTALL()
+    protected void UMNTALL()
     {
         PrintLog("UMNTALL NOIMP");
-        m_nResult = (int)PRC_STATUS.PRC_NOTIMP;
+        result = PRC_STATUS.PRC_NOTIMP;
     }
-    protected void ProcedureEXPORT()
+    protected void EXPORT()
     {
         PrintLog("EXPORT");
         //TODO: use encoding utf8?
-        foreach (var _path in m_PathMap.Keys) {
+        foreach (var _path in paths.Keys) {
             var buffer = Encoding.UTF8.GetBytes(_path);
             int length = buffer.Length;
             // dirpath
-            m_pOutStream.Write(1);
-            m_pOutStream.Write(length);
-            m_pOutStream.Write(buffer);
+            out_stream.Write(1);
+            out_stream.Write(length);
+            out_stream.Write(buffer);
             int fillBytes = (length % 4);
             if (fillBytes > 0)
             {
                 fillBytes = 4 - fillBytes;
-                m_pOutStream.Write(Encoding.ASCII.GetBytes("."));
+                out_stream.Write(Encoding.ASCII.GetBytes("."));
             }
             // groups
-            m_pOutStream.Write(1);
-            m_pOutStream.Write(1);
-            m_pOutStream.Write(Encoding.ASCII.GetBytes("*"));
-            m_pOutStream.Write(Encoding.ASCII.GetBytes("..."));
-            m_pOutStream.Write(0);
+            out_stream.Write(1);
+            out_stream.Write(1);
+            out_stream.Write(Encoding.ASCII.GetBytes("*"));
+            out_stream.Write(Encoding.ASCII.GetBytes("..."));
+            out_stream.Write(0);
         }
 
-        m_pOutStream.Write(0);
-        m_pOutStream.Write(0);
+        out_stream.Write(0);
+        out_stream.Write(0);
     }
-    protected void ProcedureNOIMP()
+    protected void NOIMP()
     {
         PrintLog("NOIMP");
-        m_nResult = (int)PRC_STATUS.PRC_NOTIMP;
+        result = PRC_STATUS.PRC_NOTIMP;
     }
 
     private bool GetPath(ref string returnPath)
@@ -296,19 +286,19 @@ public class CMountProg : CRPCProg
         string finalPath="";
         bool foundPath = false;
 
-        m_pInStream.Read(out nSize);
+        in_stream.Read(out nSize);
 
         if (nSize > MAXPATHLEN) nSize = MAXPATHLEN;
 
         var bytes = new byte[nSize];
-        m_pInStream.Read(bytes);
+        in_stream.Read(bytes);
        
         path = Encoding.UTF8.GetString(bytes);
         // TODO: this whole method is quite ugly and ripe for refactoring
         // strip slashes
         var _path = path.TrimEnd('\\').TrimEnd('/');
 
-        foreach (var pair in m_PathMap)
+        foreach (var pair in paths)
         {
             // strip slashes
             string pathAliasTemp = pair.Key;
@@ -332,7 +322,7 @@ public class CMountProg : CRPCProg
             //    finalPath = finalPath.Replace('/', '\\');
             //}
             //else 
-            if (String.Compare(path, pathAlias,true) == 0)
+            if (string.Compare(path, pathAlias,true) == 0)
             {
                 foundPath = true;
                 finalPath = windowsPath;
@@ -364,7 +354,7 @@ public class CMountProg : CRPCProg
         {
             byte[] buffer = new byte[4];
             //4 - (nSize & 3)
-            m_pInStream.Read(buffer);  //skip opaque bytes
+            in_stream.Read(buffer);  //skip opaque bytes
         }
 
         returnPath = finalPath;

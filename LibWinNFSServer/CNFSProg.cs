@@ -2,38 +2,38 @@
 
 public class CNFSProg : CRPCProg
 {
-    private uint m_nUID = 0;
-    private uint m_nGID = 0;
-    private CNFS3Prog? m_pNFS3Prog;
+    private uint uid = 0;
+    private uint gid = 0;
+    private CNFS3Prog? prog;
 
     public CNFSProg() { }
-    public void SetUserID(uint nUID, uint nGID)
+    public void SetUserID(uint uid, uint gid)
     {
-        this.m_nGID= nGID;
-        this.m_nUID = nUID;
+        this.gid= gid;
+        this.uid = uid;
     }
-    public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
+    public override int Process(IInputStream in_stream, IOutputStream out_stream, ProcessParam parameters)
     {
-        if (pParam.nVersion == 3)
+        if (parameters.nVersion == 3)
         {
-            if (m_pNFS3Prog == null)
+            if (prog == null)
             {
-                m_pNFS3Prog = new ();
-                m_pNFS3Prog.SetUserID(m_nUID, m_nGID);
-                m_pNFS3Prog.SetLogOn(m_bLogOn);
+                prog = new ();
+                prog.SetUserID(uid, gid);
+                prog.SetLogOn(enable_log);
             }
 
-            return m_pNFS3Prog.Process(pInStream, pOutStream, pParam);
+            return prog.Process(in_stream, out_stream, parameters);
         }
         else
         {
-            PrintLog("Client requested NFS version {0} which isn't supported.\n", pParam.nVersion);
+            PrintLog("Client requested NFS version {0} which isn't supported.\n", parameters.nVersion);
             return (int)PRC_STATUS.PRC_NOTIMP;
         }
     }
     public override void SetLogOn(bool bLogOn)
     {
         base.SetLogOn(bLogOn);
-        m_pNFS3Prog?.SetLogOn(bLogOn);
+        prog?.SetLogOn(bLogOn);
     }
 }

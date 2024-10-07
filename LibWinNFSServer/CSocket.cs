@@ -3,19 +3,19 @@ using System.Net.Sockets;
 
 namespace LibWinNFSServer;
 
-public class CSocket : IDisposable
+public class CSocket(int type) : IDisposable
 {
     public const int SOCK_STREAM = 1;
     public const int SOCK_DGRAM = 2;
 
-    private int m_nType = 0;
-    private Socket? m_Socket;
-    private EndPoint? m_RemoteAddr;
-    private ISocketListener? m_pListener;
-    private CSocketStream? m_SocketStream;
-    private bool m_bActive;
-    private Thread? m_hThread;
-    private bool disposedValue;
+    private int type = type;
+    private Socket? socket;
+    private EndPoint? remote;
+    private ISocketListener? listener;
+    private CSocketStream? stream;
+    private bool active;
+    private Thread? thread;
+    private bool disposed;
     public void Dispose()
     {
         Dispose(disposing: true);
@@ -24,45 +24,39 @@ public class CSocket : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!disposed)
         {
             if (disposing)
             {
 
             }
 
-            this.m_Socket?.Dispose();
-            this.m_Socket = null;
-            disposedValue = true;
+            this.socket?.Dispose();
+            this.socket = null;
+            disposed = true;
         }
     }
 
-    public CSocket(int nType)
-    {
-        this.m_nType = nType;
-    }
-    
     ~CSocket()
     {
-        
         Dispose(disposing: false);
     }
-    public int GetSocketType() => this.m_nType;
-    public void Open(Socket socket, ISocketListener? pListener, EndPoint pRemoteAddr = null)
+    public int SocketType => this.type;
+    public void Open(Socket socket, ISocketListener? listener, EndPoint? remote = null)
     {
         Close();
 
-        m_Socket = socket;  //socket
-        m_pListener = pListener;  //listener
+        this.socket = socket;  //socket
+        this.listener = listener;  //listener
 
-        if (pRemoteAddr != null)
+        if (remote != null)
         {
-            m_RemoteAddr = pRemoteAddr;  //remote address
+            this.remote = remote;  //remote address
         }
 
-        if (m_Socket != null)
+        if (this.socket != null)
         {
-            m_bActive = true;
+            active = true;
             //TODO: how to use threading
             //m_hThread = (HANDLE)_beginthreadex(NULL, 0, ThreadProc, this, 0, &id);  //begin thread
         }
@@ -70,52 +64,38 @@ public class CSocket : IDisposable
     }
     public void Close()
     {
-        m_Socket?.Close();
-        m_Socket = null;
+        this.socket?.Close();
+        this.socket = null;
     }
     public void Send()
     {
-        if (m_Socket == null)
+        if (socket == null || stream == null)
             return;
 
-        if (m_nType == SOCK_STREAM)
+        switch (type)
         {
-            m_Socket.Send(m_SocketStream.GetOutput());
-        }
-        else if (m_nType == SOCK_DGRAM)
-        {
-            m_Socket.SendTo(m_SocketStream.GetOutput(), m_RemoteAddr);
+            case SOCK_STREAM:
+                socket.Send(stream!.Output);
+                break;
+            case SOCK_DGRAM:
+                socket.SendTo(stream!.Output, remote);
+                break;
         }
 
-        m_SocketStream.Reset();  //clear output buffer
+        stream!.Reset();  //clear output buffer
 
     }
-    public bool Active()
-    {
-        return m_bActive;  //thread is active or not
-    }
-    public string GetRemoteAddress()
-    {
-        return (m_RemoteAddr is IPEndPoint ipe)
+    public bool Active => active;  //thread is active or not
+    public string RemoteAddress => (remote is IPEndPoint ipe)
             ? ipe.Address.ToString()
-            :""
+            : string.Empty
             ;
-    }
-    public int GetRemotePort()
-    {
-        return (m_RemoteAddr is IPEndPoint ipe)
+    public int RemotePort => (remote is IPEndPoint ipe)
             ? ipe.Port
-            : 0
+            : -1
             ;
-    }
-    public IInputStream GetInputStream()
-    {
-        return this.m_SocketStream;
-    }
-    public IOutputStream GetOutputStream()
-    {
-        return this.m_SocketStream;
-    }
+    public IInputStream? InputStream => this.stream;
+    public IOutputStream? OutputStream => this.stream;
 
     protected void Run()
     {
@@ -126,47 +106,47 @@ public class CSocket : IDisposable
 
         for (; ; )
         {
-            if (m_nType == SOCK_STREAM)
+            if (type == SOCK_STREAM)
             {
                 // When using tcp we cannot ensure that everything we need is already
                 // received. When using RCP over TCP a fragment header is added to
                 // work around this. The MSB of the fragment header determines if the
                 // fragment is complete (not used here) and the remaining bits define the
                 // length of the rpc call (this is what we want)
-                nBytes = m_Socket.Receive(m_SocketStream.GetInput());
+                nBytes = socket.Receive(stream.Input);
 
                 // only if at least 4 bytes are availabe (the fragment header) we can continue
                 if (nBytes == 4)
                 {
-                    m_SocketStream.SetInputSize(4);
-                    m_SocketStream.Read(out fragmentHeader);
+                    stream.SetInputSize(4);
+                    stream.Read(out fragmentHeader);
                     fragmentHeaderMsb = (int)(fragmentHeader & 0x80000000);
                     fragmentHeaderLengthBytes = (int)(fragmentHeader ^ 0x80000000) + 4;
                     while (nBytes != fragmentHeaderLengthBytes)
                     {
-                        nBytes = m_Socket.Receive(m_SocketStream.GetInput(), fragmentHeaderLengthBytes, SocketFlags.None);
+                        nBytes = socket.Receive(stream.Input, fragmentHeaderLengthBytes, SocketFlags.None);
                     }
-                    nBytes = m_Socket.Receive(m_SocketStream.GetInput(), fragmentHeaderLengthBytes, 0);
+                    nBytes = socket.Receive(stream.Input, fragmentHeaderLengthBytes, 0);
                 }
                 else
                 {
                     nBytes = 0;
                 }
             }
-            else if (m_nType == SOCK_DGRAM)
+            else if (type == SOCK_DGRAM)
             {
-                EndPoint ep = m_RemoteAddr;
-                nBytes = m_Socket.ReceiveFrom(m_SocketStream.GetInput(), m_SocketStream.GetBufferSize(),SocketFlags.None, ref ep);
+                EndPoint ep = remote;
+                nBytes = socket.ReceiveFrom(stream.Input, stream.BufferSize, SocketFlags.None, ref ep);
             }
 
 
             if (nBytes > 0)
             {
-                m_SocketStream.SetInputSize(nBytes);  //bytes received
+                stream.SetInputSize(nBytes);  //bytes received
 
-                if (m_pListener != null)
+                if (listener != null)
                 {
-                    m_pListener.SocketReceived(this);  //notify listener
+                    listener.SocketReceived(this);  //notify listener
                 }
             }
             else
@@ -175,6 +155,6 @@ public class CSocket : IDisposable
             }
         }
 
-        m_bActive = false;
+        active = false;
     }
 }

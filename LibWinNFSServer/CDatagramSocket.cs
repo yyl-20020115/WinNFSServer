@@ -21,10 +21,7 @@ public class CDatagramSocket : IDisposable
     {
         Dispose(disposing: false);
     }
-    public void SetListener(ISocketListener listener)
-    {
-        this.listener = listener;
-    }
+    public void SetListener(ISocketListener listener) => this.listener = listener;
     public bool Open(string address, int nPort)
     {
         if (!IPAddress.TryParse(address, out var ipa))

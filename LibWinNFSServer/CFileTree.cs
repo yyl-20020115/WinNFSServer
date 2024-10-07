@@ -2,11 +2,11 @@
 
 public class CFileTree
 {
-    private readonly Tree<FILE_ITEM> filesTree = new();
-    private Tree<FILE_ITEM>.PreOrderIterator? topNode = null;
+    private readonly Tree<FILE_ITEM> tree = new();
+    private Tree<FILE_ITEM>.PreOrderIterator? top = null;
 
     public static bool Debug = false;
-    public FILE_ITEM AddItem(string absolutePath, byte[] handle)
+    public FILE_ITEM AddItem(string path, byte[] handle)
     {
         FILE_ITEM item = new()
         {
@@ -15,19 +15,19 @@ public class CFileTree
         };
 
         // If the tree is empty just add the new path as node on the top level.
-        if (filesTree.IsEmpty)
+        if (tree.IsEmpty)
         {
-            item.Path = absolutePath;
-            item.PathLength = absolutePath.Length;
+            item.Path = path;
+            item.PathLength = path.Length;
 
-            filesTree?.SetHead(item);
-            topNode = filesTree?.Begin();
+            tree?.SetHead(item);
+            top = tree?.Begin();
         }
         else
         {
             // Check if the requested path belongs to an already registered parent node.
-            var sPath = absolutePath;
-            var parentNode = FindParentNodeFromRootForPath(absolutePath);
+            var sPath = path;
+            var parentNode = FindParentNodeFromRootForPath(path);
             var splittedPath = Path.GetFileName(sPath);
             //printf("spl %s %s\n", splittedPath.c_str(), absolutePath);
             item.Path = splittedPath;
@@ -35,21 +35,21 @@ public class CFileTree
             if (parentNode != null)
             {
                 //printf("parent %s\n", parentNode->data.path);
-                filesTree?.AppendChild(new Tree<FILE_ITEM>.IteratorBase(parentNode), item);
+                tree?.AppendChild(new Tree<FILE_ITEM>.IteratorBase(parentNode), item);
             }
             else
             {
                 // Node wasn't found - most likely a new root - add it to the top level.
                 //printf("No parent node found for %s. Adding new sibbling.", absolutePath);
-                item.Path = absolutePath;
-                item.PathLength = absolutePath.Length;
+                item.Path = path;
+                item.PathLength = path.Length;
 
-                filesTree?.Insert(new Tree<FILE_ITEM>.PreOrderIterator(topNode.Node), item);
-                topNode = filesTree?.Begin();
+                tree?.Insert(new Tree<FILE_ITEM>.PreOrderIterator(top?.Node), item);
+                top = tree?.Begin();
             }
         }
 
-        DisplayTree(topNode?.Node, 0);
+        DisplayTree(top?.Node, 0);
 
         return item;
     }
@@ -58,14 +58,14 @@ public class CFileTree
         var node = FindNodeFromRootWithPath(absolutePath);
         if (node != null)
         {
-            filesTree?.Erase(new Tree<FILE_ITEM>.IteratorBase(node));
+            tree?.Erase(new Tree<FILE_ITEM>.IteratorBase(node));
         }
         else
         {
             //printf("Do not find node for path : %s\n", absolutePath);
         }
 
-        DisplayTree(topNode?.Node, 0);
+        DisplayTree(top?.Node, 0);
 
     }
     public void RenameItem(string absolutePathFrom, string absolutePathTo)
@@ -82,16 +82,16 @@ public class CFileTree
                     PathLength = 0,
                     Path = ""
                 };
-                filesTree.AppendChild(new Tree<FILE_ITEM>.IteratorBase(parentNode), emptyItem);
+                tree.AppendChild(new Tree<FILE_ITEM>.IteratorBase(parentNode), emptyItem);
             }
-            Tree<FILE_ITEM>.SiblingIterator firstChild = filesTree.Begin(new Tree<FILE_ITEM>.IteratorBase(parentNode));
-            filesTree.MoveAfter(firstChild, new Tree<FILE_ITEM>.IteratorBase(node));
+            Tree<FILE_ITEM>.SiblingIterator firstChild = tree.Begin(new Tree<FILE_ITEM>.IteratorBase(parentNode));
+            tree.MoveAfter(firstChild, new Tree<FILE_ITEM>.IteratorBase(node));
 
             string sPath = (absolutePathTo);
             string splittedPath = Path.GetFileName(sPath);
             node.Data.Path = splittedPath;
         }
-        DisplayTree(topNode?.Node, 0);
+        DisplayTree(top?.Node, 0);
     }
 
     public TreeNode<FILE_ITEM>? FindFileItemForPath(string absolutePath)
@@ -111,11 +111,11 @@ public class CFileTree
     protected TreeNode<FILE_ITEM>? FindNodeFromRootWithPath(string? path)
     {
         // No topNode - bail out.
-        if (path==null || topNode?.Node == null) return null;
+        if (path==null || top?.Node == null) return null;
         var sPath = path;
-        var nPath = topNode?.Node?.Data?.Path;
+        var nPath = top?.Node?.Data?.Path;
         // topNode path and requested path are the same? Use the node.
-        if (sPath == nPath) return topNode?.Node;
+        if (sPath == nPath) return top?.Node;
         // printf("Did not find node for path : %s\n", path);
 
         // If the topNode path is part of the requested path this is a subpath.
@@ -123,8 +123,8 @@ public class CFileTree
         if (sPath.Contains(nPath))
         {
             // printf("Found %s is part of %s  \n", sPath.c_str(), topNode->path);
-            var splittedString = sPath[(topNode.Node.Data.Path.Length + 1)..];
-            return FindNodeWithPathFromNode(splittedString, topNode.Node);
+            var splittedString = sPath[(top.Node.Data.Path.Length + 1)..];
+            return FindNodeWithPathFromNode(splittedString, top.Node);
         }
 
         else
@@ -134,14 +134,14 @@ public class CFileTree
             // a matching item and register it as current top node.
 
             // printf("NOT found %s is NOT part of %s  \n", sPath.c_str(), topNode->path);
-            for (var it = filesTree.Begin(); it != filesTree.End(); it.Next())
+            for (var it = tree.Begin(); it != tree.End(); it.Next())
             {
                 var itPath = it.Node.Data.Path;
                 // Current item path matches the requested path - use the item as topNode.
                 if (sPath == itPath)
                 {
                     // printf("Found parent node %s \n", it.node->data.path);
-                    topNode = it;
+                    top = it;
                     return it.Node;
                 }
                 else if (sPath.Contains(itPath))
@@ -149,7 +149,7 @@ public class CFileTree
                     // If the item path is part of the requested path this is a subpath.
                     // Use the the item as topNode and continue analyzing.
                     // printf("Found root node %s \n", it.node->data.path);
-                    topNode = it;
+                    top = it;
                     var splittedString = sPath[(itPath.Length + 1)..];
                     return FindNodeWithPathFromNode(splittedString, it.Node);
                 }
@@ -160,8 +160,8 @@ public class CFileTree
     }
     protected TreeNode<FILE_ITEM>? FindNodeWithPathFromNode(string path, TreeNode<FILE_ITEM> node)
     {
-        var sib = filesTree.Begin(new Tree<FILE_ITEM>.IteratorBase(node));
-        var end = filesTree.End(new Tree<FILE_ITEM>.IteratorBase(node));
+        var sib = tree.Begin(new Tree<FILE_ITEM>.IteratorBase(node));
+        var end = tree.End(new Tree<FILE_ITEM>.IteratorBase(node));
         var currentLevel = true;
         var currentPath = Path.GetDirectoryName(path);
         var position = currentPath.Length;
@@ -189,16 +189,16 @@ public class CFileTree
     protected TreeNode<FILE_ITEM> FindParentNodeFromRootForPath(string path)
     {
         var sPath = path;
-        var nPath = topNode?.Node?.Data?.Path;
+        var nPath = top?.Node?.Data?.Path;
         // If the topNode path is not part of the requested path bail out.
         // This avoids also issues with taking substrings of incompatible
         // paths below.
         if (!sPath.Contains(nPath)) return null;
         // printf("Path %s doesn't belong to current topNode %s Found %s is part of %s  \n", sPath.c_str(), topNode->path);
 
-        var currentPath = sPath[(topNode.Node.Data.Path.Length + 1)..];//.substr(strlen(topNode->path) + 1);
+        var currentPath = sPath[(top.Node.Data.Path.Length + 1)..];//.substr(strlen(topNode->path) + 1);
         var followingPath = Path.GetDirectoryName(currentPath);
-        return string.IsNullOrEmpty(followingPath) ? topNode.Node : FindNodeWithPathFromNode(followingPath, topNode.Node);
+        return string.IsNullOrEmpty(followingPath) ? top.Node : FindNodeWithPathFromNode(followingPath, top.Node);
     }
     public static void DisplayTree(TreeNode<FILE_ITEM>? node, int level)
     {

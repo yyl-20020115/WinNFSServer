@@ -5,12 +5,13 @@ namespace LibWinNFSServer;
 
 public class CServerSocket
 {
-    private int m_nPort = 0, m_nMaxNum = 0;
-    private Socket? m_ServerSocket = null;
-    private ISocketListener? m_pListener = null;
-    private bool m_bClosed = true;
-    Thread m_hThread;
-    CSocket[] m_pSockets;
+    private int port = 0;
+    private int max = 0;
+    private Socket? socket = null;
+    private ISocketListener? listener = null;
+    private bool closed = true;
+    private Thread? thread;
+    private CSocket[]? sockets;
     public CServerSocket()
     {
 
@@ -19,9 +20,9 @@ public class CServerSocket
     {
         this.Close();
     }
-    public void SetListener(ISocketListener pListener)
+    public void SetListener(ISocketListener listener)
     {
-        m_pListener = pListener;
+        this.listener = listener;
     }
     public bool Open(string address,int nPort, int nMaxNum)
     {
@@ -32,26 +33,26 @@ public class CServerSocket
 
         Close();
 
-        m_nPort = nPort;
-        m_nMaxNum = nMaxNum;  //max number of concurrent clients
-        m_ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        port = nPort;
+        max = nMaxNum;  //max number of concurrent clients
+        socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         
-        if (m_ServerSocket == null)
+        if (socket == null)
         {
             return false;
         }
 
-        m_ServerSocket.Bind(localAddr);
-        m_ServerSocket.Listen();
+        socket.Bind(localAddr);
+        socket.Listen();
 
-        m_pSockets = new CSocket[m_nMaxNum];
+        sockets = new CSocket[max];
 
-        for (i = 0; i < m_nMaxNum; i++)
+        for (i = 0; i < max; i++)
         {
-            m_pSockets[i] = new CSocket(CSocket.SOCK_STREAM);
+            sockets[i] = new CSocket(CSocket.SOCK_STREAM);
         }
 
-        m_bClosed = false;
+        closed = false;
         //m_hThread = (HANDLE)_beginthreadex(NULL, 0, ThreadProc, this, 0, &id);  //begin thread
 
         return true;
@@ -60,10 +61,10 @@ public class CServerSocket
     {
         int i;
 
-        if (m_bClosed) return;
+        if (closed) return;
 
-        m_bClosed = true;
-        m_ServerSocket?.Close();
+        closed = true;
+        socket?.Close();
 
         //if (m_hThread != NULL)
         //{
@@ -71,21 +72,21 @@ public class CServerSocket
         //    CloseHandle(m_hThread);
         //}
 
-        if (m_pSockets != null)
+        if (sockets != null)
         {
-            for (i = 0; i < m_nMaxNum; i++)
+            for (i = 0; i < max; i++)
             {
-                m_pSockets[i].Dispose();
-                m_pSockets[i] = null;
+                sockets[i].Dispose();
+                sockets[i] = null;
             }
 
-            m_pSockets = null;
+            sockets = null;
         }
 
     }
     public int GetPort()
     {
-        return m_nPort;
+        return port;
 
     }
     public void Run()
@@ -94,20 +95,18 @@ public class CServerSocket
         IPEndPoint remoteAddr;
         Socket socket;
 
-        //nSize = sizeof(remoteAddr);
-
-        while (!m_bClosed)
+        while (!closed)
         {
-            socket = m_ServerSocket.Accept();
+            socket = this.socket.Accept();
             //accept(, (sockaddr*)&remoteAddr, &nSize);  //accept connection
 
             if (socket != null)
             {
-                for (i = 0; i < m_nMaxNum; i++)
+                for (i = 0; i < max; i++)
                 {
-                    if (!m_pSockets[i].Active())
+                    if (!sockets[i].Active)
                     { //find an inactive CSocket
-                        m_pSockets[i].Open(socket, m_pListener, socket.RemoteEndPoint);  //receive input data
+                        sockets[i].Open(socket, listener, socket.RemoteEndPoint);  //receive input data
                         break;
                     }
                 }

@@ -28,14 +28,14 @@ public class CRPCServer : ISocketListener
         int nResult;
 
         m_hMutex.WaitOne();
-        var pInStream = pSocket.GetInputStream();
+        var pInStream = pSocket.InputStream;
 
         while (pInStream.GetSize() > 0)
         {
-            nResult = Process((int)pSocket.GetSocketType(), pInStream, pSocket.GetOutputStream(), pSocket.GetRemoteAddress());  //process input data
+            nResult = Process((int)pSocket.SocketType, pInStream, pSocket.OutputStream, pSocket.RemoteAddress);  //process input data
             pSocket?.Send();  //send response
 
-            if (nResult != (int)PRC_STATUS.PRC_OK || pSocket?.GetSocketType() == CSocket.SOCK_DGRAM)
+            if (nResult != (int)PRC_STATUS.PRC_OK || pSocket?.SocketType == CSocket.SOCK_DGRAM)
             {
                 break;
             }
@@ -80,7 +80,7 @@ public class CRPCServer : ISocketListener
 
         if (nType == CSocket.SOCK_STREAM)
         {
-            nPos = pOutStream.GetPosition();  //remember current position
+            nPos = pOutStream.Position;  //remember current position
             pOutStream?.Write(header.header);  //this value will be updated later
         }
 
@@ -124,7 +124,7 @@ public class CRPCServer : ISocketListener
 
         if (nType == CSocket.SOCK_STREAM)
         {
-            int nSize = pOutStream.GetPosition();  //remember current position
+            int nSize = pOutStream.Position;  //remember current position
             pOutStream?.Seek(nPos, SEEKS.SEEK_SET);  //seek to the position of head
             header.header = (uint)(0x80000000 + nSize - nPos - 4);  //size of output data
             pOutStream?.Write(header.header);  //update header

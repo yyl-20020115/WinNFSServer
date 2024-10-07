@@ -6,10 +6,7 @@ public class Opaque
     public byte[]? contents = null;
 
     public Opaque() { }
-    public Opaque(uint len)
-    {
-        this.SetSize(len);
-    }
+    public Opaque(uint len) => this.SetSize(len);
 
     public virtual void SetSize(uint len)
     {

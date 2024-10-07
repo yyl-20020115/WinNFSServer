@@ -1,6 +1,6 @@
 ﻿namespace LibWinNFSServer;
 
-struct RPC_HEADER
+public struct RPC_HEADER
 {
     public uint header;
     public uint XID;

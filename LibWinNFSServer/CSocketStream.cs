@@ -4,153 +4,141 @@ public class CSocketStream : IInputStream, IOutputStream
 {
     public const int MAXDATA = 1 << 20;
 
-    private byte[] m_pInBuffer = new byte[MAXDATA];
-    private byte[] m_pOutBuffer = new byte[MAXDATA];
-    private int m_nInBufferIndex = 0;
-    private int m_nInBufferSize = 0;
-    private int m_nOutBufferIndex = 0;
-    private int m_nOutBufferSize = 0;
+    private readonly byte[] inBuffer = new byte[MAXDATA];
+    private readonly byte[] outBuffer = new byte[MAXDATA];
+    private int inBufferIndex = 0;
+    private int inBufferSize = 0;
+    private int outBufferIndex = 0;
+    private int outBufferSize = 0;
 
+    public byte[] Input => inBuffer;
+    public byte[] Output => outBuffer;
+    public int OutputSize => outBufferSize;
+    public int BufferSize => MAXDATA;
     public CSocketStream()
     {
 
     }
-    ~CSocketStream()
-    {
 
-    }
-    public byte[] GetInput() => m_pInBuffer;
-    public void SetInputSize(int nSize)
+    public void SetInputSize(int size)
     {
-        m_nInBufferIndex = 0;  //seek to the beginning of the input buffer
-        m_nInBufferSize = nSize;
+        inBufferIndex = 0;  //seek to the beginning of the input buffer
+        inBufferSize = size;
     }
-    public byte[] GetOutput() => m_pOutBuffer;
 
-    public int GetOutputSize() => m_nOutBufferSize;
-    public int GetBufferSize() => MAXDATA;
-    public int Read(byte[] pData)
+    public int Read(byte[] data)
     {
-        int nSize = pData.Length;
-        if (nSize > m_nInBufferSize - m_nInBufferIndex)
+        int nSize = data.Length;
+        if (nSize > inBufferSize - inBufferIndex)
         { //over the number of bytes of data in the input buffer
-            nSize = m_nInBufferSize - m_nInBufferIndex;
+            nSize = inBufferSize - inBufferIndex;
         }
 
-        Array.Copy(m_pInBuffer , m_nInBufferIndex, pData, 0, nSize);
-        m_nInBufferIndex += nSize;
+        Array.Copy(inBuffer , inBufferIndex, data, 0, nSize);
+        inBufferIndex += nSize;
 
         return nSize;
     }
-    public int Read(out int pnValue)
+    public int Read(out int value)
     {
-        byte[] pData = new byte[sizeof(int)];
-        int s = Read(pData);
-        pnValue = BitConverter.ToInt32(pData);
+        var data = new byte[sizeof(int)];
+        int s = Read(data);
+        value = BitConverter.ToInt32(data);
         return s;
     }
-    public int Read8(out long pnValue)
+    public int Read8(out long value)
     {
-        byte[] pData = new byte[sizeof(long)];
+        var pData = new byte[sizeof(long)];
         int s = Read(pData);
-        pnValue = BitConverter.ToInt64(pData);
+        value = BitConverter.ToInt64(pData);
         return s;
     }
-    public int Read(out uint pnValue)
+    public int Read(out uint value)
     {
-        byte[] pData = new byte[sizeof(uint)];
+        var pData = new byte[sizeof(uint)];
         int s = Read(pData);
-        pnValue = BitConverter.ToUInt32(pData);
+        value = BitConverter.ToUInt32(pData);
         return s;
     }
-    public int Read8(out ulong pnValue)
+    public int Read8(out ulong value)
     {
-        byte[] pData = new byte[sizeof(ulong)];
+        var pData = new byte[sizeof(ulong)];
         int s = Read(pData);
-        pnValue = BitConverter.ToUInt64(pData);
+        value = BitConverter.ToUInt64(pData);
         return s;
     }
-    public int Skip(int nSize)
+    public int Skip(int size)
     {
-        if (nSize > m_nInBufferSize - m_nInBufferIndex)
+        if (size > inBufferSize - inBufferIndex)
         { //over the number of bytes of data in the input buffer
-            nSize = m_nInBufferSize - m_nInBufferIndex;
+            size = inBufferSize - inBufferIndex;
         }
 
-        m_nInBufferIndex += nSize;
+        inBufferIndex += size;
 
-        return nSize;
+        return size;
     }
     public uint Skip(uint nSize)
     {
-        if (nSize > m_nInBufferSize - m_nInBufferIndex)
+        if (nSize > inBufferSize - inBufferIndex)
         { //over the number of bytes of data in the input buffer
-            nSize = (uint)(m_nInBufferSize - m_nInBufferIndex);
+            nSize = (uint)(inBufferSize - inBufferIndex);
         }
 
-        m_nInBufferIndex += (int)nSize;
+        inBufferIndex += (int)nSize;
 
         return nSize;
     }
-    public int GetSize()
+    public int GetSize() => inBufferSize - inBufferIndex;
+    public void Write(byte[] data) 
     {
-        return m_nInBufferSize - m_nInBufferIndex;
-    }
-    public void Write(byte[] pData) 
-    {
-        int nSize = pData.Length;
-        if (m_nOutBufferIndex + nSize > GetBufferSize())
+        int size = data.Length;
+        if (outBufferIndex + size > BufferSize)
         { //over the size of output buffer
-            nSize = MAXDATA - m_nOutBufferIndex;
+            size = MAXDATA - outBufferIndex;
         }
 
-        Array.Copy(pData, 0 ,m_pOutBuffer, m_nOutBufferIndex,nSize);
-        m_nOutBufferIndex += nSize;
+        Array.Copy(data, 0 ,outBuffer, outBufferIndex,size);
+        outBufferIndex += size;
 
-        if (m_nOutBufferIndex > m_nOutBufferSize)
+        if (outBufferIndex > outBufferSize)
         {
-            m_nOutBufferSize = m_nOutBufferIndex;
+            outBufferSize = outBufferIndex;
         }
 
     }
-    public void Write(int nValue)
+    public void Write(int value)
     {
-        Write(BitConverter.GetBytes(nValue));
+        Write(BitConverter.GetBytes(value));
     }
-    public void Write8(long nValue)
+    public void Write8(long value)
     {
-        Write(BitConverter.GetBytes(nValue));
+        Write(BitConverter.GetBytes(value));
     }
-    public void Write(uint nValue)
+    public void Write(uint value)
     {
-        Write(BitConverter.GetBytes(nValue));
+        Write(BitConverter.GetBytes(value));
     }
-    public void Write8(ulong nValue)
+    public void Write8(ulong value)
     {
-        Write(BitConverter.GetBytes(nValue));
+        Write(BitConverter.GetBytes(value));
     }
-    public void Seek(int nOffset, SEEKS nFrom)
+    public void Seek(int offset, SEEKS seek)
     {
-        switch (nFrom)
+        switch (seek)
         {
             case SEEKS.SEEK_SET:
-                m_nOutBufferIndex = nOffset;
+                outBufferIndex = offset;
                 break;
             case SEEKS.SEEK_CUR:
-                m_nOutBufferIndex += nOffset;
+                outBufferIndex += offset;
                 break;
             case SEEKS.SEEK_END:
-                m_nOutBufferIndex = m_nOutBufferSize + nOffset;
+                outBufferIndex = outBufferSize + offset;
                 break;
         }
 
     }
-    public int GetPosition()
-    {
-        return m_nOutBufferIndex;
-    }
-    public void Reset()
-    {
-        m_nOutBufferIndex = m_nOutBufferSize = 0;  
-    }
+    public int Position => outBufferIndex;
+    public void Reset() => outBufferIndex = outBufferSize = 0;
 }

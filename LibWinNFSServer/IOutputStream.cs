@@ -8,5 +8,5 @@ public interface IOutputStream
     void Write(uint nValue);
     void Write8(ulong nValue);
     void Seek(int nOffset, SEEKS nFrom);
-    int GetPosition();
+    int Position { get; }
 }

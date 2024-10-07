@@ -13,13 +13,13 @@ public abstract class CRPCProg
     public const int FHSIZE = 32;
     public const int NFS3_FHSIZE = 64;
     public CRPCProg() { }
-    public abstract int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam);
-    public virtual void SetLogOn(bool on) => this.m_bLogOn = on;
+    public abstract int Process(IInputStream in_stream, IOutputStream out_stream, ProcessParam parameters);
+    public virtual void SetLogOn(bool on) => this.enable_log = on;
 
-    protected bool m_bLogOn = false;
+    protected bool enable_log = false;
     public virtual int PrintLog(string format, params object[] ops)
     {
-        if (m_bLogOn) Console.Out.WriteLine(format, ops);
+        if (enable_log) Console.Out.WriteLine(format, ops);
         return 0;
     }
 }
