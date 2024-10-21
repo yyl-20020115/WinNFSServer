@@ -17,7 +17,7 @@ public abstract class CRPCProg
     public virtual void SetLogOn(bool on) => this.enable_log = on;
 
     protected bool enable_log = false;
-    public virtual int PrintLog(string format, params object[] ops)
+    public virtual int PrintLog(string format = "", params object[] ops)
     {
         if (enable_log) Console.Out.WriteLine(format, ops);
         return 0;

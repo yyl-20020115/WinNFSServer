@@ -12,9 +12,14 @@ public class CRPCServer : ISocketListener
     {
 
     }
-    public void Set(int nProg, CRPCProg pRPCProg)
+    public void Reset(PROGS nProg)
     {
-        m_pProgTable[nProg - MIN_PROG_NUM] = pRPCProg;
+        Set(nProg, null);
+    }
+
+    public void Set(PROGS nProg, CRPCProg? pRPCProg)
+    {
+        m_pProgTable[(int)nProg - MIN_PROG_NUM] = pRPCProg;
     }
     public void SetLogOn(bool bLogOn)
     {

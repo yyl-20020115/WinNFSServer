@@ -48,7 +48,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         NFS3S? stat = null;
 
-        PrintLog("[{0}] NFS ", DateTime.Now);
+        PrintLog($"[{DateTime.Now}] NFS ");
 
         if (pParam.nProc >= pf.Length)
         {
@@ -70,7 +70,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         catch (Exception ex)
         {
             result = PRC_STATUS.PRC_FAIL;
-            PrintLog("Runtime error: {0}", ex.Message);
+            PrintLog($"Runtime error: {ex.Message}");
         }
 
         PrintLog(" ");
@@ -172,7 +172,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
             }
         }
 
-        PrintLog("");
+        PrintLog();
 
         return (int)result;
     }
@@ -200,17 +200,13 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         else if (stat == NFS3S.NFS3_OK)
         {
             if (!GetFileAttributesForNFS(cStr, out obj_attributes))
-            {
                 stat = NFS3S.NFS3ERR_IO;
-            }
         }
 
         Write((int)stat);
 
         if (stat == NFS3S.NFS3_OK)
-        {
             Write(obj_attributes);
-        }
 
         return stat;
     }
@@ -226,14 +222,12 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         SYSTEMTIME systemTime;
 
         PrintLog("SETATTR");
-        bool validHandle = GetPath(ref path);
+        var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
-        if (cStr == null)
-        {
-            return NFS3S.NFS3ERR_STALE;
-        }
+        if (cStr == null) return NFS3S.NFS3ERR_STALE;
+
         Read(out Sattr3 new_attributes);
-        Read(out sattrguard3 guard);
+        Read(out Sattrguard3 guard);
         stat = CheckFile(cStr);
         obj_wcc.before.attributes_follow = GetFileAttributesForNFS(cStr, out obj_wcc.before.attributes);
 
@@ -287,12 +281,12 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         PrintLog("LOOKUP");
 
-        string dirName = "";
-        string fileName = "";
+        var dirName = "";
+        var fileName = "";
         ReadDirectory(ref dirName, ref fileName);
 
         path = GetFullPath(ref dirName, ref fileName);
-        stat = CheckFile((string)dirName, path);
+        stat = CheckFile(dirName, path);
 
         if (stat == NFS3S.NFS3_OK)
         {
@@ -316,12 +310,12 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S ACCESS()
     {
-        string path = "";
+        var path = "";
         PostOpAttr obj_attributes = new();
         NFS3S stat;
 
         PrintLog("ACCESS");
-        bool validHandle = GetPath(ref path);
+        var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         Read(out uint access);
         stat = CheckFile(cStr);
@@ -337,17 +331,15 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         Write(obj_attributes);
 
         if (stat == NFS3S.NFS3_OK)
-        {
             Write(access);
-        }
 
         return stat;
     }
     protected NFS3S READLINK()
     {
         PrintLog("READLINK");
-        string path = "";
-        string pMBBuffer = "";
+        var path = string.Empty;
+        var pMBBuffer = string.Empty;
 
         PostOpAttr symlink_attributes = new();
         NfsPath3 data = new();
@@ -360,10 +352,8 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
-        if (cStr == null)
-        {
-            return NFS3S.NFS3ERR_STALE;
-        }
+        if (cStr == null) return NFS3S.NFS3ERR_STALE;
+
         stat = CheckFile(cStr);
         //if (stat == NFS3S.NFS3_OK)
         //{
@@ -454,32 +444,24 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         Write(stat);
         Write(symlink_attributes);
-        if (stat == NFS3S.NFS3_OK)
-        {
-            Write(data);
-        }
+        if (stat == NFS3S.NFS3_OK) Write(data);
 
         return stat;
     }
     protected NFS3S READ()
     {
-        string path = "";
-        long offset;
-        int count;
+        var path = "";
         PostOpAttr file_attributes = new();
-        bool eof = false;
+        var eof = false;
         Opaque data = new();
         NFS3S stat;
 
         PrintLog("READ");
-        bool validHandle = GetPath(ref path);
-        string cStr = validHandle ? path : null;
-        if (cStr == null)
-        {
-            return NFS3S.NFS3ERR_STALE;
-        }
-        Read(out offset);
-        Read(out count);
+        var validHandle = GetPath(ref path);
+        var cStr = validHandle ? path : null;
+        if (cStr == null) return NFS3S.NFS3ERR_STALE;
+        Read(out long offset);
+        Read(out int count);
         stat = CheckFile(cStr);
 
         if (stat == NFS3S.NFS3_OK)
@@ -495,17 +477,9 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
             }
             else
             {
-                int errorNumber = WinAPIs.GetLastError();
-                PrintLog("{0}", errorNumber);
-
-                if (errorNumber == 13)
-                {
-                    stat = NFS3S.NFS3ERR_ACCES;
-                }
-                else
-                {
-                    stat = NFS3S.NFS3ERR_IO;
-                }
+                var errorNumber = WinAPIs.GetLastError();
+                PrintLog($"{errorNumber}");
+                stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
             }
         }
 
@@ -525,33 +499,25 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S WRITE()
     {
-        string path = "";
-        long offset;
-        int count;
-        int stable;
-        Opaque data;
+        var path = "";
         WccData file_wcc = new();
         long verf = 0;
         NFS3S stat;
 
         PrintLog("WRITE");
-        bool validHandle = GetPath(ref path);
-        string cStr = validHandle ? path : null;
-        if (cStr == null)
-        {
-            return NFS3S.NFS3ERR_STALE;
-        }
-        Read(out offset);
-        Read(out count);
-        Read(out stable);
-        Read(out data);
+        var validHandle = GetPath(ref path);
+        var cStr = validHandle ? path : null;
+        if (cStr == null) return NFS3S.NFS3ERR_STALE;
+        Read(out long offset);
+        Read(out int count);
+        Read(out int stable);
+        Read(out Opaque data);
         stat = CheckFile(cStr);
 
         file_wcc.before.attributes_follow = GetFileAttributesForNFS(cStr, out file_wcc.before.attributes);
 
         if (stat == NFS3S.NFS3_OK)
         {
-
             if (stable == (int)SYNC_MODES.UNSTABLE)
             {
                 NfsFh3 handle = new();
@@ -579,16 +545,9 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
                 //else
                 {
                     int errorNumber = WinAPIs.GetLastError();
-                    PrintLog("{0}", errorNumber);
+                    PrintLog($"{errorNumber}");
 
-                    if (errorNumber == 13)
-                    {
-                        stat = NFS3S.NFS3ERR_ACCES;
-                    }
-                    else
-                    {
-                        stat = NFS3S.NFS3ERR_IO;
-                    }
+                    stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
                 }
                 // this should not be zero but a timestamp (process start time) instead
                 verf = 0;
@@ -597,8 +556,6 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
             }
             else
             {
-
-
                 using var fs = new FileStream(cStr, FileMode.OpenOrCreate, FileAccess.Write);
                 if (fs != null)
                 {
@@ -608,23 +565,17 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
                 }
                 else
                 {
-                    int errorNumber = WinAPIs.GetLastError();
-                    PrintLog("{0}", errorNumber);
+                    var errorNumber = WinAPIs.GetLastError();
+                    PrintLog($"{errorNumber}");
 
-                    if (errorNumber == 13)
-                    {
-                        stat = NFS3S.NFS3ERR_ACCES;
-                    }
-                    else
-                    {
-                        stat = NFS3S.NFS3ERR_IO;
-                    }
+                    stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
                 }
 
                 stable = (int)SYNC_MODES.FILE_SYNC;
                 verf = 0;
 
-                file_wcc.after.attributes_follow = GetFileAttributesForNFS(cStr, out file_wcc.after.attributes);
+                file_wcc.after.attributes_follow = GetFileAttributesForNFS(
+                    cStr, out file_wcc.after.attributes);
             }
         }
 
@@ -647,12 +598,12 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         PostOpFh3 obj = new();
         PostOpAttr obj_attributes = new();
         WccData dir_wcc = new();
-        NFS3S stat = 0;
-        int errorNumber = 0;
+        NFS3S stat;
+        var errorNumber = 0;
 
         PrintLog("CREATE");
-        string dirName = "";
-        string fileName = "";
+        var dirName = "";
+        var fileName = "";
         ReadDirectory(ref dirName, ref fileName);
         path = GetFullPath(ref dirName, ref fileName);
         Read(out how);
@@ -666,20 +617,9 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         }
         else
         {
-            PrintLog("{0}", WinAPIs.GetLastError());
+            PrintLog($"{WinAPIs.GetLastError()}");
 
-            if (errorNumber == 2)
-            {
-                stat = NFS3S.NFS3ERR_STALE;
-            }
-            else if (errorNumber == 13)
-            {
-                stat = NFS3S.NFS3ERR_ACCES;
-            }
-            else
-            {
-                stat = NFS3S.NFS3ERR_IO;
-            }
+            stat = errorNumber == 2 ? NFS3S.NFS3ERR_STALE : errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
         }
 
         if (stat == NFS3S.NFS3_OK)
@@ -713,8 +653,8 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         PrintLog("MKDIR");
 
-        string dirName = "";
-        string fileName = "";
+        var dirName = "";
+        var fileName = "";
         ReadDirectory(ref dirName, ref fileName);
         path = GetFullPath(ref dirName, ref fileName);
         Read(out attributes);
@@ -749,7 +689,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
             }
         }
 
-        dir_wcc.after.attributes_follow = GetFileAttributesForNFS((string)dirName, out dir_wcc.after.attributes);
+        dir_wcc.after.attributes_follow = GetFileAttributesForNFS(dirName, out dir_wcc.after.attributes);
 
         Write(stat);
 
@@ -778,8 +718,8 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         uint dwFlags = 0;
 
-        string dirName = "";
-        string fileName = "";
+        var dirName = "";
+        var fileName = "";
         ReadDirectory(ref dirName, ref fileName);
         path = GetFullPath(ref dirName, ref fileName);
 
@@ -791,11 +731,11 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         // Convert target path to windows path format, maybe this could also be done
         // in a safer way by a combination of PathRelativePathTo and GetFullPathName.
         // Without this conversion nested folder symlinks do not work cross platform.
-        string strFromChar = symlink.symlink_data.path; // target (should be relative path));
+        var strFromChar = symlink.symlink_data.path; // target (should be relative path));
         strFromChar = strFromChar.Replace('/', '\\');
         var lpTargetFileName = (strFromChar);
 
-        string fullTargetPath = dirName + ("\\") + (lpTargetFileName);
+        var fullTargetPath = $"{dirName}{"\\"}{lpTargetFileName}";
 
         // Relative path do not work with GetFileAttributes (directory are not recognized)
         // so we normalize the path before calling GetFileAttributes
@@ -858,11 +798,11 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         PrintLog("REMOVE");
 
-        string dirName = "";
-        string fileName = "";
+        var dirName = "";
+        var fileName = "";
         ReadDirectory(ref dirName, ref fileName);
         path = GetFullPath(ref dirName, ref fileName);
-        stat = CheckFile((string)dirName, path);
+        stat = CheckFile(dirName, path);
 
         dir_wcc.before.attributes_follow = GetFileAttributesForNFS(dirName, out dir_wcc.before.attributes);
 
@@ -873,16 +813,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
             {
                 var returnCode = fileTable.RemoveFolder(path);
                 if (returnCode != 0)
-                {
-                    if (returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY)
-                    {
-                        stat = NFS3S.NFS3ERR_NOTEMPTY;
-                    }
-                    else
-                    {
-                        stat = NFS3S.NFS3ERR_IO;
-                    }
-                }
+                    stat = returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY ? NFS3S.NFS3ERR_NOTEMPTY : NFS3S.NFS3ERR_IO;
             }
             else
             {
@@ -909,8 +840,8 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         PrintLog("RMDIR");
 
-        string dirName = "";
-        string fileName = "";
+        var dirName = "";
+        var fileName = "";
         ReadDirectory(ref dirName, ref fileName);
         path = GetFullPath(ref dirName, ref fileName);
         stat = CheckFile(dirName, path);
@@ -921,16 +852,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         {
             returnCode = fileTable.RemoveFolder(path);
             if (returnCode != 0)
-            {
-                if (returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY)
-                {
-                    stat = NFS3S.NFS3ERR_NOTEMPTY;
-                }
-                else
-                {
-                    stat = NFS3S.NFS3ERR_IO;
-                }
-            }
+                stat = returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY ? NFS3S.NFS3ERR_NOTEMPTY : NFS3S.NFS3ERR_IO;
         }
 
         dir_wcc.after.attributes_follow = GetFileAttributesForNFS(dirName, out dir_wcc.after.attributes);
@@ -949,13 +871,13 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
         PrintLog("RENAME");
 
-        string dirFromName = "";
-        string fileFromName = "";
+        var dirFromName = "";
+        var fileFromName = "";
         ReadDirectory(ref dirFromName, ref fileFromName);
         pathFrom = GetFullPath(ref dirFromName, ref fileFromName);
 
-        string dirToName = "";
-        string fileToName = "";
+        var dirToName = "";
+        var fileToName = "";
         ReadDirectory(ref dirToName, ref fileToName);
         pathTo = GetFullPath(ref dirToName, ref fileToName);
 
@@ -971,23 +893,12 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
             {
                 returnCode = fileTable.RemoveFolder(pathTo);
                 if (returnCode != 0)
-                {
-                    if (returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY)
-                    {
-                        stat = NFS3S.NFS3ERR_NOTEMPTY;
-                    }
-                    else
-                    {
-                        stat = NFS3S.NFS3ERR_IO;
-                    }
-                }
+                    stat = returnCode == WinAPIs.ERROR_DIR_NOT_EMPTY ? NFS3S.NFS3ERR_NOTEMPTY : NFS3S.NFS3ERR_IO;
             }
             else
             {
                 if (0 == fileTable.RemoveFile(pathTo))
-                {
                     stat = NFS3S.NFS3ERR_IO;
-                }
             }
         }
 
@@ -997,16 +908,9 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
 
             if (errorNumber != 0)
             {
-                PrintLog("Error {0}", errorNumber);
+                PrintLog($"Error {errorNumber}");
 
-                if (errorNumber == 13)
-                {
-                    stat = NFS3S.NFS3ERR_ACCES;
-                }
-                else
-                {
-                    stat = NFS3S.NFS3ERR_IO;
-                }
+                stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
             }
         }
 
@@ -1022,23 +926,20 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected NFS3S LINK()
     {
         PrintLog("LINK");
-        string path = "";
+        var path = "";
         Diropargs3 link = new();
-        string dirName = "";
-        string fileName = "";
+        var dirName = "";
+        var fileName = "";
         NFS3S stat;
         PostOpAttr obj_attributes = new();
         WccData dir_wcc = new();
 
-        bool validHandle = GetPath(ref path);
+        var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
-        if (cStr == null)
-        {
-            return NFS3S.NFS3ERR_STALE;
-        }
+        if (cStr == null) return NFS3S.NFS3ERR_STALE;
         ReadDirectory(ref dirName, ref fileName);
 
-        string linkFullPath = GetFullPath(ref dirName, ref fileName);
+        var linkFullPath = GetFullPath(ref dirName, ref fileName);
 
         //TODO: Improve checks here, cStr may be null because handle is invalid
         var fi = File.CreateSymbolicLink(linkFullPath, cStr);
@@ -1067,10 +968,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S READDIR()
     {
-        string path = "";
-        long cookie;
-        long cookieverf;
-        int count;
+        var path = "";
         PostOpAttr dir_attributes = new();
         long fileid;
         Filename3 name = new();
@@ -1086,9 +984,9 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         PrintLog("READDIR");
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
-        Read(out cookie);
-        Read(out cookieverf);
-        Read(out count);
+        Read(out long cookie);
+        Read(out long cookieverf);
+        Read(out int count);
         stat = CheckFile(cStr);
 
         if (stat == NFS3S.NFS3_OK)
@@ -1127,13 +1025,13 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
                 {
                     j = 10;
 
-                    foreach (var name2 in Directory.GetFiles(path, "*.*"))
+                    foreach (var filename in Directory.GetFiles(path, "*.*"))
                     {
                         Write(bFollows); //value follows
-                        filePath = cStr + "\\" + name2;// fileinfo.name;
+                        filePath = $"{cStr}\\{filename}";// fileinfo.name;
                         fileid = fileTable.GetIDByPath(filePath);
                         Write(fileid); //file id
-                        name.Set(name2);// fileinfo.name);
+                        name.Set(filename);// fileinfo.name);
                         Write(name); //name
                         ++cookie;
                         Write(cookie); //cookie
@@ -1156,10 +1054,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S READDIRPLUS()
     {
-        string path = "";
-        long cookie;
-        long cookieverf;
-        int dircount, maxcount;
+        var path = "";
         PostOpAttr dir_attributes = new();
         long fileid;
         Filename3 name = new();
@@ -1178,10 +1073,10 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         PrintLog("READDIRPLUS");
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
-        Read(out cookie);
-        Read(out cookieverf);
-        Read(out dircount);
-        Read(out maxcount);
+        Read(out long cookie);
+        Read(out long cookieverf);
+        Read(out int dircount);
+        Read(out int maxcount);
         stat = CheckFile(cStr);
 
         if (stat == NFS3S.NFS3_OK)
@@ -1200,7 +1095,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         if (stat == NFS3S.NFS3_OK)
         {
             Write(cookieverf);
-            filePath = cStr + "\\*";
+            filePath = $"{cStr}\\*";
 
             //handle = _findfirst(filePath, ref fileinfo);
             eof = true;
@@ -1219,15 +1114,14 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
                     bFollows = true;
                     j = 10;
 
-                    foreach (var name2 in Directory.GetFiles(path, "*.*"))
+                    foreach (var filename in Directory.GetFiles(path, "*.*"))
                     {
-
                         //fileinfo.name = name2;
                         Write(bFollows); //value follows
-                        filePath = cStr + "\\" + name2;// fileinfo.name;
+                        filePath = $"{cStr}\\{filename}";// fileinfo.name;
                         fileid = fileTable.GetIDByPath(filePath);
                         Write(fileid); //file id
-                        name.Set(name2);// fileinfo.name);
+                        name.Set(filename);// fileinfo.name);
                         Write(name); //name
                         ++cookie;
                         Write(cookie); //cookie
@@ -1243,7 +1137,6 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
                         }
                     } //while (_findnext(handle, ref fileinfo) == 0);
                 }
-
             }
 
             bFollows = false;
@@ -1255,7 +1148,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S FSSTAT()
     {
-        string path = "";
+        var path = "";
         PostOpAttr obj_attributes = new();
         long tbytes = 0L, fbytes = 0L, abytes = 0L, tfiles = 0L, ffiles = 0L, afiles = 0L;
         uint invarsec = 0;
@@ -1263,7 +1156,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         NFS3S stat;
 
         PrintLog("FSSTAT");
-        bool validHandle = GetPath(ref path);
+        var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         stat = CheckFile(cStr);
 
@@ -1303,7 +1196,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S FSINFO()
     {
-        string path = "";
+        var path = "";
         PostOpAttr obj_attributes = new();
         uint rtmax = 0, rtpref = 0, rtmult = 0, wtmax = 0, wtpref = 0, wtmult = 0, dtpref = 0;
         long maxfilesize = 0;
@@ -1361,7 +1254,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S PATHCONF()
     {
-        string path = "";
+        var path = "";
         PostOpAttr obj_attributes = new();
         NFS3S stat;
         uint linkmax = 0, name_max = 0;
@@ -1408,39 +1301,34 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     }
     protected NFS3S COMMIT()
     {
-        string path = "";
+        var path = "";
         int handleId;
-        long offset;
-        int count;
         WccData file_wcc = new();
         NFS3S stat;
-        NfsFh3 file;
         long verf;
 
         PrintLog("COMMIT");
-        Read(out file);
+        Read(out NfsFh3 file);
         bool validHandle = fileTable.GetPathByHandle(file.contents, ref path);
         var cStr = validHandle ? path : null;
 
         if (validHandle)
-        {
-            PrintLog(" {0} ", path);
-        }
+            PrintLog($" {path} ");
 
         // offset and count are unused
         // offset never was anything else than 0 in my tests
         // count does not matter in the way COMMIT is implemented here
         // to fulfill the spec this should be improved
-        Read(out offset);
-        Read(out count);
+        Read(out long offset);
+        Read(out int count);
 
         file_wcc.before.attributes_follow = GetFileAttributesForNFS(cStr, out file_wcc.before.attributes);
 
         handleId = BitConverter.ToInt32(file.contents);
 
-        if (unstable_storage_files.ContainsKey(handleId))
+        if (unstable_storage_files.TryGetValue(handleId, out nint value))
         {
-            if (unstable_storage_files[handleId] != 0)
+            if (value != 0)
             {
                 //CloseHandle(unstableStorageFile[handleId]);
                 unstable_storage_files.Remove(handleId);
@@ -1476,35 +1364,25 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected void Read(byte[] buffer)
     {
         if (in_stream.Read(buffer) < buffer.Length)
-        {
             throw new Exception();
-        }
     }
     protected void Read(out bool pBool)
     {
-        uint b;
-
-        if (in_stream.Read(out b) < sizeof(uint))
-        {
+        if (in_stream.Read(out uint b) < sizeof(uint))
             throw new Exception();
-        }
 
         pBool = b == 1;
     }
     protected void Read(out int pUint32)
     {
         if (in_stream.Read(out pUint32) < sizeof(uint))
-        {
             throw new Exception();
-        }
     }
 
     protected void Read(out uint pUint32)
     {
         if (in_stream.Read(out pUint32) < sizeof(uint))
-        {
             throw new Exception();
-        }
     }
     protected void Read(out TIME_SETS ts)
     {
@@ -1514,16 +1392,12 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected void Read(out long pUint64)
     {
         if (in_stream.Read8(out pUint64) < sizeof(ulong))
-        {
             throw new Exception();
-        }
     }
     protected void Read(out ulong pUint64)
     {
         if (in_stream.Read8(out pUint64) < sizeof(ulong))
-        {
             throw new Exception();
-        }
     }
     protected void Read(out STAS stas)
     {
@@ -1537,66 +1411,52 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         Read(out pAttr.mode.set_it);
 
         if (pAttr.mode.set_it)
-        {
             Read(out pAttr.mode.mode);
-        }
 
         Read(out pAttr.uid.set_it);
 
         if (pAttr.uid.set_it)
-        {
             Read(out pAttr.uid.uid);
-        }
 
         Read(out pAttr.gid.set_it);
 
         if (pAttr.gid.set_it)
-        {
             Read(out pAttr.gid.gid);
-        }
 
         Read(out pAttr.size.set_it);
 
         if (pAttr.size.set_it)
-        {
             Read(out pAttr.size.size);
-        }
 
         Read(out pAttr.atime.set_it);
 
         if (pAttr.atime.set_it == TIME_SETS.SET_TO_CLIENT_TIME)
-        {
             Read(out pAttr.atime.atime);
-        }
 
         Read(out pAttr.mtime.set_it);
 
         if (pAttr.mtime.set_it == TIME_SETS.SET_TO_CLIENT_TIME)
-        {
             Read(out pAttr.mtime.mtime);
-        }
     }
-    protected void Read(out sattrguard3 pGuard)
+    protected void Read(out Sattrguard3 pGuard)
     {
         pGuard = new();
         Read(out pGuard.check);
 
         if (pGuard.check)
-        {
             Read(out pGuard.obj_ctime);
-        }
     }
     protected void Read(out NfsFh3 pPath)
     {
         pPath = new();
         Read(out pPath.length);
-        Read(pPath.contents);
+        Read(pPath.contents = new byte[pPath.length]);
     }
     protected void Read(out Filename3 pfn)
     {
         pfn = new Filename3();
         Read(out pfn.length);
-        Read(pfn.contents);
+        Read(pfn.contents=new byte[pfn.length]);
     }
     protected void Read(out Diropargs3 pDir)
     {
@@ -1608,24 +1468,18 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected void Read(out Opaque pOpaque)
     {
         pOpaque = new();
-        uint len, b;
-
-        Read(out len);
+        Read(out uint len);
         pOpaque.SetSize(len);
 
         if (in_stream.Read(pOpaque.contents) < len)
-        {
             throw new Exception();
-        }
 
         len = 4 - (len & 3);
 
         if (len != 4)
         {
-            if (in_stream.Read(out b) < len)
-            {
+            if (in_stream.Read(out uint b) < len)
                 throw new Exception();
-            }
         }
     }
     protected void Read(out NfsTime3 pTime)
@@ -1633,28 +1487,27 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         pTime = new();
         Read(out pTime.seconds);
         Read(out pTime.nseconds);
-
     }
     protected void Read(out Createhow3 pHow)
     {
         pHow = new();
         Read(out pHow.mode);
 
-        if (pHow.mode == STAS.UNCHECKED || pHow.mode == STAS.GUARDED)
+        switch (pHow.mode)
         {
-            Read(out pHow.obj_attributes);
+            case STAS.UNCHECKED or STAS.GUARDED:
+                Read(out pHow.obj_attributes);
+                break;
+            default:
+                Read(out pHow.verf);
+                break;
         }
-        else
-        {
-            Read(out pHow.verf);
-        }
-
     }
     protected void Read(out NfsPath3 pPath)
     {
         pPath = new();
         Read(out pPath.length);
-        Read(pPath.contents);
+        Read(pPath.contents = new byte[pPath.length]);
         pPath.path = Encoding.UTF8.GetString(pPath.contents);
     }
     protected void Read(out SymLinkData3 pSymlink)
@@ -1667,7 +1520,6 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected void Write(bool pBool)
     {
         out_stream?.Write(pBool ? 1 : 0);
-
     }
     protected void Write(NFS3S status)
     {
@@ -1676,22 +1528,18 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected void Write(int pUint32)
     {
         out_stream?.Write(pUint32);
-
     }
     protected void Write(uint pUint32)
     {
         out_stream?.Write(pUint32);
-
     }
     protected void Write(long pUint64)
     {
         out_stream?.Write8(pUint64);
-
     }
     protected void Write(ulong pUint64)
     {
         out_stream?.Write8(pUint64);
-
     }
     protected void Write(Fattr3 pAttr)
     {
@@ -1708,7 +1556,6 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         Write(pAttr.atime);
         Write(pAttr.mtime);
         Write(pAttr.ctime);
-
     }
     protected void Write(Opaque pOpaque)
     {
@@ -1723,64 +1570,46 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
             b = 0;
             out_stream.Write(BitConverter.GetBytes(b));//, 4 - len);
         }
-
     }
     protected void Write(WccData pWcc)
     {
         Write(pWcc.before);
         Write(pWcc.after);
-
     }
     protected void Write(PostOpAttr pAttr)
     {
         Write(pAttr.attributes_follow);
-
         if (pAttr.attributes_follow)
-        {
             Write(pAttr.attributes);
-        }
-
     }
     protected void Write(PreOpAttr pAttr)
     {
         Write(pAttr.attributes_follow);
-
         if (pAttr.attributes_follow)
-        {
             Write(pAttr.attributes);
-        }
-
     }
     protected void Write(PostOpFh3 pObj)
     {
         Write(pObj.handle_follows);
-
         if (pObj.handle_follows)
-        {
             Write(pObj.handle);
-        }
-
     }
     protected void Write(NfsTime3 pTime)
     {
         Write(pTime.seconds);
         Write(pTime.nseconds);
-
     }
     protected void Write(Specdata3 pSpec)
     {
         Write(pSpec.specdata1);
         Write(pSpec.specdata2);
-
     }
     protected void Write(WccAttribute pAttr)
     {
         Write(pAttr.size);
         Write(pAttr.mtime);
         Write(pAttr.ctime);
-
     }
-
 
     protected bool GetPath(ref string path)
     {
@@ -1788,7 +1617,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         bool valid = fileTable.GetPathByHandle(obj.contents, ref path);
         if (valid)
         {
-            PrintLog(" {0} ", path);
+            PrintLog($" {path} ");
         }
         else
         {
@@ -1815,36 +1644,26 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected string GetFullPath(ref string dirName, ref string fileName)
     {
         if (dirName.Length + 1 + fileName.Length > MAXPATHLEN)
-        {
             return null;
-        }
 
-        var fullPath = dirName + "\\" + fileName;
-        PrintLog(" {0} ", fullPath);
+        var fullPath = $"{dirName}\\{fileName}";
+        PrintLog($" {fullPath} ");
 
         return fullPath;
     }
-    protected NFS3S CheckFile(string? fullPath) => fullPath switch
+    protected static NFS3S CheckFile(string? fullPath) => fullPath switch
     {
         null => NFS3S.NFS3ERR_STALE,
         _ => !File.Exists(fullPath) ? NFS3S.NFS3ERR_NOENT : NFS3S.NFS3_OK
     };
-    protected NFS3S CheckFile(string directory, string fullPath)
-    {
+    protected static NFS3S CheckFile(string directory, string fullPath) =>
         // FileExists will not work for the root of a drive, e.g. \\?\D:\, therefore check if it is a drive root with GetDriveType
-        if (directory == null || (!Directory.Exists(directory)
-            && Directory.GetDirectoryRoot(directory) == directory) || fullPath == null)
-        {
-            return NFS3S.NFS3ERR_STALE;
-        }
-
-        if (!File.Exists(fullPath))
-        {
-            return NFS3S.NFS3ERR_NOENT;
-        }
-
-        return NFS3S.NFS3_OK;
-    }
+        directory == null || (!Directory.Exists(directory)
+            && Directory.GetDirectoryRoot(directory) == directory) || fullPath == null
+            ? NFS3S.NFS3ERR_STALE
+            : !File.Exists(fullPath) ? NFS3S.NFS3ERR_NOENT 
+        : NFS3S.NFS3_OK
+        ;
     protected bool GetFileHandle(string path, NfsFh3 pObject)
     {
         var handle = fileTable.GetHandleByPath(path);
@@ -1860,12 +1679,8 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
     protected static bool GetFileAttributesForNFS(string path, out WccAttribute pAttr)
     {
         pAttr = new();
-        if (path == null || !File.Exists(path))
-        {
-            return false;
-        }
+        if (path == null || !File.Exists(path)) return false;
         FileInfo f = new(path);
-
         pAttr.size = (ulong)f.Length;
         pAttr.mtime.seconds = (uint)f.LastWriteTime.Second;
         pAttr.mtime.nseconds = 0;
@@ -1882,10 +1697,7 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         var fileAttr = File.GetAttributes(path);
         pAttr = new();
 
-        if (path == null || fileAttr == FileAttributes.None)
-        {
-            return false;
-        }
+        if (path == null || fileAttr == FileAttributes.None) return false;
 
         if ((fileAttr & FileAttributes.Directory) != 0)
         {
@@ -1905,23 +1717,17 @@ public partial class CNFS3Prog(CFileTable? fileTable = null) : CRPCProg
         }
 
         if ((fileAttr & FileAttributes.ReparsePoint) != 0)
-        {
             pAttr.type = (uint)NF3S.NF3LNK;
-        }
 
         pAttr.mode = 0;
-
         // Set execution right for all
         pAttr.mode |= 0x49;
-
         // Set read right for all
         pAttr.mode |= 0x124;
 
         //if ((lpFileInformation.dwFileAttributes ref  FILE_ATTRIBUTE_READONLY) == 0) {
         if ((fileAttr & FileAttributes.ReadOnly) != 0)
-        {
             pAttr.mode |= 0x92;
-        }
         //}
         var fi = new FileInfo(path);
         pAttr.nlink = fi.LinkTarget != null ? 1u : 0u;

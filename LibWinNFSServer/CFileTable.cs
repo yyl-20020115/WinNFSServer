@@ -89,10 +89,7 @@ public class CFileTable
         }
         return false;
     }
-    public void RenameFile(string pathFrom, string pathTo)
-    {
-        tree.RenameItem(pathFrom, pathTo);
-    }
+    public void RenameFile(string pathFrom, string pathTo) => tree.RenameItem(pathFrom, pathTo);
 
     protected TreeNode<FILE_ITEM>? AddItem(string path)
     {
@@ -133,8 +130,8 @@ public class CFileTable
     {
         if (nID >= size) return null;
         var pTable = first;
-        uint i;
-        for (i = FILE_TABLE.TABLE_SIZE; i <= nID; i += FILE_TABLE.TABLE_SIZE)
+        uint i = FILE_TABLE.TABLE_SIZE;
+        for (; i <= nID; i += FILE_TABLE.TABLE_SIZE)
             pTable = pTable?.pNext;
 
         return pTable?.pItems[nID + FILE_TABLE.TABLE_SIZE - i];

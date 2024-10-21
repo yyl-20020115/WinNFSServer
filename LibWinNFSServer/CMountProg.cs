@@ -22,10 +22,8 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     {
         var formattedFile = FormatPath(file, PathFormats.FORMAT_PATH);
 
-        if (formattedFile == null|| File.Exists(formattedFile))
-        {
+        if (formattedFile == null || File.Exists(formattedFile))
             return false;
-        }
         path_file = formattedFile;
         return true;
     }
@@ -59,10 +57,8 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     }
     public string? GetClientAddr(int nIndex)
     {
-        int i;
-
         if (nIndex < 0 || nIndex >= mounts) return null;
-        for (i = 0; i < MOUNT_NUM_MAX; i++)
+        for (var i = 0; i < MOUNT_NUM_MAX; i++)
         {
             if (clients[i] != null)
             {
@@ -84,10 +80,10 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
     {
         PPROC[] procs = [
-            NULL, 
-            MNT, 
-            NOIMP, 
-            UMNT, 
+            NULL,
+            MNT,
+            NOIMP,
+            UMNT,
             UMNTALL,
             EXPORT];
 
@@ -143,9 +139,9 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
 
             if ((result.Length < 6) || result[5] != ':' || !char.IsLetter(result[4]))
             { //check path format
-                Console.WriteLine("Path %s format is incorrect.", pPath);
+                Console.WriteLine($"Path {pPath} format is incorrect.");
                 Console.WriteLine("Please use a full path such as C:\\work or \\\\?\\C:\\work");
-                
+
                 return null;
             }
             result = result.Replace('/', '\\');
@@ -154,7 +150,7 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         {
             if (pPath[1] == ':' && ((pPath[0] >= 'A' && pPath[0] <= 'Z') || (pPath[0] >= 'a' && pPath[0] <= 'z')))
             {
-                result = "/"+pPath[1..];
+                result = "/" + pPath[1..];
 
                 //transform Windows format to mount path d:\work => /d/work
                 result = result.Replace('/', '\\');
@@ -164,7 +160,7 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
             { //check path alias format
                 Console.WriteLine("Path alias format is incorrect.");
                 Console.WriteLine("Please use a path like /exports");
-               
+
                 return null;
             }
         }
@@ -178,11 +174,11 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     protected void MNT()
     {
         Refresh();
-        var path =""; //MAXPATHLEN+1
+        var path = ""; //MAXPATHLEN+1
         int i;
 
         PrintLog("MNT");
-        PrintLog(" from {0}\n", m_pParam?.pRemoteAddr??"");
+        PrintLog($" from {m_pParam?.pRemoteAddr ?? ""}\n");
 
         if (GetPath(ref path))
         {
@@ -220,19 +216,18 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     protected void UMNT()
     {
         var path = ""; //MAXPATHLEN+1
-        int i;
 
         PrintLog("UMNT");
         GetPath(ref path);
-        PrintLog(" from {0}", m_pParam.pRemoteAddr);
+        PrintLog($" from {m_pParam?.pRemoteAddr ?? ""}");
 
-        for (i = 0; i < clients.Count; i++)
+        for (var i = 0; i < clients.Count; i++)
         {
             if (clients[i] != null)
             {
-                if (String.Compare(m_pParam.pRemoteAddr, clients[i]) == 0)
+                if (string.Compare(m_pParam?.pRemoteAddr, clients[i]) == 0)
                 { //address match
-                     //remove this address
+                  //remove this address
                     clients[i] = null;
                     --mounts;
                     break;
@@ -249,14 +244,15 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     {
         PrintLog("EXPORT");
         //TODO: use encoding utf8?
-        foreach (var _path in paths.Keys) {
+        foreach (var _path in paths.Keys)
+        {
             var buffer = Encoding.UTF8.GetBytes(_path);
             int length = buffer.Length;
             // dirpath
             out_stream.Write(1);
             out_stream.Write(length);
             out_stream.Write(buffer);
-            int fillBytes = (length % 4);
+            var fillBytes = (length % 4);
             if (fillBytes > 0)
             {
                 fillBytes = 4 - fillBytes;
@@ -281,18 +277,17 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
 
     private bool GetPath(ref string returnPath)
     {
-        uint i, nSize = 0;
         string path;
-        string finalPath="";
+        string finalPath = "";
         bool foundPath = false;
 
-        in_stream.Read(out nSize);
+        in_stream.Read(out uint nSize);
 
         if (nSize > MAXPATHLEN) nSize = MAXPATHLEN;
 
         var bytes = new byte[nSize];
         in_stream.Read(bytes);
-       
+
         path = Encoding.UTF8.GetString(bytes);
         // TODO: this whole method is quite ugly and ripe for refactoring
         // strip slashes
@@ -301,18 +296,18 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         foreach (var pair in paths)
         {
             // strip slashes
-            string pathAliasTemp = pair.Key;
+            var pathAliasTemp = pair.Key;
             //pathAliasTemp.erase(pathAliasTemp.find_last_not_of("/\\") + 1);
-            string pathAlias = pathAliasTemp;
+            var pathAlias = pathAliasTemp;
 
             // strip slashes
-            string windowsPathTemp = pair.Value;
+            var windowsPathTemp = pair.Value;
             // if it is a drive letter, e.g. D:\ keep the slash
             //if (windowsPathTemp.substr(windowsPathTemp.size() - 2) != ":\\")
             //{
             //    windowsPathTemp.erase(windowsPathTemp.find_last_not_of("/\\") + 1);
             //}
-            string windowsPath = windowsPathTemp;
+            var windowsPath = windowsPathTemp;
 
             //if ((requestedPathSize > aliasPathSize) && (strncmp(path, pathAlias, aliasPathSize) == 0))
             //{
@@ -322,7 +317,7 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
             //    finalPath = finalPath.Replace('/', '\\');
             //}
             //else 
-            if (string.Compare(path, pathAlias,true) == 0)
+            if (string.Compare(path, pathAlias, true) == 0)
             {
                 foundPath = true;
                 finalPath = windowsPath;
@@ -330,29 +325,26 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
 
             }
 
-            if (foundPath == true)
-            {
-                break;
-            }
+            if (foundPath) break;
         }
 
         if (foundPath)
         {
             //The requested path does not start with the alias, let's treat it normally.
-           
+
             //transform mount path to Windows format. /d/work => d:\work
             //finalPath[0] = finalPath[1];
             //finalPath[1] = ':';
             finalPath = path[1..];
             finalPath = finalPath.Replace('/', '\\');
-         
+
         }
 
-        PrintLog("Final local requested path: {0}\n", finalPath);
+        PrintLog($"Final local requested path: {finalPath}\n");
 
         if ((nSize & 3) != 0)
         {
-            byte[] buffer = new byte[4];
+            var buffer = new byte[4];
             //4 - (nSize & 3)
             in_stream.Read(buffer);  //skip opaque bytes
         }
@@ -361,10 +353,10 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         return foundPath;
     }
 
-    private bool ReadPathsFromFile(string sFileName)
+    private bool ReadPathsFromFile(string filename)
     {
-        var lines = File.ReadAllLines(sFileName);
-        if(File.Exists(sFileName) && lines.Length>0)
+        var lines = File.ReadAllLines(filename);
+        if (File.Exists(filename) && lines.Length > 0)
         {
             foreach (var line in lines)
             {
@@ -389,7 +381,7 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         }
         else
         {
-            Console.WriteLine("Can't open file {0}.", sFileName);
+            Console.WriteLine($"Can't open file {filename}.");
             return false;
         }
     }

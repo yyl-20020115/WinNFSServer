@@ -5,7 +5,7 @@ public class CFileTree
     private readonly Tree<FILE_ITEM> tree = new();
     private Tree<FILE_ITEM>.PreOrderIterator? top = null;
 
-    public static bool Debug = false;
+    public static bool Debug;
     public FILE_ITEM AddItem(string path, byte[] handle)
     {
         FILE_ITEM item = new()
@@ -26,9 +26,9 @@ public class CFileTree
         else
         {
             // Check if the requested path belongs to an already registered parent node.
-            var sPath = path;
+            var _path = path;
             var parentNode = FindParentNodeFromRootForPath(path);
-            var splittedPath = Path.GetFileName(sPath);
+            var splittedPath = Path.GetFileName(_path);
             //printf("spl %s %s\n", splittedPath.c_str(), absolutePath);
             item.Path = splittedPath;
             // If a parent was found use th parent.
@@ -80,7 +80,7 @@ public class CFileTree
                 FILE_ITEM emptyItem = new()
                 {
                     PathLength = 0,
-                    Path = ""
+                    Path = string.Empty
                 };
                 tree.AppendChild(new Tree<FILE_ITEM>.IteratorBase(parentNode), emptyItem);
             }
@@ -103,7 +103,7 @@ public class CFileTree
         var parentNode = node?.Parent;
         while (parentNode != null)
         {
-            path = parentNode?.Data?.Path + "\\" + path;
+            path = $"{parentNode?.Data?.Path}\\{path}";
             parentNode = parentNode?.Parent;
         }
     }
@@ -162,25 +162,17 @@ public class CFileTree
     {
         var sib = tree.Begin(new Tree<FILE_ITEM>.IteratorBase(node));
         var end = tree.End(new Tree<FILE_ITEM>.IteratorBase(node));
-        var currentLevel = true;
         var currentPath = Path.GetDirectoryName(path);
         var position = currentPath.Length;
         string followingPath = path.IndexOf('\\') is int p && p >= 0 ? path[(p + 1)..] : "";
-        currentLevel = followingPath.Length == 0;
+        bool currentLevel = followingPath.Length == 0;
 
         while (sib != end)
         {
             // printf("sib->path '%s' lv %d curpath '%s' follow '%s'\n", sib->path, currentLevel, currentPath.c_str(), followingPath.c_str());
             if (string.Compare(sib.Node.Data.Path, currentPath) == 0)
             {
-                if (currentLevel)
-                {
-                    return sib.Node;
-                }
-                else
-                {
-                    return FindNodeWithPathFromNode(followingPath, sib.Node);
-                }
+                return currentLevel ? sib.Node : FindNodeWithPathFromNode(followingPath, sib.Node);
             }
             sib.Next();
         }

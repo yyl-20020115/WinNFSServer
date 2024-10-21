@@ -13,7 +13,7 @@ public class CPortmapProg :  CRPCProg
     private PRC_STATUS result = PRC_STATUS.PRC_OK;
 
     public CPortmapProg() { }
-    public void Set(uint prog, uint port) => this.port_table[prog - MIN_PROG_NUM] = port;
+    public void Set(PROGS prog, NFS_PORTS port) => this.port_table[(int)prog - MIN_PROG_NUM] = (uint)port;
 
     public override int Process(IInputStream in_stream, IOutputStream out_stream, ProcessParam parameters)
     {

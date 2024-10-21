@@ -10,7 +10,7 @@ public class CServerSocket
     private Socket? socket = null;
     private ISocketListener? listener = null;
     private bool closed = true;
-    private Thread? thread;
+    private readonly Thread? thread;
     private CSocket[]? sockets;
     public CServerSocket()
     {
