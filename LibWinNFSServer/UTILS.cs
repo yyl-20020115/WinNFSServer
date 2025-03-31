@@ -1,8 +1,7 @@
-﻿using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
+using System.Runtime.InteropServices;
 
 namespace LibWinNFSServer;
-
 
 public enum FSF3S : int
 {
@@ -11,7 +10,6 @@ public enum FSF3S : int
     FSF3_HOMOGENEOUS = 0x0008,
     FSF3_CANSETTIME = 0x0010
 }
-
 
 public enum SYNC_MODES : int
 {
@@ -49,13 +47,13 @@ public enum TIME_SETS : int
     SET_TO_SERVER_TIME = 1,
     SET_TO_CLIENT_TIME = 2
 }
-public class Createhow3
-{
-    public STAS mode = 0;
-    public Sattr3 obj_attributes = new();
-    public ulong verf = 0;
-}
 
+public class CreateHow3
+{
+    public STAS Mode = 0;
+    public Sattr3 Obj_Attributes = new();
+    public ulong Verification = 0;
+}
 
 public class CACHE_LIST
 {
@@ -63,93 +61,90 @@ public class CACHE_LIST
     public CACHE_LIST? Next;
 }
 
-
 public class WccData
 {
-    public PreOpAttr before = new();
-    public PostOpAttr after = new();
+    public PreOpAttr Before = new();
+    public PostOpAttr After = new();
 }
 
 public class SetATime
 {
-    public TIME_SETS do_set = 0;
-    public NfsTime3 atime = new();
+    public TIME_SETS DoSet = 0;
+    public NfsTime3 ATime = new();
 }
 
-public class Specdata3
-{
-    public uint specdata1 = 0;
-    public uint specdata2 = 0;
-}
 public class Sattrguard3
 {
-    public bool check = false;
-    public NfsTime3 obj_ctime = new();
+    public bool Check = false;
+    public NfsTime3 Obj_CTime = new();
 }
 public class SetAtime
 {
-    public TIME_SETS set_it = 0;
-    public NfsTime3 atime = new();
+    public TIME_SETS SetIt = 0;
+    public NfsTime3 ATime = new();
 }
 public class SetMtime
 {
-    public TIME_SETS set_it = 0;
-    public NfsTime3 mtime = new();
+    public TIME_SETS SetIt = 0;
+    public NfsTime3 MTime = new();
 }
 
 public class Sattr3
 {
-    public SetMode3 mode = new();
-    public SetUid3 uid = new();
-    public SetGid3 gid = new();
-    public SetSize3 size = new();
-    public SetAtime atime = new();
-    public SetMtime mtime = new();
+    public SetMode3 Mode = new();
+    public SetUid3 Uid = new();
+    public SetGid3 Gid = new();
+    public SetSize3 Size = new();
+    public SetAtime ATime = new();
+    public SetMtime MTime = new();
 }
 
 public class SymLinkData3
 {
-    public Sattr3 symlink_attributes = new();
-    public NfsPath3 symlink_data = new();
+    public Sattr3 Symlink_Attributes = new();
+    public NfsPath3 Symlink_Data = new();
+}
+public class Specdata3
+{
+    public uint SpecData1 = 0;
+    public uint SpecData2 = 0;
 }
 
 public class SetGid3
 {
-    public bool set_it = false;
-    public uint gid = 0;
+    public bool SetIt = false;
+    public uint Gid = 0;
 }
 
 public class Fattr3
 {
-    public uint type = 0;
-    public uint mode = 0;
-    public uint nlink = 0;
-    public uint uid = 0;
-    public uint gid = 0;
-    public ulong size = 0;
-    public ulong used = 0;
-    public Specdata3 rdev = new();
-    public ulong fsid = 0;
-    public ulong fileid = 0;
-    public NfsTime3 atime = new();
-    public NfsTime3 mtime = new();
-    public NfsTime3 ctime = new();
+    public uint Type = 0;
+    public uint Mode = 0;
+    public uint NLink = 0;
+    public uint Uid = 0;
+    public uint Gid = 0;
+    public ulong Size = 0;
+    public ulong Used = 0;
+    public Specdata3 Rdev = new();
+    public ulong Fsid = 0;
+    public ulong FileId = 0;
+    public NfsTime3 ATime = new();
+    public NfsTime3 MTime = new();
+    public NfsTime3 CTime = new();
 }
 
 public class Filename3 : Opaque
 {
-    public string? name = null;
-
+    public string? Name = null;
     public Filename3() { }
-
-    public override void SetSize(uint len) => length = len;
-    public void Set(string str) => this.contents = Encoding.UTF8.GetBytes(name = str);
+    public override void SetSize(uint length) => this.Length = length;
+    public void Set(string text) => this.Contents = Encoding.UTF8.GetBytes(Name = text);
 }
 
-public class Diropargs3
+public class DirOpArgs3
 {
-    public NfsFh3? dir = new();
-    public Filename3? name = new();
+    public NfsFh3? Dir = new();
+    public Filename3? Name = new();
 }
 
 public class FILE_ITEM
@@ -163,13 +158,13 @@ public class FILE_ITEM
 public class FILE_TABLE
 {
     public const int TABLE_SIZE = 1024;
-    public TreeNode<FILE_ITEM>[] pItems = new TreeNode<FILE_ITEM>[TABLE_SIZE];
-    public FILE_TABLE? pNext = null;
+    public TreeNode<FILE_ITEM>[] Items = new TreeNode<FILE_ITEM>[TABLE_SIZE];
+    public FILE_TABLE? Next = null;
 }
 public struct FILETIME
 {
-    public uint dwLowDateTime;
-    public uint dwHighDateTime;
+    public uint LowDateTime;
+    public uint HighDateTime;
 }
 public enum IPPROTOS : int
 {
@@ -177,7 +172,7 @@ public enum IPPROTOS : int
     IPPROTO_UDP = 17
 }
 
-public enum MAPPROCS : int
+public enum MAP_PROCS : int
 {
     MAPPROC_NULL = 0,
     MAPPROC_SET = 1,
@@ -198,8 +193,7 @@ public enum MNTS : int
     MNTERR_INVAL = 22
 }
 
-
-public enum MOUNTPROCS : int
+public enum MOUNT_PROCS : int
 {
     MOUNTPROC_NULL = 0,
     MOUNTPROC_MNT = 1,
@@ -209,13 +203,11 @@ public enum MOUNTPROCS : int
     MOUNTPROC_EXPORT = 5
 }
 
-
 public enum MSGREPS : int
 {
     MSG_ACCEPTED = 0,
     MSG_DENIED = 1
 }
-
 
 public enum NFS3S : int
 {
@@ -250,7 +242,6 @@ public enum NFS3S : int
     NFS3ERR_JUKEBOX = 10008
 }
 
-
 public enum NF3S : uint
 {
     NF3REG = 1,
@@ -262,7 +253,6 @@ public enum NF3S : uint
     NF3FIFO = 7
 }
 
-
 public enum NFS_PORTS : uint
 {
     PORTMAP_PORT = 111,
@@ -272,49 +262,44 @@ public enum NFS_PORTS : uint
 
 public class NfsFh3 : Opaque
 {
-    public NfsFh3() : base(CFileTable.NFS3_FHSIZE) { }
+    public NfsFh3() : base(FileTable.NFS3_FHSIZE) { }
 }
-
-
 
 public class WccAttribute
 {
-    public ulong size = 0;
-    public NfsTime3 mtime = new();
-    public NfsTime3 ctime = new();
+    public ulong Size = 0;
+    public NfsTime3 MTime = new();
+    public NfsTime3 CTime = new();
 }
 
 public class NfsPath3 : Opaque
 {
-    public string? path = null;
-
+    public string? Path = null;
     public NfsPath3() { }
-
     public override void SetSize(uint len) { }
-    public void Set(string str) => this.contents = Encoding.UTF8.GetBytes(path = str);
+    public void Set(string text) => this.Contents = Encoding.UTF8.GetBytes(Path = text);
 }
 
 
 public class SetUid3
 {
-    public bool set_it = false;
-    public uint uid = 0;
+    public bool SetIt = false;
+    public uint Uid = 0;
 }
-
 
 public class SetSize3
 {
-    public bool set_it = false;
-    public ulong size = 0;
+    public bool SetIt = false;
+    public ulong Size = 0;
 }
 
 public class SetMode3
 {
-    public bool set_it = false;
-    public uint mode = 0;
+    public bool SetIt = false;
+    public uint Mode = 0;
 }
 
-public enum NFSPROC3S : int
+public enum NFS_PROC3S : int
 {
     NFSPROC3_NULL = 0,
     NFSPROC3_GETATTR = 1,
@@ -341,25 +326,25 @@ public enum NFSPROC3S : int
 }
 public class NfsTime3
 {
-    public uint seconds = 0;
-    public uint nseconds = 0;
+    public uint Seconds = 0;
+    public uint NSeconds = 0;
 }
 
 public class Opaque
 {
-    public uint length = 0;
-    public byte[]? contents = null;
+    public uint Length = 0;
+    public byte[]? Contents = null;
 
     public Opaque() { }
-    public Opaque(uint len) => this.SetSize(len);
-
-    public virtual void SetSize(uint len) => this.contents = new byte[this.length = len];
+    public Opaque(uint length) => this.SetSize(length);
+    public virtual void SetSize(uint length)
+        => this.Contents = new byte[this.Length = length];
 }
 
 public class OPAQUE_AUTH
 {
-    public uint flavor = 0;
-    public uint length = 0;
+    public uint Flavor = 0;
+    public uint Length = 0;
 }
 
 public enum OPS : int
@@ -370,10 +355,10 @@ public enum OPS : int
 
 public class PORTMAP_HEADER
 {
-    public uint prog = 0;
-    public uint vers = 0;
-    public uint proto = 0;
-    public uint port = 0;
+    public uint Procedure = 0;
+    public uint Vers = 0;
+    public uint Proto = 0;
+    public uint Port = 0;
 }
 public enum PathFormats : int
 {
@@ -382,14 +367,14 @@ public enum PathFormats : int
 }
 public class PostOpAttr
 {
-    public bool attributes_follow = false;
-    public Fattr3 attributes = new();
+    public bool AttributesFollow = false;
+    public Fattr3 Attributes = new();
 }
 
 public class PostOpFh3
 {
-    public bool handle_follows = false;
-    public NfsFh3 handle = new();
+    public bool HandleFollows = false;
+    public NfsFh3 Handle = new();
 }
 
 public enum PPORTS : int
@@ -405,21 +390,20 @@ public enum PRC_STATUS : int
     PRC_NOTIMP
 }
 
-
 public class PreOpAttr
 {
-    public bool attributes_follow = false;
-    public WccAttribute attributes = new();
+    public bool AttributesFollow = false;
+    public WccAttribute Attributes = new();
 }
 
 public class ProcessParam
 {
-    public uint nVersion = 0;
-    public uint nProc = 0;
-    public string pRemoteAddr = "";
+    public uint Version = 0;
+    public uint Procedure = 0;
+    public string RemoteAddress = "";
 }
 
-public enum PROGCS : int
+public enum PROG_RESULT : int
 {
     SUCCESS = 0,
     PROG_UNAVAIL = 1,
@@ -434,6 +418,7 @@ public enum PROGS : int
     PROG_NFS = 100003,
     PROG_MOUNT = 100005
 }
+
 public enum PROG_PORTS : int
 {
     PROG_PORTMAP = 100000,
@@ -441,19 +426,18 @@ public enum PROG_PORTS : int
     PROG_MOUNT = 100005
 }
 
-public struct RPC_HEADER
+public class RPC_HEADER
 {
-    public uint header;
+    public uint Header;
     public uint XID;
-    public uint msg;
-    public uint rpcvers;
-    public uint prog;
-    public uint vers;
-    public uint proc;
-    public OPAQUE_AUTH cred;
-    public OPAQUE_AUTH verf;
+    public uint Msg;
+    public uint Rpcvers;
+    public uint Prog;
+    public uint Vers;
+    public uint Proc;
+    public OPAQUE_AUTH Credential = new ();
+    public OPAQUE_AUTH Verification = new();
 }
-
 
 [StructLayout(LayoutKind.Sequential)]
 public struct SymbolicLinkReparseBuffer
@@ -465,6 +449,7 @@ public struct SymbolicLinkReparseBuffer
     public uint Flags;
     public StringBuilder PathBuffer;
 }
+
 [StructLayout(LayoutKind.Sequential)]
 public struct MountPointReparseBuffer
 {
@@ -474,12 +459,12 @@ public struct MountPointReparseBuffer
     public ushort PrintNameLength;
     public StringBuilder PathBuffer;
 }
+
 [StructLayout(LayoutKind.Sequential)]
 public struct GenericReparseBuffer
 {
     public StringBuilder DataBuffer;
 }
-
 
 [StructLayout(LayoutKind.Explicit)]
 public struct REPARSE_DATA_BUFFER
@@ -491,9 +476,9 @@ public struct REPARSE_DATA_BUFFER
     [FieldOffset(6)]
     public ushort Reserved;
     [FieldOffset(8)]
-    public SymbolicLinkReparseBuffer sbuffer;
+    public SymbolicLinkReparseBuffer SBuffer;
     [FieldOffset(8)]
-    public MountPointReparseBuffer mbuffer;
+    public MountPointReparseBuffer MBuffer;
     [FieldOffset(8)]
-    public GenericReparseBuffer gbuffer;
+    public GenericReparseBuffer GBuffer;
 }

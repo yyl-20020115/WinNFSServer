@@ -2,7 +2,7 @@
 
 namespace LibWinNFSServer;
 
-public class CMountProg(CFileTable fileTable) : CRPCProg
+public class MountProcedure(FileTable table) : RPCProcedure
 {
     public const int MOUNT_NUM_MAX = 100;
     public const int MOUNT_PATH_MAX = 100;
@@ -11,12 +11,12 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     protected string? path_file = null;
     protected Dictionary<string, string>? paths;
     protected List<string> clients = [];
-    protected IInputStream? in_stream;
-    protected IOutputStream? out_stream;
+    protected InputStream? ins;
+    protected OutputStream? outs;
 
-    private ProcessParam? m_pParam;
+    private ProcessParam? parameter;
     private PRC_STATUS result;
-    private readonly CFileTable fileTable = fileTable;
+    private readonly FileTable table = table;
 
     public bool SetPathFile(string file)
     {
@@ -27,21 +27,21 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         path_file = formattedFile;
         return true;
     }
-    public void Export(string path, string pathAlias)
+    public void Export(string path, string alias)
     {
         var formattedPath = FormatPath(path, PathFormats.FORMAT_PATH);
-        pathAlias = FormatPath(pathAlias, PathFormats.FORMAT_PATHALIAS);
+        alias = FormatPath(alias, PathFormats.FORMAT_PATHALIAS);
 
-        if (path != null && pathAlias != null)
+        if (path != null && alias != null)
         {
-            if (!paths.ContainsKey(pathAlias))
+            if (!paths.ContainsKey(alias))
             {
-                paths[pathAlias] = formattedPath;
-                Console.WriteLine($"Path #{paths.Count} is: {path}, path alias is: {pathAlias}");
+                paths[alias] = formattedPath;
+                Console.WriteLine($"Path #{paths.Count} is: {path}, path alias is: {alias}");
             }
             else
             {
-                Console.WriteLine($"Path {path} with path alias {pathAlias} already known");
+                Console.WriteLine($"Path {path} with path alias {alias} already known");
             }
         }
     }
@@ -77,9 +77,9 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
     }
     public int Clients => mounts;  //the number of clients mounted
 
-    public override int Process(IInputStream pInStream, IOutputStream pOutStream, ProcessParam pParam)
+    public override int Process(InputStream ins, OutputStream outs, ProcessParam param)
     {
-        PPROC[] procs = [
+        PROC[] procs = [
             NULL,
             MNT,
             NOIMP,
@@ -89,18 +89,18 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
 
         PrintLog("MOUNT ");
 
-        if (pParam.nProc >= procs.Length)
+        if (param.Procedure >= procs.Length)
         {
             NOIMP();
             PrintLog("\n");
             return (int)PRC_STATUS.PRC_NOTIMP;
         }
 
-        in_stream = pInStream;
-        out_stream = pOutStream;
-        m_pParam = pParam;
+        this.ins = ins;
+        this.outs = outs;
+        this.parameter = param;
         result = PRC_STATUS.PRC_OK;
-        procs[pParam.nProc]();
+        procs[param.Procedure]();
         PrintLog("\n");
 
         return (int)result;
@@ -178,23 +178,23 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         int i;
 
         PrintLog("MNT");
-        PrintLog($" from {m_pParam?.pRemoteAddr ?? ""}\n");
+        PrintLog($" from {parameter?.RemoteAddress ?? ""}\n");
 
         if (GetPath(ref path))
         {
-            out_stream.Write((int)MNTS.MNT_OK); //OK
-            var handle = this.fileTable.GetHandleByPath(path);
-            if (m_pParam.nVersion == 1)
+            outs.Write((int)MNTS.MNT_OK); //OK
+            var handle = this.table.GetHandleByPath(path);
+            if (parameter.Version == 1)
             {
                 var half = new byte[handle.Length >> 1];
                 Array.Copy(handle, half, half.Length);
-                out_stream.Write(half);  //fhandle
+                outs.Write(half);  //fhandle
             }
             else
             {
-                out_stream.Write(NFS3_FHSIZE);  //length
-                out_stream.Write(handle);  //fhandle
-                out_stream.Write(0);  //flavor
+                outs.Write(NFS3_FHSIZE);  //length
+                outs.Write(handle);  //fhandle
+                outs.Write(0);  //flavor
             }
 
             ++mounts;
@@ -203,14 +203,14 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
             {
                 if (clients[i] == null)
                 { //search an empty space
-                    clients[i] = m_pParam.pRemoteAddr;
+                    clients[i] = parameter.RemoteAddress;
                     break;
                 }
             }
         }
         else
         {
-            out_stream.Write((int)MNTS.MNTERR_ACCESS);  //permission denied
+            outs.Write((int)MNTS.MNTERR_ACCESS);  //permission denied
         }
     }
     protected void UMNT()
@@ -219,13 +219,13 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
 
         PrintLog("UMNT");
         GetPath(ref path);
-        PrintLog($" from {m_pParam?.pRemoteAddr ?? ""}");
+        PrintLog($" from {parameter?.RemoteAddress ?? ""}");
 
         for (var i = 0; i < clients.Count; i++)
         {
             if (clients[i] != null)
             {
-                if (string.Compare(m_pParam?.pRemoteAddr, clients[i]) == 0)
+                if (string.Compare(parameter?.RemoteAddress, clients[i]) == 0)
                 { //address match
                   //remove this address
                     clients[i] = null;
@@ -249,25 +249,25 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
             var buffer = Encoding.UTF8.GetBytes(_path);
             int length = buffer.Length;
             // dirpath
-            out_stream.Write(1);
-            out_stream.Write(length);
-            out_stream.Write(buffer);
+            outs.Write(1);
+            outs.Write(length);
+            outs.Write(buffer);
             var fillBytes = (length % 4);
             if (fillBytes > 0)
             {
                 fillBytes = 4 - fillBytes;
-                out_stream.Write(Encoding.ASCII.GetBytes("."));
+                outs.Write(Encoding.ASCII.GetBytes("."));
             }
             // groups
-            out_stream.Write(1);
-            out_stream.Write(1);
-            out_stream.Write(Encoding.ASCII.GetBytes("*"));
-            out_stream.Write(Encoding.ASCII.GetBytes("..."));
-            out_stream.Write(0);
+            outs.Write(1);
+            outs.Write(1);
+            outs.Write(Encoding.ASCII.GetBytes("*"));
+            outs.Write(Encoding.ASCII.GetBytes("..."));
+            outs.Write(0);
         }
 
-        out_stream.Write(0);
-        out_stream.Write(0);
+        outs.Write(0);
+        outs.Write(0);
     }
     protected void NOIMP()
     {
@@ -281,12 +281,12 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         string finalPath = "";
         bool foundPath = false;
 
-        in_stream.Read(out uint nSize);
+        ins.Read(out uint nSize);
 
         if (nSize > MAXPATHLEN) nSize = MAXPATHLEN;
 
         var bytes = new byte[nSize];
-        in_stream.Read(bytes);
+        ins.Read(bytes);
 
         path = Encoding.UTF8.GetString(bytes);
         // TODO: this whole method is quite ugly and ripe for refactoring
@@ -346,7 +346,7 @@ public class CMountProg(CFileTable fileTable) : CRPCProg
         {
             var buffer = new byte[4];
             //4 - (nSize & 3)
-            in_stream.Read(buffer);  //skip opaque bytes
+            ins.Read(buffer);  //skip opaque bytes
         }
 
         returnPath = finalPath;

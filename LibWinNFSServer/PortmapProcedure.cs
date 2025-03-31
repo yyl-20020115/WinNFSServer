@@ -1,23 +1,23 @@
 ﻿namespace LibWinNFSServer;
 
-public class CPortmapProg :  CRPCProg
+public class PortmapProcedure :  RPCProcedure
 {
     public const int PORT_NUM = 10;
     public const int MIN_PROG_NUM = 100000;
 
-    protected uint[] port_table = new uint[PORT_NUM];
-    protected IInputStream? in_stream;
-    protected IOutputStream? out_stream;
+    protected uint[] ports = new uint[PORT_NUM];
+    protected InputStream? ins;
+    protected OutputStream? outs;
 
     private ProcessParam parameters = new();
     private PRC_STATUS result = PRC_STATUS.PRC_OK;
 
-    public CPortmapProg() { }
-    public void Set(PROGS prog, NFS_PORTS port) => this.port_table[(int)prog - MIN_PROG_NUM] = (uint)port;
+    public PortmapProcedure() { }
+    public void Set(PROGS prog, NFS_PORTS port) => this.ports[(int)prog - MIN_PROG_NUM] = (uint)port;
 
-    public override int Process(IInputStream in_stream, IOutputStream out_stream, ProcessParam parameters)
+    public override int Process(InputStream in_stream, OutputStream out_stream, ProcessParam parameters)
     {
-        PPROC[] procs = [
+        PROC[] procs = [
             NULL, 
             SET, 
             UNSET,
@@ -28,18 +28,18 @@ public class CPortmapProg :  CRPCProg
 
         PrintLog("PORTMAP ");
 
-        if (parameters.nProc >= procs.Length)
+        if (parameters.Procedure >= procs.Length)
         {
             PrintLog("NOIMP");
             PrintLog("\n");
             return (int)(result = PRC_STATUS.PRC_NOTIMP);
         }
 
-        this.in_stream = in_stream;
-        this.out_stream = out_stream;
+        this.ins = in_stream;
+        this.outs = out_stream;
         this.parameters = parameters;
         result = PRC_STATUS.PRC_OK;
-        procs[parameters.nProc]();
+        procs[parameters.Procedure]();
         PrintLog("\n");
 
         return (int)result;
@@ -65,13 +65,13 @@ public class CPortmapProg :  CRPCProg
     {
         PORTMAP_HEADER header = new();
         PrintLog("GETPORT");
-        in_stream?.Read(out header.prog);  //program
-        in_stream?.Skip(12);
-        uint nPort = header.prog >= MIN_PROG_NUM && header.prog < MIN_PROG_NUM + PORT_NUM
-            ? port_table[header.prog - MIN_PROG_NUM] 
+        ins?.Read(out header.Procedure);  //program
+        ins?.Skip(12);
+        uint port = header.Procedure >= MIN_PROG_NUM && header.Procedure < MIN_PROG_NUM + PORT_NUM
+            ? ports[header.Procedure - MIN_PROG_NUM] 
             : 0;
-        PrintLog(" {0} {1}", header.prog, nPort);
-        out_stream?.Write(nPort);  //port
+        PrintLog($" {header.Procedure} {port}");
+        outs?.Write(port);  //port
 
     }
 
@@ -86,7 +86,7 @@ public class CPortmapProg :  CRPCProg
         Write(PROG_PORTS.PROG_MOUNT, 3, IPPROTOS.IPPROTO_TCP, PPORTS.MOUNT_PORT);
         Write(PROG_PORTS.PROG_MOUNT, 3, IPPROTOS.IPPROTO_UDP, PPORTS.MOUNT_PORT);
 
-        out_stream?.Write(0);
+        outs?.Write(0);
     }
 
     protected void CALLIT()
@@ -97,10 +97,10 @@ public class CPortmapProg :  CRPCProg
 
     private void Write(PROG_PORTS prog, uint vers, IPPROTOS proto, PPORTS port)
     {
-        out_stream?.Write(1);
-        out_stream?.Write((uint)prog);
-        out_stream?.Write(vers);
-        out_stream?.Write((uint)proto);
-        out_stream?.Write((uint)port);
+        outs?.Write(1);
+        outs?.Write((uint)prog);
+        outs?.Write(vers);
+        outs?.Write((uint)proto);
+        outs?.Write((uint)port);
     }
 }

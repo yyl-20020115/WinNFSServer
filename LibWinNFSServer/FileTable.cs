@@ -1,16 +1,16 @@
 ﻿namespace LibWinNFSServer;
 
-public class CFileTable
+public class FileTable
 {
     public const int FHSIZE = 32;
     public const int NFS3_FHSIZE = 64;
 
-    private readonly CFileTree tree = new();
+    private readonly FileTree tree = new();
 
     private readonly FILE_TABLE first;
     private FILE_TABLE last;
     private uint size = 0;
-    public CFileTable()
+    public FileTable()
     {
         this.first
             = this.last
@@ -47,7 +47,7 @@ public class CFileTable
         var node = GetItemByID(id);
         if (node != null)
         {
-            CFileTree.GetNodeFullPath(node, ref path);
+            FileTree.GetNodeFullPath(node, ref path);
             return true;
         }
         return false;
@@ -71,15 +71,15 @@ public class CFileTable
                 var pTable = first;
                 for (i = FILE_TABLE.TABLE_SIZE; i <= handle; i += FILE_TABLE.TABLE_SIZE)
                 {
-                    pTable = pTable?.pNext;
+                    pTable = pTable?.Next;
                 }
 
-                pTable.pItems[handle + FILE_TABLE.TABLE_SIZE - i] = null;
+                pTable.Items[handle + FILE_TABLE.TABLE_SIZE - i] = null;
             }
             // Remove from table end
 
             var rpath = "";
-            CFileTree.GetNodeFullPath(foundDeletedItem, ref rpath);
+            FileTree.GetNodeFullPath(foundDeletedItem, ref rpath);
             tree.RemoveItem(rpath);
             return true;
         }
@@ -106,10 +106,10 @@ public class CFileTable
 
         if (size > 0 && (size & (FILE_TABLE.TABLE_SIZE - 1)) == 0)
         {
-            last.pNext = new ();
-            last = last.pNext;
-            last.pNext = null;
-            Array.Clear(last.pItems);
+            last.Next = new ();
+            last = last.Next;
+            last.Next = null;
+            Array.Clear(last.Items);
         }
 
         //printf("\nAdd file %s for handle %i\n", path, (unsigned int )item.handle);
@@ -120,7 +120,7 @@ public class CFileTable
             //printf("Can't find node just added %s\n", path);
         }
 
-        last.pItems[size & (FILE_TABLE.TABLE_SIZE - 1)] = node;  //add the new item in the file table
+        last.Items[size & (FILE_TABLE.TABLE_SIZE - 1)] = node;  //add the new item in the file table
         ++size;
 
         return node;  //return the pointer to the new item
@@ -132,9 +132,9 @@ public class CFileTable
         var pTable = first;
         uint i = FILE_TABLE.TABLE_SIZE;
         for (; i <= nID; i += FILE_TABLE.TABLE_SIZE)
-            pTable = pTable?.pNext;
+            pTable = pTable?.Next;
 
-        return pTable?.pItems[nID + FILE_TABLE.TABLE_SIZE - i];
+        return pTable?.Items[nID + FILE_TABLE.TABLE_SIZE - i];
     }
     public int SRenameFile(string pathFrom, string pathTo)
     {

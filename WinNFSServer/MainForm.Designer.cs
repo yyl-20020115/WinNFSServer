@@ -30,90 +30,177 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             statusStrip = new StatusStrip();
-            menuStrip = new MenuStrip();
-            文件FToolStripMenuItem = new ToolStripMenuItem();
-            打开OToolStripMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem1 = new ToolStripSeparator();
-            退出XToolStripMenuItem = new ToolStripMenuItem();
-            帮助HToolStripMenuItem = new ToolStripMenuItem();
-            关于AToolStripMenuItem = new ToolStripMenuItem();
-            exitToolStripMenuItem = new ToolStripMenuItem();
-            helpToolStripMenuItem = new ToolStripMenuItem();
-            aboutToolStripMenuItem = new ToolStripMenuItem();
-            menuStrip.SuspendLayout();
+            label1 = new Label();
+            label2 = new Label();
+            textBoxUID = new TextBox();
+            textBoxGID = new TextBox();
+            textBoxIP = new TextBox();
+            label3 = new Label();
+            label4 = new Label();
+            textBoxLocalDirectory = new TextBox();
+            label5 = new Label();
+            textBoxExportDirectory = new TextBox();
+            textBoxMountPort = new TextBox();
+            label6 = new Label();
+            checkBoxLog = new CheckBox();
+            label7 = new Label();
+            textBoxRPC = new TextBox();
+            label8 = new Label();
+            label9 = new Label();
+            textBoxLockPort = new TextBox();
+            textBoxStatPort = new TextBox();
+            buttonConfirm = new Button();
+            buttonCancel = new Button();
             SuspendLayout();
             // 
             // statusStrip
             // 
+            statusStrip.ImageScalingSize = new Size(24, 24);
             resources.ApplyResources(statusStrip, "statusStrip");
             statusStrip.Name = "statusStrip";
             // 
-            // menuStrip
+            // label1
             // 
-            resources.ApplyResources(menuStrip, "menuStrip");
-            menuStrip.Items.AddRange(new ToolStripItem[] { 文件FToolStripMenuItem, 帮助HToolStripMenuItem, helpToolStripMenuItem });
-            menuStrip.Name = "menuStrip";
+            resources.ApplyResources(label1, "label1");
+            label1.Name = "label1";
             // 
-            // 文件FToolStripMenuItem
+            // label2
             // 
-            resources.ApplyResources(文件FToolStripMenuItem, "文件FToolStripMenuItem");
-            文件FToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 打开OToolStripMenuItem, toolStripMenuItem1, 退出XToolStripMenuItem });
-            文件FToolStripMenuItem.Name = "文件FToolStripMenuItem";
+            resources.ApplyResources(label2, "label2");
+            label2.Name = "label2";
             // 
-            // 打开OToolStripMenuItem
+            // textBoxUID
             // 
-            resources.ApplyResources(打开OToolStripMenuItem, "打开OToolStripMenuItem");
-            打开OToolStripMenuItem.Name = "打开OToolStripMenuItem";
+            resources.ApplyResources(textBoxUID, "textBoxUID");
+            textBoxUID.Name = "textBoxUID";
             // 
-            // toolStripMenuItem1
+            // textBoxGID
             // 
-            resources.ApplyResources(toolStripMenuItem1, "toolStripMenuItem1");
-            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            resources.ApplyResources(textBoxGID, "textBoxGID");
+            textBoxGID.Name = "textBoxGID";
             // 
-            // 退出XToolStripMenuItem
+            // textBoxIP
             // 
-            resources.ApplyResources(退出XToolStripMenuItem, "退出XToolStripMenuItem");
-            退出XToolStripMenuItem.Name = "退出XToolStripMenuItem";
-            退出XToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
+            resources.ApplyResources(textBoxIP, "textBoxIP");
+            textBoxIP.Name = "textBoxIP";
             // 
-            // 帮助HToolStripMenuItem
+            // label3
             // 
-            resources.ApplyResources(帮助HToolStripMenuItem, "帮助HToolStripMenuItem");
-            帮助HToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 关于AToolStripMenuItem, exitToolStripMenuItem });
-            帮助HToolStripMenuItem.Name = "帮助HToolStripMenuItem";
+            resources.ApplyResources(label3, "label3");
+            label3.Name = "label3";
             // 
-            // 关于AToolStripMenuItem
+            // label4
             // 
-            resources.ApplyResources(关于AToolStripMenuItem, "关于AToolStripMenuItem");
-            关于AToolStripMenuItem.Name = "关于AToolStripMenuItem";
-            关于AToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
+            resources.ApplyResources(label4, "label4");
+            label4.Name = "label4";
             // 
-            // exitToolStripMenuItem
+            // textBoxLocalDirectory
             // 
-            resources.ApplyResources(exitToolStripMenuItem, "exitToolStripMenuItem");
-            exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            resources.ApplyResources(textBoxLocalDirectory, "textBoxLocalDirectory");
+            textBoxLocalDirectory.Name = "textBoxLocalDirectory";
             // 
-            // helpToolStripMenuItem
+            // label5
             // 
-            resources.ApplyResources(helpToolStripMenuItem, "helpToolStripMenuItem");
-            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem });
-            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            resources.ApplyResources(label5, "label5");
+            label5.Name = "label5";
             // 
-            // aboutToolStripMenuItem
+            // textBoxExportDirectory
             // 
-            resources.ApplyResources(aboutToolStripMenuItem, "aboutToolStripMenuItem");
-            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            resources.ApplyResources(textBoxExportDirectory, "textBoxExportDirectory");
+            textBoxExportDirectory.Name = "textBoxExportDirectory";
+            // 
+            // textBoxMountPort
+            // 
+            resources.ApplyResources(textBoxMountPort, "textBoxMountPort");
+            textBoxMountPort.Name = "textBoxMountPort";
+            // 
+            // label6
+            // 
+            resources.ApplyResources(label6, "label6");
+            label6.Name = "label6";
+            // 
+            // checkBoxLog
+            // 
+            resources.ApplyResources(checkBoxLog, "checkBoxLog");
+            checkBoxLog.Name = "checkBoxLog";
+            checkBoxLog.UseVisualStyleBackColor = true;
+            // 
+            // label7
+            // 
+            resources.ApplyResources(label7, "label7");
+            label7.Name = "label7";
+            // 
+            // textBoxRPC
+            // 
+            resources.ApplyResources(textBoxRPC, "textBoxRPC");
+            textBoxRPC.Name = "textBoxRPC";
+            // 
+            // label8
+            // 
+            resources.ApplyResources(label8, "label8");
+            label8.Name = "label8";
+            // 
+            // label9
+            // 
+            resources.ApplyResources(label9, "label9");
+            label9.Name = "label9";
+            // 
+            // textBoxLockPort
+            // 
+            resources.ApplyResources(textBoxLockPort, "textBoxLockPort");
+            textBoxLockPort.Name = "textBoxLockPort";
+            // 
+            // textBoxStatPort
+            // 
+            resources.ApplyResources(textBoxStatPort, "textBoxStatPort");
+            textBoxStatPort.Name = "textBoxStatPort";
+            // 
+            // buttonConfirm
+            // 
+            resources.ApplyResources(buttonConfirm, "buttonConfirm");
+            buttonConfirm.Name = "buttonConfirm";
+            buttonConfirm.UseVisualStyleBackColor = true;
+            // 
+            // buttonCancel
+            // 
+            resources.ApplyResources(buttonCancel, "buttonCancel");
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
+            AcceptButton = buttonConfirm;
             resources.ApplyResources(this, "$this");
             AutoScaleMode = AutoScaleMode.Font;
+            CancelButton = buttonCancel;
+            Controls.Add(buttonCancel);
+            Controls.Add(buttonConfirm);
+            Controls.Add(textBoxStatPort);
+            Controls.Add(textBoxLockPort);
+            Controls.Add(label9);
+            Controls.Add(label8);
+            Controls.Add(textBoxRPC);
+            Controls.Add(label7);
+            Controls.Add(checkBoxLog);
+            Controls.Add(label6);
+            Controls.Add(textBoxMountPort);
+            Controls.Add(textBoxExportDirectory);
+            Controls.Add(label5);
+            Controls.Add(textBoxLocalDirectory);
+            Controls.Add(label4);
+            Controls.Add(textBoxIP);
+            Controls.Add(label3);
+            Controls.Add(textBoxGID);
+            Controls.Add(textBoxUID);
+            Controls.Add(label2);
+            Controls.Add(label1);
             Controls.Add(statusStrip);
-            Controls.Add(menuStrip);
-            MainMenuStrip = menuStrip;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "MainForm";
-            menuStrip.ResumeLayout(false);
-            menuStrip.PerformLayout();
+            TopMost = true;
+            Load += MainForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -121,15 +208,26 @@
         #endregion
 
         private StatusStrip statusStrip;
-        private MenuStrip menuStrip;
-        private ToolStripMenuItem 文件FToolStripMenuItem;
-        private ToolStripMenuItem 打开OToolStripMenuItem;
-        private ToolStripSeparator toolStripMenuItem1;
-        private ToolStripMenuItem 退出XToolStripMenuItem;
-        private ToolStripMenuItem 帮助HToolStripMenuItem;
-        private ToolStripMenuItem 关于AToolStripMenuItem;
-        private ToolStripMenuItem exitToolStripMenuItem;
-        private ToolStripMenuItem helpToolStripMenuItem;
-        private ToolStripMenuItem aboutToolStripMenuItem;
+        private Label label1;
+        private Label label2;
+        private TextBox textBoxUID;
+        private TextBox textBoxGID;
+        private TextBox textBoxIP;
+        private Label label3;
+        private Label label4;
+        private TextBox textBoxLocalDirectory;
+        private Label label5;
+        private TextBox textBoxExportDirectory;
+        private TextBox textBoxMountPort;
+        private Label label6;
+        private CheckBox checkBoxLog;
+        private Label label7;
+        private TextBox textBoxRPC;
+        private Label label8;
+        private Label label9;
+        private TextBox textBoxLockPort;
+        private TextBox textBoxStatPort;
+        private Button buttonConfirm;
+        private Button buttonCancel;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace LibWinNFSServer;
 
-public class CSocketStream : IInputStream, IOutputStream
+public class SocketStream : InputStream, OutputStream
 {
     public const int MAXDATA = 1 << 20;
 
@@ -15,7 +15,7 @@ public class CSocketStream : IInputStream, IOutputStream
     public byte[] Output => outBuffer;
     public int OutputSize => outBufferSize;
     public int BufferSize => MAXDATA;
-    public CSocketStream()
+    public SocketStream()
     {
 
     }
@@ -60,7 +60,7 @@ public class CSocketStream : IInputStream, IOutputStream
         value = BitConverter.ToUInt32(pData);
         return s;
     }
-    public int Read8(out ulong value)
+    public int Read(out ulong value)
     {
         var pData = new byte[sizeof(ulong)];
         int s = Read(pData);

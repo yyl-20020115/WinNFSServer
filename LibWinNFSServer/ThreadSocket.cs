@@ -3,16 +3,16 @@ using System.Net.Sockets;
 
 namespace LibWinNFSServer;
 
-public class CSocket(int type) : IDisposable
+public class ThreadSocket(int type) : IDisposable
 {
     public const int SOCK_STREAM = 1;
     public const int SOCK_DGRAM = 2;
 
-    private int type = type;
+    private readonly int type = type;
     private Socket? socket;
     private EndPoint? remote;
-    private ISocketListener? listener;
-    private CSocketStream? stream;
+    private SocketListener? listener;
+    private SocketStream? stream;
     private bool active;
     private Thread? thread;
     private bool disposed;
@@ -37,12 +37,12 @@ public class CSocket(int type) : IDisposable
         }
     }
 
-    ~CSocket()
+    ~ThreadSocket()
     {
         Dispose(disposing: false);
     }
     public int SocketType => this.type;
-    public void Open(Socket socket, ISocketListener? listener, EndPoint? remote = null)
+    public void Open(Socket socket, SocketListener? listener, EndPoint? remote = null)
     {
         Close();
 
@@ -94,8 +94,8 @@ public class CSocket(int type) : IDisposable
             ? ipe.Port
             : -1
             ;
-    public IInputStream? InputStream => this.stream;
-    public IOutputStream? OutputStream => this.stream;
+    public InputStream? InputStream => this.stream;
+    public OutputStream? OutputStream => this.stream;
 
     protected void Run()
     {

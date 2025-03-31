@@ -1,7 +1,7 @@
 ﻿namespace LibWinNFSServer;
-public abstract class CRPCProg
+public abstract class RPCProcedure
 {
-    protected delegate void PPROC();
+    protected delegate void PROC();
 
     /* The maximum number of bytes in a pathname argument. */
     public const int MAXPATHLEN = 1024;
@@ -12,8 +12,8 @@ public abstract class CRPCProg
     /* The size in bytes of the opaque file handle. */
     public const int FHSIZE = 32;
     public const int NFS3_FHSIZE = 64;
-    public CRPCProg() { }
-    public abstract int Process(IInputStream in_stream, IOutputStream out_stream, ProcessParam parameters);
+    public RPCProcedure() { }
+    public abstract int Process(InputStream ins, OutputStream outs, ProcessParam parameters);
     public virtual void SetLogOn(bool on) => this.enable_log = on;
 
     protected bool enable_log = false;

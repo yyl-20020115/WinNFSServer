@@ -3,34 +3,28 @@ using System.Net.Sockets;
 
 namespace LibWinNFSServer;
 
-public class CServerSocket
+public class ServerSocket
 {
     private int port = 0;
     private int max = 0;
     private Socket? socket = null;
-    private ISocketListener? listener = null;
+    private SocketListener? listener = null;
     private bool closed = true;
     private readonly Thread? thread;
-    private CSocket[]? sockets;
-    public CServerSocket()
+    private ThreadSocket[]? sockets;
+    public ServerSocket()
     {
 
     }
-    ~CServerSocket()
+    ~ServerSocket()
     {
         this.Close();
     }
-    public void SetListener(ISocketListener listener)
-    {
-        this.listener = listener;
-    }
+    public void SetListener(SocketListener listener) => this.listener = listener;
     public bool Open(string address,int nPort, int nMaxNum)
     {
         if (!IPEndPoint.TryParse(address, out var localAddr))
             return false;
-        int i;
-        uint id;
-
         Close();
 
         port = nPort;
@@ -45,11 +39,11 @@ public class CServerSocket
         socket.Bind(localAddr);
         socket.Listen();
 
-        sockets = new CSocket[max];
+        sockets = new ThreadSocket[max];
 
-        for (i = 0; i < max; i++)
+        for (var i = 0; i < max; i++)
         {
-            sockets[i] = new CSocket(CSocket.SOCK_STREAM);
+            sockets[i] = new ThreadSocket(ThreadSocket.SOCK_STREAM);
         }
 
         closed = false;
@@ -59,8 +53,6 @@ public class CServerSocket
     }
     public void Close()
     {
-        int i;
-
         if (closed) return;
 
         closed = true;
@@ -74,7 +66,7 @@ public class CServerSocket
 
         if (sockets != null)
         {
-            for (i = 0; i < max; i++)
+            for (var i = 0; i < max; i++)
             {
                 sockets[i].Dispose();
                 sockets[i] = null;
@@ -84,11 +76,7 @@ public class CServerSocket
         }
 
     }
-    public int GetPort()
-    {
-        return port;
-
-    }
+    public int Port => port;
     public void Run()
     {
         int i, nSize;

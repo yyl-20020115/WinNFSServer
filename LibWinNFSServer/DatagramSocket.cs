@@ -3,25 +3,25 @@ using System.Net.Sockets;
 
 namespace LibWinNFSServer;
 
-public class CDatagramSocket : IDisposable
+public class DatagramSocket : IDisposable
 {
     public const int SendBufferSize = 1 * (1 << 20);
     public const int ReceiveBufferSize = 8 * (1 << 20);
     public int Port => port;
     protected Socket? socket;
-    protected CSocket? csocket;
-    protected ISocketListener? listener;
+    protected ThreadSocket? csocket;
+    protected SocketListener? listener;
     protected int port;
-    protected bool is_closed;
+    protected bool closed;
     protected bool disposed;
 
-    public CDatagramSocket() { }
+    public DatagramSocket() { }
 
-    ~CDatagramSocket()
+    ~DatagramSocket()
     {
         Dispose(disposing: false);
     }
-    public void SetListener(ISocketListener listener) => this.listener = listener;
+    public void SetListener(SocketListener listener) => this.listener = listener;
     public bool Open(string address, int nPort)
     {
         if (!IPAddress.TryParse(address, out var ipa))
@@ -36,15 +36,15 @@ public class CDatagramSocket : IDisposable
         };
         this.socket.Bind(new IPEndPoint(ipa, nPort));
 
-        this.is_closed = false;
-        this.csocket = new CSocket(CSocket.SOCK_DGRAM);
+        this.closed = false;
+        this.csocket = new ThreadSocket(ThreadSocket.SOCK_DGRAM);
         this.csocket.Open(socket, listener);  //wait for receiving data
         return true;
     }
     public void Close()
     {
-        if (this.is_closed) return;
-        this.is_closed = true;
+        if (this.closed) return;
+        this.closed = true;
         this.csocket?.Dispose();
         this.csocket = null;
         this.socket = null;

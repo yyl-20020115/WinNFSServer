@@ -1,7 +1,12 @@
 ﻿using LibWinNFSServer;
 
 namespace WinNFSServerRepl;
-
+/// <summary>
+///    端口111:  RPC
+///    端口2048：用于NFS服务器的NFS mount协议，用于将远程文件系统挂载到本地文件系统。
+///    端口4045：用于NFS服务器的lockd进程，用于处理文件锁定操作。
+///    端口4046：用于NFS服务器的statd进程，用于处理客户端状态信息。
+/// </summary>
 public class Program
 {
     private static uint UID = 0;
@@ -9,27 +14,27 @@ public class Program
     private static bool UseLog = false;
     private static string FileName = "";
     private static string SocketAddress = "0.0.0.0";
-    private static readonly CFileTable fileTable = new();
-    private static readonly CRPCServer RPCServer = new();
-    private static readonly CPortmapProg PortmapProg = new();
-    private static readonly CNFSProg NFSProg = new();
-    private static readonly CMountProg MountProg = new(fileTable);
+    private static readonly FileTable fileTable = new();
+    private static readonly RPCServer RPCServer = new();
+    private static readonly PortmapProcedure PortmapProg = new();
+    private static readonly NFSProcedure NFSProg = new();
+    private static readonly MountProcedure MountProg = new(fileTable);
 
     public const int SOCKET_NUM = 3;
 
     private static void PrintUsage(string exe_path)
     {
-        Console.WriteLine($"Usage: {0} [-id <uid> <gid>] [-log on | off] [-pathFile <file>] [-addr <ip>] [export path] [alias path]\n", exe_path);
+        Console.WriteLine($"Usage: {exe_path} [-id <uid> <gid>] [-log on | off] [-pathFile <file>] [-addr <ip>] [export path] [alias path]\n");
         Console.WriteLine($"At least a file or a path is needed");
         Console.WriteLine($"For example:");
-        Console.WriteLine($"On Windows> {exe_path} d:\\work\n");
-        Console.WriteLine($"On Linux> mount -t nfs 192.168.12.34:/d/work mount\n");
+        Console.WriteLine($"On Windows> {exe_path} d:\\work");
+        Console.WriteLine($"On Linux> mount -t nfs 192.168.12.34:/d/work mount");
         Console.WriteLine($"For another example:");
         Console.WriteLine($"On Windows> {exe_path} d:\\work /exports");
-        Console.WriteLine($"On Linux> mount -t nfs 192.168.12.34:/exports\n");
+        Console.WriteLine($"On Linux> mount -t nfs 192.168.12.34:/exports");
         Console.WriteLine($"Another example where WinNFSServer is only bound to a specific interface:");
         Console.WriteLine($"On Windows> {exe_path} -addr 192.168.12.34 d:\\work /exports");
-        Console.WriteLine($"On Linux> mount - t nfs 192.168.12.34: / exports\n");
+        Console.WriteLine($"On Linux> mount - t nfs 192.168.12.34: / exports");
         Console.WriteLine($"Use \".\" to export the current directory (works also for -filePath):");
         Console.WriteLine($"On Windows> {exe_path} . /exports");
     }
@@ -171,8 +176,8 @@ public class Program
 
     private static void Start(List<(string path, string alias)> paths)
     {
-        var DatagramSockets = new CDatagramSocket[SOCKET_NUM];
-        var ServerSockets = new CServerSocket[SOCKET_NUM];
+        var DatagramSockets = new DatagramSocket[SOCKET_NUM];
+        var ServerSockets = new ServerSocket[SOCKET_NUM];
         var success = false;
 
         PortmapProg.Set(PROGS.PROG_MOUNT, NFS_PORTS.MOUNT_PORT);  //map port for mount

@@ -1,11 +1,10 @@
 ﻿namespace LibWinNFSServer;
 
-public class CFileTree
+public class FileTree
 {
     private readonly Tree<FILE_ITEM> tree = new();
     private Tree<FILE_ITEM>.PreOrderIterator? top = null;
-
-    public static bool Debug;
+    public static bool Debug { get; set; }
     public FILE_ITEM AddItem(string path, byte[] handle)
     {
         FILE_ITEM item = new()
@@ -53,9 +52,9 @@ public class CFileTree
 
         return item;
     }
-    public void RemoveItem(string absolutePath)
+    public void RemoveItem(string path)
     {
-        var node = FindNodeFromRootWithPath(absolutePath);
+        var node = FindNodeFromRootWithPath(path);
         if (node != null)
         {
             tree?.Erase(new Tree<FILE_ITEM>.IteratorBase(node));
@@ -87,8 +86,8 @@ public class CFileTree
             Tree<FILE_ITEM>.SiblingIterator firstChild = tree.Begin(new Tree<FILE_ITEM>.IteratorBase(parentNode));
             tree.MoveAfter(firstChild, new Tree<FILE_ITEM>.IteratorBase(node));
 
-            string sPath = (absolutePathTo);
-            string splittedPath = Path.GetFileName(sPath);
+            var sPath = (absolutePathTo);
+            var splittedPath = Path.GetFileName(sPath);
             node.Data.Path = splittedPath;
         }
         DisplayTree(top?.Node, 0);

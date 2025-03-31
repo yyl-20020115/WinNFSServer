@@ -1,29 +1,29 @@
 ﻿namespace LibWinNFSServer;
-public interface IInputStream
+public interface InputStream
 {
-    int Read(byte[] pData);
-    int Read(out int pnValue);
-    int Read8(out long pnValue);
-    int Read(out uint pnValue);
-    int Read8(out ulong pnValue);
-    int Skip(int nSize);
-    uint Skip(uint nSize);
+    int Read(byte[] data);
+    int Read(out int value);
+    int Read8(out long value);
+    int Read(out uint value);
+    int Read(out ulong value);
+    int Skip(int size);
+    uint Skip(uint size);
     int GetSize();
 }
 
 
-public interface IOutputStream
+public interface OutputStream
 {
-    void Write(byte[] pData);
-    void Write(int nValue);
-    void Write8(long nValue);
-    void Write(uint nValue);
-    void Write8(ulong nValue);
-    void Seek(int nOffset, SEEKS nFrom);
+    void Write(byte[] data);
+    void Write(int value);
+    void Write8(long value);
+    void Write(uint value);
+    void Write8(ulong value);
+    void Seek(int offset, SEEKS from);
     int Position { get; }
 }
 
-public interface ISocketListener
+public interface SocketListener
 {
-    void SocketReceived(CSocket pSocket);
+    void SocketReceived(ThreadSocket socket);
 }
