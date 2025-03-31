@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace LibWinNFSServer;
+﻿namespace LibWinNFSServer;
 
 public class NFSServer
 {
@@ -9,27 +7,23 @@ public class NFSServer
     public bool UseLog = false;
     public string FileName = "";
     public string SocketAddress = "0.0.0.0";
+    private const int SOCKET_NUM = 3;
     private FileTable? fileTable = new();
     private RPCServer? RPCServer = new();
     private PortmapProcedure? PortmapProg = new();
     private NFSProcedure? NFSProg = new();
     private MountProcedure? MountProg = new();
+    private readonly DatagramSocket[] _DatagramSockets = new DatagramSocket[SOCKET_NUM];
+    private readonly ServerSocket[] _ServerSockets = new ServerSocket[SOCKET_NUM];
 
-    private const int SOCKET_NUM = 3;
 
-    public NFSServer()
-    {
-    }
+    public NFSServer() { }
 
     private void MountPaths(List<(string path, string alias)> paths)
     {
         for (var i = 0; i < paths.Count; i++)
-        {
             MountProg?.Export(paths[i].path, paths[i].alias);  //export path for mount
-        }
     }
-    private readonly DatagramSocket[] _DatagramSockets = new DatagramSocket[SOCKET_NUM];
-    private readonly ServerSocket[] _ServerSockets = new ServerSocket[SOCKET_NUM];
 
     public void Stop()
     {
@@ -56,8 +50,7 @@ public class NFSServer
         this.RPCServer = new();
         this.PortmapProg = new();
         this.NFSProg = new();
-        this.MountProg = new();
-        this.MountProg.SetFileTable(this.fileTable);
+        this.MountProg = new(this.fileTable);
 
         PortmapProg.Set(PROGS.PROG_MOUNT,MountPort);  //map port for mount
         PortmapProg.Set(PROGS.PROG_NFS, NFSPort);  //map port for nfs
