@@ -65,7 +65,7 @@ public class NFSServer
         RPCServer.Set(PROGS.PROG_PORTMAP, PortmapProg);  //program for portmap
         RPCServer.Set(PROGS.PROG_NFS, NFSProg);  //program for nfs
         RPCServer.Set(PROGS.PROG_MOUNT, MountProg);  //program for mount
-        RPCServer.SetLogOn(UseLog);
+        Log.EnableLog(UseLog);
 
         for (var i = 0; i < SOCKET_NUM; i++)
         {

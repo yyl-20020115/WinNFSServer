@@ -195,7 +195,7 @@ public class FileTree
     {
         if (Debug)
         {
-            Console.WriteLine("\n\n\n<<<<<<<<<<<<<<<<<<<<<DISPLAY tree \n\n\n");
+            //Console.WriteLine("\n\n\n<<<<<<<<<<<<<<<<<<<<<DISPLAY tree \n\n\n");
             var sib = node?.FirstChild;
             var end = node?.LastChild;
             while (sib != end)
@@ -210,7 +210,7 @@ public class FileTree
                 }
                 sib = sib?.NextSibling;
             }
-            Console.WriteLine("\n\n\n<<<<<<<<<<<<<<<<<<<<<End tree \n\n\n");
+            //Console.WriteLine("\n\n\n<<<<<<<<<<<<<<<<<<<<<End tree \n\n\n");
         }
     }
 }

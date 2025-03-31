@@ -86,12 +86,12 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
             UMNTALL,
             EXPORT];
 
-        PrintLog("MOUNT ");
+        Log.Print("MOUNT ");
 
         if (param.Procedure >= procs.Length)
         {
             NOIMP();
-            PrintLog("\n");
+            Log.Print("\n");
             return (int)PRC_STATUS.PRC_NOTIMP;
         }
 
@@ -100,7 +100,7 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
         this.parameter = param;
         result = PRC_STATUS.PRC_OK;
         procs[param.Procedure]();
-        PrintLog("\n");
+        Log.Print("\n");
 
         return (int)result;
     }
@@ -168,7 +168,7 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
 
     protected void NULL()
     {
-        PrintLog("NULL");
+        Log.Print("NULL");
     }
     protected void MNT()
     {
@@ -176,8 +176,8 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
         var path = ""; //MAXPATHLEN+1
         int i;
 
-        PrintLog("MNT");
-        PrintLog($" from {parameter?.RemoteAddress ?? ""}\n");
+        Log.Print("MNT");
+        Log.Print($" from {parameter?.RemoteAddress ?? ""}\n");
 
         if (GetPath(ref path))
         {
@@ -216,9 +216,9 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
     {
         var path = ""; //MAXPATHLEN+1
 
-        PrintLog("UMNT");
+        Log.Print("UMNT");
         GetPath(ref path);
-        PrintLog($" from {parameter?.RemoteAddress ?? ""}");
+        Log.Print($" from {parameter?.RemoteAddress ?? ""}");
 
         for (var i = 0; i < clients.Count; i++)
         {
@@ -236,12 +236,12 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
     }
     protected void UMNTALL()
     {
-        PrintLog("UMNTALL NOIMP");
+        Log.Print("UMNTALL NOIMP");
         result = PRC_STATUS.PRC_NOTIMP;
     }
     protected void EXPORT()
     {
-        PrintLog("EXPORT");
+        Log.Print("EXPORT");
         //TODO: use encoding utf8?
         foreach (var _path in paths.Keys)
         {
@@ -270,7 +270,7 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
     }
     protected void NOIMP()
     {
-        PrintLog("NOIMP");
+        Log.Print("NOIMP");
         result = PRC_STATUS.PRC_NOTIMP;
     }
 
@@ -339,7 +339,7 @@ public class MountProcedure(FileTable? table = null) : RPCProcedure
 
         }
 
-        PrintLog($"Final local requested path: {finalPath}\n");
+        Log.Print($"Final local requested path: {finalPath}\n");
 
         if ((nSize & 3) != 0)
         {

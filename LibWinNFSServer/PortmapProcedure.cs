@@ -13,7 +13,8 @@ public class PortmapProcedure :  RPCProcedure
     private PRC_STATUS result = PRC_STATUS.PRC_OK;
 
     public PortmapProcedure() { }
-    public void Set(PROGS prog, NFS_PORTS port) => this.ports[(int)prog - MIN_PROG_NUM] = (uint)port;
+    public void Set(PROGS prog, NFS_PORTS port) 
+        => this.ports[(int)prog - MIN_PROG_NUM] = (uint)port;
 
     public override int Process(InputStream in_stream, OutputStream out_stream, ProcessParam parameters)
     {
@@ -26,12 +27,12 @@ public class PortmapProcedure :  RPCProcedure
             CALLIT
         ];
 
-        PrintLog("PORTMAP ");
+        Log.Print("PORTMAP ");
 
         if (parameters.Procedure >= procs.Length)
         {
-            PrintLog("NOIMP");
-            PrintLog("\n");
+            Log.Print("NOIMP");
+            Log.Print("\n");
             return (int)(result = PRC_STATUS.PRC_NOTIMP);
         }
 
@@ -40,44 +41,44 @@ public class PortmapProcedure :  RPCProcedure
         this.parameters = parameters;
         result = PRC_STATUS.PRC_OK;
         procs[parameters.Procedure]();
-        PrintLog("\n");
+        Log.Print("\n");
 
         return (int)result;
     }
 
     protected void NULL()
     {
-        PrintLog("NULL");
+        Log.Print("NULL");
     }
 
     protected void SET()
     {
-        PrintLog("SET - NOIMP");
+        Log.Print("SET - NOIMP");
         result = PRC_STATUS.PRC_NOTIMP;
     }
 
     protected void UNSET()
     {
-        PrintLog("UNSET - NOIMP");
+        Log.Print("UNSET - NOIMP");
         result = PRC_STATUS.PRC_NOTIMP;
     }
     protected void GETPORT()
     {
         PORTMAP_HEADER header = new();
-        PrintLog("GETPORT");
+        Log.Print("GETPORT");
         ins?.Read(out header.Procedure);  //program
         ins?.Skip(12);
         uint port = header.Procedure >= MIN_PROG_NUM && header.Procedure < MIN_PROG_NUM + PORT_NUM
             ? ports[header.Procedure - MIN_PROG_NUM] 
             : 0;
-        PrintLog($" {header.Procedure} {port}");
+        Log.Print($" {header.Procedure} {port}");
         outs?.Write(port);  //port
 
     }
 
     protected void DUMP()
     {
-        PrintLog("DUMP");
+        Log.Print("DUMP");
 
         Write(PROG_PORTS.PROG_PORTMAP, 2, IPPROTOS.IPPROTO_TCP, PPORTS.PORTMAP_PORT);
         Write(PROG_PORTS.PROG_PORTMAP, 2, IPPROTOS.IPPROTO_UDP, PPORTS.PORTMAP_PORT);
@@ -91,7 +92,7 @@ public class PortmapProcedure :  RPCProcedure
 
     protected void CALLIT()
     {
-        PrintLog("CALLIT - NOIMP");
+        Log.Print("CALLIT - NOIMP");
         result = PRC_STATUS.PRC_NOTIMP;
     }
 

@@ -6,6 +6,7 @@ public class SocketStream : InputStream, OutputStream
 
     private readonly byte[] inBuffer = new byte[MAXDATA];
     private readonly byte[] outBuffer = new byte[MAXDATA];
+
     private int inBufferIndex = 0;
     private int inBufferSize = 0;
     private int outBufferIndex = 0;
@@ -15,10 +16,7 @@ public class SocketStream : InputStream, OutputStream
     public byte[] Output => outBuffer;
     public int OutputSize => outBufferSize;
     public int BufferSize => MAXDATA;
-    public SocketStream()
-    {
-
-    }
+    public SocketStream() { }
 
     public void SetInputSize(int size)
     {
@@ -139,6 +137,8 @@ public class SocketStream : InputStream, OutputStream
         }
 
     }
-    public int Position => outBufferIndex;
-    public void Reset() => outBufferIndex = outBufferSize = 0;
+    public int Position
+        => outBufferIndex;
+    public void Reset() 
+        => outBufferIndex = outBufferSize = 0;
 }

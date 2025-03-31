@@ -89,7 +89,8 @@ public class FileTable
         }
         return false;
     }
-    public void RenameFile(string pathFrom, string pathTo) => tree.RenameItem(pathFrom, pathTo);
+    public void RenameFile(string pathFrom, string pathTo) 
+        => tree.RenameItem(pathFrom, pathTo);
 
     protected TreeNode<FILE_ITEM>? AddItem(string path)
     {
@@ -144,12 +145,12 @@ public class FileTable
             File.Move(pathFrom, pathTo);
             e = WinAPIs.GetLastError();
             this.RenameFile(pathFrom, pathTo);
-            return e;
+            e = WinAPIs.GetLastError();
         }
         catch
         {
-            return e;
         }
+        return e;
     }
 
     public int RenameDirectory(string pathFrom, string pathTo)

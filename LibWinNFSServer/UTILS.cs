@@ -137,8 +137,10 @@ public class Filename3 : Opaque
 {
     public string? Name = null;
     public Filename3() { }
-    public override void SetSize(uint length) => this.Length = length;
-    public void Set(string text) => this.Contents = Encoding.UTF8.GetBytes(Name = text);
+    public override void SetSize(uint length)
+        => this.Length = length;
+    public void Set(string text) 
+        => this.Contents = Encoding.UTF8.GetBytes(Name = text);
 }
 
 public class DirOpArgs3

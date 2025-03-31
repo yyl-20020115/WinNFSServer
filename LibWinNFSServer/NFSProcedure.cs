@@ -20,20 +20,18 @@ public class NFSProcedure : RPCProcedure
             {
                 procedure = new ();
                 procedure.SetUserID(uid, gid);
-                procedure.SetLogOn(enable_log);
             }
 
             return procedure.Process(in_stream, out_stream, parameters);
         }
         else
         {
-            PrintLog("Client requested NFS version {0} which isn't supported.\n", parameters.Version);
+            Log.Print("Client requested NFS version {0} which isn't supported.\n", parameters.Version);
             return (int)PRC_STATUS.PRC_NOTIMP;
         }
     }
-    public override void SetLogOn(bool bLogOn)
+    public virtual void SetLogOn(bool bLogOn)
     {
-        base.SetLogOn(bLogOn);
-        procedure?.SetLogOn(bLogOn);
+        Log.EnableLog(bLogOn);
     }
 }

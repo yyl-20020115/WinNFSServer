@@ -80,15 +80,18 @@ public struct NOTIFYICONDATA
     public int uFlags;
     public int uCallbackMessage;
     public HANDLE hIcon;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string szTip;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] 
+    public string szTip;
 }
 public struct SHFILEINFO
 {
     public HANDLE hIcon;
     public int iIcon;
     public int dwAttributes;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = Kernel.MAX_PATH)] public string szDisplayName;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)] public string szTypeName;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = Kernel.MAX_PATH)] 
+    public string szDisplayName;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)] 
+    public string szTypeName;
 }
 
 public abstract class Shell

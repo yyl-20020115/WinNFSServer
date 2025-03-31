@@ -20,7 +20,8 @@ public class ServerSocket
     {
         this.Close();
     }
-    public void SetListener(SocketListener listener) => this.listener = listener;
+    public void SetListener(SocketListener listener)
+        => this.listener = listener;
     public bool Open(string address,int nPort, int nMaxNum)
     {
         if (!IPEndPoint.TryParse(address, out var localAddr))
@@ -81,11 +82,11 @@ public class ServerSocket
     {
         int i, nSize;
         IPEndPoint remoteAddr;
-        Socket socket;
+        Socket? socket;
 
         while (!closed)
         {
-            socket = this.socket.Accept();
+            socket = this.socket?.Accept();
             //accept(, (sockaddr*)&remoteAddr, &nSize);  //accept connection
 
             if (socket != null)

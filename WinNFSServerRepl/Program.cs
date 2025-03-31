@@ -133,10 +133,10 @@ public class Program
                     PrintHelp();
                     break;
                 case "log on":
-                    RPCServer.SetLogOn(true);
+                    Log.EnableLog(true);
                     break;
                 case "log off":
-                    RPCServer.SetLogOn(false);
+                    Log.EnableLog(false);
                     break;
                 case "list":
                     PrintList();
@@ -179,6 +179,7 @@ public class Program
         var DatagramSockets = new DatagramSocket[SOCKET_NUM];
         var ServerSockets = new ServerSocket[SOCKET_NUM];
         var success = false;
+        Log.EnableLog(UseLog);
 
         PortmapProg.Set(PROGS.PROG_MOUNT, NFS_PORTS.MOUNT_PORT);  //map port for mount
         PortmapProg.Set(PROGS.PROG_NFS, NFS_PORTS.NFS_PORT);  //map port for nfs
@@ -189,7 +190,6 @@ public class Program
         RPCServer.Set(PROGS.PROG_PORTMAP, PortmapProg);  //program for portmap
         RPCServer.Set(PROGS.PROG_NFS, NFSProg);  //program for nfs
         RPCServer.Set(PROGS.PROG_MOUNT, MountProg);  //program for mount
-        RPCServer.SetLogOn(UseLog);
 
         for (var i = 0; i < SOCKET_NUM; i++)
         {

@@ -9,19 +9,24 @@ public class DatagramSocket : IDisposable
     public const int ReceiveBufferSize = 8 * (1 << 20);
     public int Port => port;
     protected Socket? socket;
-    protected ThreadSocket? csocket;
+    protected ThreadSocket? sock;
     protected SocketListener? listener;
     protected int port;
     protected bool closed;
     protected bool disposed;
 
-    public DatagramSocket() { }
+    public DatagramSocket() 
+    { 
+    }
 
     ~DatagramSocket()
     {
         Dispose(disposing: false);
     }
-    public void SetListener(SocketListener listener) => this.listener = listener;
+    public void SetListener(SocketListener listener)
+        => this.listener = listener
+        ;
+
     public bool Open(string address, int nPort)
     {
         if (!IPAddress.TryParse(address, out var ipa))
@@ -37,16 +42,16 @@ public class DatagramSocket : IDisposable
         this.socket.Bind(new IPEndPoint(ipa, nPort));
 
         this.closed = false;
-        this.csocket = new ThreadSocket(ThreadSocket.SOCK_DGRAM);
-        this.csocket.Open(socket, listener);  //wait for receiving data
+        this.sock = new ThreadSocket(ThreadSocket.SOCK_DGRAM);
+        this.sock.Open(socket, listener);  //wait for receiving data
         return true;
     }
     public void Close()
     {
         if (this.closed) return;
         this.closed = true;
-        this.csocket?.Dispose();
-        this.csocket = null;
+        this.sock?.Dispose();
+        this.sock = null;
         this.socket = null;
     }
 

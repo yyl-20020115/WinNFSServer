@@ -1,13 +1,11 @@
-﻿namespace LibWinNFSServer;
-
-using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 
-using HANDLE = System.IntPtr;
-using HWND = System.IntPtr;
-using HDC = System.IntPtr;
+using HANDLE = nint;
+using HWND = nint;
+using HDC = nint;
 
+namespace LibWinNFSServer;
 public struct CBTACTIVATESTRUCT
 {
     public int fMouse;

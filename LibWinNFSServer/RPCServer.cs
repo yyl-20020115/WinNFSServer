@@ -21,13 +21,6 @@ public class RPCServer : SocketListener
     {
         procedures[(int)prog - MIN_PROG_NUM] = rpc;
     }
-    public void SetLogOn(bool bLogOn)
-    {
-        for (var i = 0; i < procedures.Length; i++)
-        {
-            procedures[i]?.SetLogOn(bLogOn);
-        }
-    }
     public void SocketReceived(ThreadSocket socket)
     {
         int nResult;

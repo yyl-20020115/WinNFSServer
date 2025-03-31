@@ -1,12 +1,10 @@
-﻿namespace LibWinNFSServer;
-
-using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 
-using HANDLE = System.IntPtr;
-using HWND = System.IntPtr;
+using HANDLE = nint;
+using HWND = nint;
 
+namespace LibWinNFSServer;
 public struct SYSTEMTIME
 {
     public ushort wYear;
@@ -58,7 +56,8 @@ public struct COMMPROP
     public int dwCurrentRxQueue;
     public int dwProvSpec1;
     public int dwProvSpec2;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)] public short[] wcProvChar;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)] 
+    public short[] wcProvChar;
 }
 public struct COMSTAT
 {

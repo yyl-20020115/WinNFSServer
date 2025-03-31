@@ -48,12 +48,12 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
 
         NFS3S? stat = null;
 
-        PrintLog($"[{DateTime.Now}] NFS ");
+        Log.Print($"[{DateTime.Now}] NFS ");
 
         if (parameter.Procedure >= procs.Length)
         {
             ProcedureNOIMP();
-            PrintLog("\n");
+            Log.Print("\n");
 
             return (int)PRC_STATUS.PRC_NOTIMP;
         }
@@ -70,115 +70,115 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         catch (Exception ex)
         {
             result = PRC_STATUS.PRC_FAIL;
-            PrintLog($"Runtime error: {ex.Message}");
+            Log.Print($"Runtime error: {ex.Message}");
         }
 
-        PrintLog(" ");
+        Log.Print(" ");
 
         if (stat.HasValue)
         {
             switch (stat.Value)
             {
                 case NFS3S.NFS3_OK:
-                    PrintLog("OK");
+                    Log.Print("OK");
                     break;
                 case NFS3S.NFS3ERR_PERM:
-                    PrintLog("PERM");
+                    Log.Print("PERM");
                     break;
                 case NFS3S.NFS3ERR_NOENT:
-                    PrintLog("NOENT");
+                    Log.Print("NOENT");
                     break;
                 case NFS3S.NFS3ERR_IO:
-                    PrintLog("IO");
+                    Log.Print("IO");
                     break;
                 case NFS3S.NFS3ERR_NXIO:
-                    PrintLog("NXIO");
+                    Log.Print("NXIO");
                     break;
                 case NFS3S.NFS3ERR_ACCES:
-                    PrintLog("ACCESS");
+                    Log.Print("ACCESS");
                     break;
                 case NFS3S.NFS3ERR_EXIST:
-                    PrintLog("EXIST");
+                    Log.Print("EXIST");
                     break;
                 case NFS3S.NFS3ERR_XDEV:
-                    PrintLog("XDEV");
+                    Log.Print("XDEV");
                     break;
                 case NFS3S.NFS3ERR_NODEV:
-                    PrintLog("NODEV");
+                    Log.Print("NODEV");
                     break;
                 case NFS3S.NFS3ERR_NOTDIR:
-                    PrintLog("NOTDIR");
+                    Log.Print("NOTDIR");
                     break;
                 case NFS3S.NFS3ERR_ISDIR:
-                    PrintLog("ISDIR");
+                    Log.Print("ISDIR");
                     break;
                 case NFS3S.NFS3ERR_INVAL:
-                    PrintLog("INVAL");
+                    Log.Print("INVAL");
                     break;
                 case NFS3S.NFS3ERR_FBIG:
-                    PrintLog("FBIG");
+                    Log.Print("FBIG");
                     break;
                 case NFS3S.NFS3ERR_NOSPC:
-                    PrintLog("NOSPC");
+                    Log.Print("NOSPC");
                     break;
                 case NFS3S.NFS3ERR_ROFS:
-                    PrintLog("ROFS");
+                    Log.Print("ROFS");
                     break;
                 case NFS3S.NFS3ERR_MLINK:
-                    PrintLog("MLINK");
+                    Log.Print("MLINK");
                     break;
                 case NFS3S.NFS3ERR_NAMETOOLONG:
-                    PrintLog("NAMETOOLONG");
+                    Log.Print("NAMETOOLONG");
                     break;
                 case NFS3S.NFS3ERR_NOTEMPTY:
-                    PrintLog("NOTEMPTY");
+                    Log.Print("NOTEMPTY");
                     break;
                 case NFS3S.NFS3ERR_DQUOT:
-                    PrintLog("DQUOT");
+                    Log.Print("DQUOT");
                     break;
                 case NFS3S.NFS3ERR_STALE:
-                    PrintLog("STALE");
+                    Log.Print("STALE");
                     break;
                 case NFS3S.NFS3ERR_REMOTE:
-                    PrintLog("REMOTE");
+                    Log.Print("REMOTE");
                     break;
                 case NFS3S.NFS3ERR_BADHANDLE:
-                    PrintLog("BADHANDLE");
+                    Log.Print("BADHANDLE");
                     break;
                 case NFS3S.NFS3ERR_NOT_SYNC:
-                    PrintLog("NOT_SYNC");
+                    Log.Print("NOT_SYNC");
                     break;
                 case NFS3S.NFS3ERR_BAD_COOKIE:
-                    PrintLog("BAD_COOKIE");
+                    Log.Print("BAD_COOKIE");
                     break;
                 case NFS3S.NFS3ERR_NOTSUPP:
-                    PrintLog("NOTSUPP");
+                    Log.Print("NOTSUPP");
                     break;
                 case NFS3S.NFS3ERR_TOOSMALL:
-                    PrintLog("TOOSMALL");
+                    Log.Print("TOOSMALL");
                     break;
                 case NFS3S.NFS3ERR_SERVERFAULT:
-                    PrintLog("SERVERFAULT");
+                    Log.Print("SERVERFAULT");
                     break;
                 case NFS3S.NFS3ERR_BADTYPE:
-                    PrintLog("BADTYPE");
+                    Log.Print("BADTYPE");
                     break;
                 case NFS3S.NFS3ERR_JUKEBOX:
-                    PrintLog("JUKEBOX");
+                    Log.Print("JUKEBOX");
                     break;
                 default:
                     break;
             }
         }
 
-        PrintLog();
+        Log.Print();
 
         return (int)result;
     }
 
     protected NFS3S NULL()
     {
-        PrintLog("null");
+        Log.Print("null");
         return NFS3S.NFS3_OK;
     }
     protected NFS3S GETATTR()
@@ -187,7 +187,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         Fattr3 obj_attributes = new();
         NFS3S stat;
 
-        PrintLog("GETATTR");
+        Log.Print("GETATTR");
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         stat = CheckFile(cStr);
@@ -220,7 +220,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         //HANDLE hFile;
         SYSTEMTIME systemTime;
 
-        PrintLog("SETATTR");
+        Log.Print("SETATTR");
         var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         if (cStr == null) return NFS3S.NFS3ERR_STALE;
@@ -278,7 +278,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         PostOpAttr dir_attributes = new();
         NFS3S stat;
 
-        PrintLog("LOOKUP");
+        Log.Print("LOOKUP");
 
         var dirName = "";
         var fileName = "";
@@ -313,7 +313,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         PostOpAttr obj_attributes = new();
         NFS3S stat;
 
-        PrintLog("ACCESS");
+        Log.Print("ACCESS");
         var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         Read(out uint access);
@@ -336,7 +336,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
     }
     protected NFS3S READLINK()
     {
-        PrintLog("READLINK");
+        Log.Print("READLINK");
         var path = string.Empty;
         var pMBBuffer = string.Empty;
 
@@ -455,7 +455,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         Opaque data = new();
         NFS3S stat;
 
-        PrintLog("READ");
+        Log.Print("READ");
         var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         if (cStr == null) return NFS3S.NFS3ERR_STALE;
@@ -477,7 +477,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
             else
             {
                 var errorNumber = WinAPIs.GetLastError();
-                PrintLog($"{errorNumber}");
+                Log.Print($"{errorNumber}");
                 stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
             }
         }
@@ -503,7 +503,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         long verf = 0;
         NFS3S stat;
 
-        PrintLog("WRITE");
+        Log.Print("WRITE");
         var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         if (cStr == null) return NFS3S.NFS3ERR_STALE;
@@ -544,7 +544,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
                 //else
                 {
                     int errorNumber = WinAPIs.GetLastError();
-                    PrintLog($"{errorNumber}");
+                    Log.Print($"{errorNumber}");
 
                     stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
                 }
@@ -565,7 +565,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
                 else
                 {
                     var errorNumber = WinAPIs.GetLastError();
-                    PrintLog($"{errorNumber}");
+                    Log.Print($"{errorNumber}");
 
                     stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
                 }
@@ -600,7 +600,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         NFS3S stat;
         var errorNumber = 0;
 
-        PrintLog("CREATE");
+        Log.Print("CREATE");
         var dirName = "";
         var fileName = "";
         ReadDirectory(ref dirName, ref fileName);
@@ -616,7 +616,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         }
         else
         {
-            PrintLog($"{WinAPIs.GetLastError()}");
+            Log.Print($"{WinAPIs.GetLastError()}");
 
             stat = errorNumber == 2 ? NFS3S.NFS3ERR_STALE : errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
         }
@@ -650,7 +650,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         WccData dir_wcc = new();
         NFS3S stat;
 
-        PrintLog("MKDIR");
+        Log.Print("MKDIR");
 
         var dirName = "";
         var fileName = "";
@@ -671,7 +671,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         }
         else if (e == WinAPIs.FILE_EXISTS)
         {
-            PrintLog("Directory already exists.");
+            Log.Print("Directory already exists.");
             stat = NFS3S.NFS3ERR_EXIST;
         }
         else if (e == WinAPIs.FILE_NOT_FOUND)
@@ -704,7 +704,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
     }
     protected NFS3S SYMLINK()
     {
-        PrintLog("SYMLINK");
+        Log.Print("SYMLINK");
 
         string path;
         PostOpFh3 obj = new();
@@ -760,7 +760,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         else
         {
             stat = NFS3S.NFS3ERR_IO;
-            PrintLog("An error occurs or file already exists.");
+            Log.Print("An error occurs or file already exists.");
             stat = CheckFile(path);
             if (stat != NFS3S.NFS3_OK)
             {
@@ -784,7 +784,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
     }
     protected NFS3S MKNOD()
     {
-        PrintLog("MKNOD");
+        Log.Print("MKNOD");
 
         return NFS3S.NFS3ERR_NOTSUPP;
     }
@@ -795,7 +795,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         NFS3S stat;
 
 
-        PrintLog("REMOVE");
+        Log.Print("REMOVE");
 
         var dirName = "";
         var fileName = "";
@@ -837,7 +837,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         NFS3S stat;
         int returnCode;
 
-        PrintLog("RMDIR");
+        Log.Print("RMDIR");
 
         var dirName = "";
         var fileName = "";
@@ -868,7 +868,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         NFS3S stat;
         int returnCode;
 
-        PrintLog("RENAME");
+        Log.Print("RENAME");
 
         var dirFromName = "";
         var fileFromName = "";
@@ -907,7 +907,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
 
             if (errorNumber != 0)
             {
-                PrintLog($"Error {errorNumber}");
+                Log.Print($"Error {errorNumber}");
 
                 stat = errorNumber == 13 ? NFS3S.NFS3ERR_ACCES : NFS3S.NFS3ERR_IO;
             }
@@ -924,7 +924,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
     }
     protected NFS3S LINK()
     {
-        PrintLog("LINK");
+        Log.Print("LINK");
         var path = "";
         DirOpArgs3 link = new();
         var dirName = "";
@@ -980,7 +980,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         //_finddata_t fileinfo;
         uint i, j;
 
-        PrintLog("READDIR");
+        Log.Print("READDIR");
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         Read(out long cookie);
@@ -1069,7 +1069,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         //intptr_t handle;
         //_finddata_t fileinfo;
 
-        PrintLog("READDIRPLUS");
+        Log.Print("READDIRPLUS");
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         Read(out long cookie);
@@ -1154,7 +1154,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
 
         NFS3S stat;
 
-        PrintLog("FSSTAT");
+        Log.Print("FSSTAT");
         var validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         stat = CheckFile(cStr);
@@ -1203,7 +1203,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         uint properties = 0;
         NFS3S stat;
 
-        PrintLog("FSINFO");
+        Log.Print("FSINFO");
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         stat = CheckFile(cStr);
@@ -1259,7 +1259,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         uint linkmax = 0, name_max = 0;
         bool no_trunc = false, chown_restricted = false, case_insensitive = false, case_preserving = false;
 
-        PrintLog("PATHCONF");
+        Log.Print("PATHCONF");
         bool validHandle = GetPath(ref path);
         var cStr = validHandle ? path : null;
         stat = CheckFile(cStr);
@@ -1306,13 +1306,13 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         NFS3S stat;
         long verf;
 
-        PrintLog("COMMIT");
+        Log.Print("COMMIT");
         Read(out NfsFh3 file);
         bool validHandle = table.GetPathByHandle(file.Contents, ref path);
         var cStr = validHandle ? path : null;
 
         if (validHandle)
-            PrintLog($" {path} ");
+            Log.Print($" {path} ");
 
         // offset and count are unused
         // offset never was anything else than 0 in my tests
@@ -1355,7 +1355,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
     }
     protected NFS3S ProcedureNOIMP()
     {
-        PrintLog("NOIMP");
+        Log.Print("NOIMP");
         result = PRC_STATUS.PRC_NOTIMP;
 
         return NFS3S.NFS3_OK;
@@ -1616,11 +1616,11 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         bool valid = table.GetPathByHandle(obj.Contents, ref path);
         if (valid)
         {
-            PrintLog($" {path} ");
+            Log.Print($" {path} ");
         }
         else
         {
-            PrintLog(" File handle is invalid ");
+            Log.Print(" File handle is invalid ");
         }
 
         return valid;
@@ -1646,7 +1646,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
             return null;
 
         var fullPath = $"{dirName}\\{fileName}";
-        PrintLog($" {fullPath} ");
+        Log.Print($" {fullPath} ");
 
         return fullPath;
     }
@@ -1668,7 +1668,7 @@ public partial class NFS3Procedure(FileTable? table = null) : RPCProcedure
         var handle = table.GetHandleByPath(path);
         if (handle == null)
         {
-            PrintLog("no filehandle(path %s)", path);
+            Log.Print("no filehandle(path %s)", path);
             return false;
         }
         fh.Contents = handle;
