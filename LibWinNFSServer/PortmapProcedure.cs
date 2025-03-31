@@ -13,7 +13,7 @@ public class PortmapProcedure :  RPCProcedure
     private PRC_STATUS result = PRC_STATUS.PRC_OK;
 
     public PortmapProcedure() { }
-    public void Set(PROGS prog, NFS_PORTS port) 
+    public void Set(PROGS prog, int port) 
         => this.ports[(int)prog - MIN_PROG_NUM] = (uint)port;
 
     public override int Process(InputStream in_stream, OutputStream out_stream, ProcessParam parameters)

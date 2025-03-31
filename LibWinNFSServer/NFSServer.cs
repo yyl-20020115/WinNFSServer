@@ -45,7 +45,10 @@ public class NFSServer
         this.MountProg = null;
 
     }
-    public bool Start(List<(string path, string alias)> paths)
+    public bool Start(List<(string path, string alias)> paths,
+        int NFSPort = (int)NFS_PORTS.NFS_PORT,
+        int MountPort = (int)NFS_PORTS.MOUNT_PORT,
+        int RPCPort = (int)NFS_PORTS.PORTMAP_PORT)
     {
         var success = false;
 
@@ -56,8 +59,8 @@ public class NFSServer
         this.MountProg = new();
         this.MountProg.SetFileTable(this.fileTable);
 
-        PortmapProg.Set(PROGS.PROG_MOUNT, NFS_PORTS.MOUNT_PORT);  //map port for mount
-        PortmapProg.Set(PROGS.PROG_NFS, NFS_PORTS.NFS_PORT);  //map port for nfs
+        PortmapProg.Set(PROGS.PROG_MOUNT,MountPort);  //map port for mount
+        PortmapProg.Set(PROGS.PROG_NFS, NFSPort);  //map port for nfs
         NFSProg.SetUserID(UID, GID);  //set uid and gid of files
 
         MountPaths(paths);
@@ -73,18 +76,14 @@ public class NFSServer
             _ServerSockets[i].SetListener(RPCServer);
         }
 
-        if (_ServerSockets[0].Open(SocketAddress, (int)NFS_PORTS.PORTMAP_PORT, 3)
-            && _DatagramSockets[0].Open(
-            SocketAddress,
-            (int)NFS_PORTS.PORTMAP_PORT))
+        if (_ServerSockets[0].Open(SocketAddress, RPCPort, 3)
+            && _DatagramSockets[0].Open(SocketAddress, RPCPort))
         { 
-            if (_ServerSockets[1].Open(SocketAddress,
-                (int)NFS_PORTS.NFS_PORT, 10)
-                && _DatagramSockets[1].Open(SocketAddress, (int)NFS_PORTS.NFS_PORT))
+            if (_ServerSockets[1].Open(SocketAddress, NFSPort, 10)
+                && _DatagramSockets[1].Open(SocketAddress, NFSPort))
             { 
-
-                if (_ServerSockets[2].Open(SocketAddress, (int)NFS_PORTS.MOUNT_PORT, 3)
-                 && _DatagramSockets[2].Open(SocketAddress, (int)NFS_PORTS.MOUNT_PORT))
+                if (_ServerSockets[2].Open(SocketAddress, MountPort, 3)
+                    && _DatagramSockets[2].Open(SocketAddress, MountPort))
                 { 
                     success = true;  //all daemon started
                 }
@@ -92,8 +91,4 @@ public class NFSServer
         }
         return success;
     }
-
-
-
-
 }
