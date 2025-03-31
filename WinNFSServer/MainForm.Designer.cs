@@ -51,6 +51,8 @@
             textBoxStatPort = new TextBox();
             buttonConfirm = new Button();
             buttonCancel = new Button();
+            buttonStart = new Button();
+            buttonStop = new Button();
             SuspendLayout();
             // 
             // statusStrip
@@ -160,12 +162,28 @@
             resources.ApplyResources(buttonConfirm, "buttonConfirm");
             buttonConfirm.Name = "buttonConfirm";
             buttonConfirm.UseVisualStyleBackColor = true;
+            buttonConfirm.Click += buttonConfirm_Click;
             // 
             // buttonCancel
             // 
             resources.ApplyResources(buttonCancel, "buttonCancel");
             buttonCancel.Name = "buttonCancel";
             buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
+            // 
+            // buttonStart
+            // 
+            resources.ApplyResources(buttonStart, "buttonStart");
+            buttonStart.Name = "buttonStart";
+            buttonStart.UseVisualStyleBackColor = true;
+            buttonStart.Click += buttonStart_Click;
+            // 
+            // buttonStop
+            // 
+            resources.ApplyResources(buttonStop, "buttonStop");
+            buttonStop.Name = "buttonStop";
+            buttonStop.UseVisualStyleBackColor = true;
+            buttonStop.Click += buttonStop_Click;
             // 
             // MainForm
             // 
@@ -173,6 +191,8 @@
             resources.ApplyResources(this, "$this");
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
+            Controls.Add(buttonStop);
+            Controls.Add(buttonStart);
             Controls.Add(buttonCancel);
             Controls.Add(buttonConfirm);
             Controls.Add(textBoxStatPort);
@@ -229,5 +249,7 @@
         private TextBox textBoxStatPort;
         private Button buttonConfirm;
         private Button buttonCancel;
+        private Button buttonStart;
+        private Button buttonStop;
     }
 }

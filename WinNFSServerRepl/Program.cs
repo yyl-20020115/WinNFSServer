@@ -18,7 +18,7 @@ public class Program
     private static readonly RPCServer RPCServer = new();
     private static readonly PortmapProcedure PortmapProg = new();
     private static readonly NFSProcedure NFSProg = new();
-    private static readonly MountProcedure MountProg = new(fileTable);
+    private static readonly MountProcedure MountProg = new();
 
     public const int SOCKET_NUM = 3;
 
@@ -253,6 +253,8 @@ public class Program
             PrintUsage(Path.GetFileName(args[0]));
             return 1;
         }
+
+        MountProg.SetFileTable(fileTable);
 
         List<(string path, string alias)> paths = [];
         UID = GID = 0;

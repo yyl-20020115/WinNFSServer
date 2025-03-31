@@ -2,7 +2,7 @@
 
 namespace LibWinNFSServer;
 
-public class MountProcedure(FileTable table) : RPCProcedure
+public class MountProcedure(FileTable? table = null) : RPCProcedure
 {
     public const int MOUNT_NUM_MAX = 100;
     public const int MOUNT_PATH_MAX = 100;
@@ -16,16 +16,15 @@ public class MountProcedure(FileTable table) : RPCProcedure
 
     private ProcessParam? parameter;
     private PRC_STATUS result;
-    private readonly FileTable table = table;
+    private FileTable? table = table;
+
+    public void SetFileTable(FileTable table) => this.table = table;
 
     public bool SetPathFile(string file)
     {
         var formattedFile = FormatPath(file, PathFormats.FORMAT_PATH);
 
-        if (formattedFile == null || File.Exists(formattedFile))
-            return false;
-        path_file = formattedFile;
-        return true;
+        return (path_file = formattedFile) != null && File.Exists(formattedFile);
     }
     public void Export(string path, string alias)
     {
