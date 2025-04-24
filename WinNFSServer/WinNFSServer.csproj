@@ -12,4 +12,8 @@
     <EmbeddedResource Remove="MainForm.zh-Hans-CN.resx" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LibWinNFSServer\LibWinNFSServer.csproj" />
+  </ItemGroup>
+
 </Project>

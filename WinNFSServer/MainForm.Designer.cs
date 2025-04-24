@@ -162,28 +162,28 @@
             resources.ApplyResources(buttonConfirm, "buttonConfirm");
             buttonConfirm.Name = "buttonConfirm";
             buttonConfirm.UseVisualStyleBackColor = true;
-            buttonConfirm.Click += buttonConfirm_Click;
+            buttonConfirm.Click += ButtonConfirm_Click;
             // 
             // buttonCancel
             // 
             resources.ApplyResources(buttonCancel, "buttonCancel");
             buttonCancel.Name = "buttonCancel";
             buttonCancel.UseVisualStyleBackColor = true;
-            buttonCancel.Click += buttonCancel_Click;
+            buttonCancel.Click += ButtonCancel_Click;
             // 
             // buttonStart
             // 
             resources.ApplyResources(buttonStart, "buttonStart");
             buttonStart.Name = "buttonStart";
             buttonStart.UseVisualStyleBackColor = true;
-            buttonStart.Click += buttonStart_Click;
+            buttonStart.Click += ButtonStart_Click;
             // 
             // buttonStop
             // 
             resources.ApplyResources(buttonStop, "buttonStop");
             buttonStop.Name = "buttonStop";
             buttonStop.UseVisualStyleBackColor = true;
-            buttonStop.Click += buttonStop_Click;
+            buttonStop.Click += ButtonStop_Click;
             // 
             // MainForm
             // 
@@ -217,7 +217,6 @@
             Controls.Add(statusStrip);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
-            MinimizeBox = false;
             Name = "MainForm";
             TopMost = true;
             Load += MainForm_Load;

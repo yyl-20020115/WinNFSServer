@@ -7,6 +7,10 @@ public class NFSServer
     public bool UseLog = false;
     public string FileName = "";
     public string SocketAddress = "0.0.0.0";
+    public int NFSPort = (int)NFS_PORTS.NFS_PORT;
+    public int MountPort = (int)NFS_PORTS.MOUNT_PORT;
+    public int RPCPort = (int)NFS_PORTS.PORTMAP_PORT; 
+
     private const int SOCKET_NUM = 3;
     private FileTable? fileTable = new();
     private RPCServer? RPCServer = new();
@@ -39,10 +43,7 @@ public class NFSServer
         this.MountProg = null;
 
     }
-    public bool Start(List<(string path, string alias)> paths,
-        int NFSPort = (int)NFS_PORTS.NFS_PORT,
-        int MountPort = (int)NFS_PORTS.MOUNT_PORT,
-        int RPCPort = (int)NFS_PORTS.PORTMAP_PORT)
+    public bool Start(List<(string path, string alias)> paths)
     {
         var success = false;
 
@@ -65,6 +66,8 @@ public class NFSServer
 
         for (var i = 0; i < SOCKET_NUM; i++)
         {
+            _DatagramSockets[i] = new();
+            _ServerSockets[i] = new();
             _DatagramSockets[i].SetListener(RPCServer);
             _ServerSockets[i].SetListener(RPCServer);
         }
@@ -78,7 +81,7 @@ public class NFSServer
                 if (_ServerSockets[2].Open(SocketAddress, MountPort, 3)
                     && _DatagramSockets[2].Open(SocketAddress, MountPort))
                 { 
-                    success = true;  //all daemon started
+                    success = true;  //all daemon started   
                 }
             }
         }

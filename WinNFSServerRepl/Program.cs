@@ -181,8 +181,8 @@ public class Program
         var success = false;
         Log.EnableLog(UseLog);
 
-        PortmapProg.Set(PROGS.PROG_MOUNT, NFS_PORTS.MOUNT_PORT);  //map port for mount
-        PortmapProg.Set(PROGS.PROG_NFS, NFS_PORTS.NFS_PORT);  //map port for nfs
+        PortmapProg.Set(PROGS.PROG_MOUNT, (int)NFS_PORTS.MOUNT_PORT);  //map port for mount
+        PortmapProg.Set(PROGS.PROG_NFS, (int)NFS_PORTS.NFS_PORT);  //map port for nfs
         NFSProg.SetUserID(UID, GID);  //set uid and gid of files
 
         MountPaths(paths);

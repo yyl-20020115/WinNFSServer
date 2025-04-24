@@ -142,3 +142,4 @@ public class SocketStream : InputStream, OutputStream
     public void Reset() 
         => outBufferIndex = outBufferSize = 0;
 }
+ 

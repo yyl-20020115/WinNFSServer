@@ -72,7 +72,7 @@ public class Tree<T> where T : class
         }
         else
             node.PreviousSibling.NextSibling = node;
-        return new (node);
+        return new(node);
     }
 
     public IteratorBase AppendChild(IteratorBase iterator, T? data = null)
@@ -103,7 +103,7 @@ public class Tree<T> where T : class
         var src = source.Node;
 
         if (dst == src) return source;
-        if (dst?.NextSibling!=null)
+        if (dst?.NextSibling != null)
             if (dst.NextSibling == src) // already in the right spot
                 return source;
 
@@ -122,9 +122,9 @@ public class Tree<T> where T : class
         src.Parent = dst.Parent;
         return new IteratorBase(src);
     }
-    public SiblingIterator Begin(IteratorBase? iterator) 
-        => iterator?.Node?.FirstChild == null 
-        ? End(iterator) 
+    public SiblingIterator Begin(IteratorBase? iterator)
+        => iterator?.Node?.FirstChild == null
+        ? End(iterator)
         : new(iterator.Node.FirstChild)
         ;
 
@@ -270,12 +270,8 @@ public class Tree<T> where T : class
             return this;
         }
     }
-    public class PostOrderIterator : IteratorBase
+    public class PostOrderIterator(TreeNode<T>? Node = null) : IteratorBase(Node)
     {
-        public PostOrderIterator(TreeNode<T>? Node = null) : base(Node)
-        {
-
-        }
         public override PostOrderIterator Next()
         {
             if (this.Node?.NextSibling == null)
@@ -369,21 +365,15 @@ public class Tree<T> where T : class
             }
             Queue.Dequeue();
 
-            if (Queue.Count > 0)
-                this.Node = Queue.Peek();
-            else
-                this.Node = null;
+            this.Node = Queue.Count > 0 ? Queue.Peek() : null;
 
             return this;
         }
     }
-    public class FixedDepthIterator : IteratorBase
+    public class FixedDepthIterator(TreeNode<T>? Node = null) : IteratorBase(Node)
     {
         public TreeNode<T>? TopNode = null;
-        public FixedDepthIterator(TreeNode<T>? Node = null) : base(Node)
-        {
 
-        }
         public override FixedDepthIterator Next()
         {
             if (this.Node?.NextSibling != null)
@@ -474,13 +464,10 @@ public class Tree<T> where T : class
 
         }
     }
-    public class LeafIterator : IteratorBase
+    public class LeafIterator(TreeNode<T>? Node = null) : IteratorBase(Node)
     {
         public TreeNode<T>? TopNode = null;
-        public LeafIterator(TreeNode<T>? Node = null) : base(Node)
-        {
 
-        }
         public override LeafIterator Next()
         {
             if (this.Node?.FirstChild != null)
